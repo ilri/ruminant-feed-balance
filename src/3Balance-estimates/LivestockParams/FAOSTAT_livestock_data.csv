@@ -1,0 +1,25 @@
+,Domain.Code,Domain,Area.Code..FAO.,Area,Element.Code,Element,Item.Code..FAO.,Item,Year.Code,Year,Unit,Value,Flag,Flag.Description,PcChange
+1,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2014,2014,Head,9090700,,Official data,-0.01960742
+2,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2015,2015,Head,9272510,,Official data,0
+3,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2016,2016,Head,9457934,,Official data,0.019997174
+4,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2017,2017,Head,9647073,,Official data,0.040394996
+5,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2018,2018,Head,9840000,,Official data,0.061201336
+6,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,866,Cattle,2019,2019,Head,10000233,Im,FAO data based on imputation methodology,0.07848177
+7,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2014,2014,Head,13891000,,Official data,-0.029156205
+8,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2015,2015,Head,14308172,,Official data,0
+9,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2016,2016,Head,14737393,,Official data,0.029998311
+10,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2017,2017,Head,15179490,,Official data,0.060896528
+11,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2018,2018,Head,15635000,,Official data,0.092732181
+12,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,1016,Goats,2019,2019,Head,16059598,Im,FAO data based on imputation methodology,0.122407391
+13,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2014,2014,Head,9277700,,Official data,-0.029128754
+14,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2015,2015,Head,9556056,,Official data,0
+15,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2016,2016,Head,9842712,,Official data,0.029997313
+16,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2017,2017,Head,10137973,,Official data,0.060895101
+17,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2018,2018,Head,10442000,,Official data,0.092710214
+18,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Sheep,2019,2019,Head,10703021,Im,FAO data based on imputation methodology,0.120024935
+19,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2014,2014,Head,23168700,,,-0.029145213
+20,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2015,2015,Head,23864228,,,0
+21,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2016,2016,Head,24580105,,,0.029997912
+22,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2017,2017,Head,25317463,,,0.060895957
+23,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2018,2018,Head,26077000,,,0.092723385
+24,QCL,Crops and livestock products,233,Burkina Faso,5111,Stocks,976,Shoats,2019,2019,Head,26762619,,,0.121453374

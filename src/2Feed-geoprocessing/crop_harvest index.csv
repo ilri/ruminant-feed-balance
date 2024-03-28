@@ -1,0 +1,32 @@
+crop#,full_name,name,harvest_index,Source
+1,banana,bana,0.44,Feast
+2,barley,barl,0.534,Feast
+3,bean,bean,0.555,Feast
+4,cassava,cass,0.8696,Feast
+5,chickpea,chic,0.31,Feast
+6,cowpea,cowp,0.335,Feast
+7,groundnut,grou,0.45,Feast
+8,lentil,lent,0.246,Feast
+9,maize,maiz,0.3785,Feast
+10,other cereals,ocer,0.3,Tef https://www.iiste.org/Journals/index.php/JBAH/article/download/43891/45223
+11,other pulses,opul,0.3,Rough from other pulses in Feast
+12,other roots,orts,0.27,From Feast sweet potato
+13,pearl millet,pmil,0.188,Feast
+14,pigeonpea,pige,0.294,Feast
+15,plantain,plnt,0.44,Feast
+16,potato,pota,1,Feast
+17,rapeseed,rape,0.361,Feast
+18,rice,rice,0.4613,Feast
+19,sesameseed,sesa,0.01,Feast
+20,small millet,smil,0.391,Feast
+21,sorghum,sorg,0.458,Feast
+22,soybean,soyb,0.422,Feast
+23,sugarbeet,sugb,1,NA in Feast
+24,sugarcane,sugc,0.19,Feast
+25,sunflower,sunf,0.32,Feast
+26,sweet potato,swpo,0.27,Feast
+27,temperate fruit,temf,1,NA in Feast
+28,tropical fruit,trof,1,NA in Feast
+29,vegetables,vege,1,NA in Feast
+30,wheat,whea,0.36575,Feast
+31,yams,yams,0.24102,Feast
