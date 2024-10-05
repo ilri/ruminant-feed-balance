@@ -1,38 +1,33 @@
 library(dplyr)
 library(raster)
-
 library(rgdal)
+library(sf)
 
+# root folder
+root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
-args <- commandArgs(TRUE)
+# output folder
+outdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP_2023"); dir.create(outdir, F, T)
 
-EDDIE_TMP <- as.character(args[1])
-#print(EDDIE_TMP)
-#print(args)
+# read AOI
+aoi <- read_sf(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
 
-#Runs with 16gb ram and 40+gb hdd space
-rasterOptions(tmpdir = EDDIE_TMP)
-rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
-rasterOptions(todisk = TRUE)
-##memory.limit(size = 56000) #Windows specific
+nc_files <- list.files(paste0(root, "/src/1Data-download/SpatialData/inputs/Feed/DMP"), pattern = ".nc$", full.names = TRUE, recursive = TRUE)
 
-
-setwd("")
-
-aoi <- readOGR("SpatialData/inputs/aoi1.shp")
-
-dmpPath <- 'SpatialData/inputs/Feed_DrySeason/DMP/'
-
-filenamesTifInter <- list.files(path = dmpPath ,pattern="*1.0.1.tiff$",full.names = T)
-filenamesTifInter2 <- list.files(path = dmpPath ,pattern="*1.0.1.tiff$",full.names = F)
-
-
-##@Resample and crop with gdal?
-for(i in 1:length(filenamesTifInter)){
-  iDMP <- raster(filenamesTifInter[i])
-  iDMP <- extend(iDMP, extent(aoi))
-  iDMP <- crop(iDMP, extent(aoi))
-  #iDMP <- mask(iDMP, aoi)
-  writeRaster(iDMP, paste0(dmpPath, substr(filenamesTifInter2[i], 1, nchar(filenamesTifInter2[i])-5), "_clip.tif"), overwrite = T)
-  print(i)
+for (nc_file in nc_files){
+  
+  nc_name <- gsub('.{3}$', '', basename(nc_file))
+  
+  if (!file.exists(paste0(outdir, "/", nc_name, ".tif", sep=""))){
+    
+    iDMP <- raster::raster(nc_file, varname="DMP", ncdf=TRUE)
+    iDMP <- extend(iDMP, extent(aoi))
+    iDMP <- crop(iDMP, extent(aoi))
+    
+    # save as GeoTIFF
+    raster::writeRaster(iDMP, filename = paste0(outdir, "/", nc_name, ".tif"), overwrite=TRUE)
+    
+    }else{
+    cat("Already cropped: ", nc_name, "\n")
+    }
 }

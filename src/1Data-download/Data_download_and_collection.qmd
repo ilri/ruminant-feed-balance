@@ -63,22 +63,29 @@ root <- "~/AU_IBAR/ruminant-feed-balance"
 
 #### Administrative boundaries
 
-We create a new folder under `ruminant-feed-balance`, name it `AdminBound` and assign it the name `outdir`. We can download administrative boundaries of world countries with the `geodata` package (Hijmans et al. 2023). Here we use `geodata` to download the administrative boundaries of Nigeria from [GADM](https://gadm.org), and store the data in `AdminBound` folder. We convert it to a `simple feature` and assign it the name `aoi`.
+We create a new folder under `ruminant-feed-balance`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` package (Hijmans et al. 2023). Here we use `geodata` to download the administrative boundaries of Nigeria from [GADM](https://gadm.org), and store the data in `AdminBound` folder. We convert it to a `simple feature` and assign it the name `aoi`.
 
 ```{r message=FALSE}
 library(geodata)
 library(ggplot2)
 library(cowplot)
+library(sf)
 
 outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound"); dir.create(outdir, F, T)
+outdir2 <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound"); dir.create(outdir2, F, T)
+
 
 # Level 0
 aoi0 <- geodata::gadm(country = "NGA", level=0, path = paste0(outdir), version="latest") %>% 
   sf::st_as_sf()
 
+write_sf(aoi0, paste0(outdir2, "/aoi0.shp"), append = FALSE)
+
 # Level 1
 aoi1 <- geodata::gadm(country = "NGA", level=1, path = paste0(outdir), version="latest") %>% 
   sf::st_as_sf()
+
+write_sf(aoi1, paste0(outdir2, "/aoi1.shp"), append = FALSE)
 
 p0 <- ggplot() + 
   geom_sf(data = aoi0, colour = "black", show.legend = F) + 
@@ -92,7 +99,6 @@ plot_grid(p0, p1, labels = NULL)
 ```
 
 #### Ruminant systems aggregation zones
-
 We use FEWSNET livelihood zones, the most recent version is available on <https://drive.google.com/file/d/1FwbhyjxjpuCFZ6hMcdQFIG4tdLoe9WV4/view?usp=sharing>, and download the data.
 
 ```{r message=FALSE, warning=FALSE}
@@ -108,7 +114,6 @@ drive_download(public_file, path = paste0(outdir, "/livelihood_zones.gpkg"), ove
 ```
 
 We then load the data as an `sf` and plot it.
-
 ```{r message=FALSE}
 library(ggplot2)
 library(sf)
@@ -157,7 +162,7 @@ lapply(land_use_classes, function(land_use_class){
 
 #### Tree cover
 
-Download the most recent version (v1.0) of tree cover data generated from 3m PlanetScope data, presented as % of 100m cell. The data by Florian et al. (2023) can be downloaded from <https://doi.org/10.1038/s41467-023-37880-4>
+Download the most recent version (v1.0) of tree cover data generated from 3m PlanetScope data, presented as % of 100m cell (Florian et al. (2023) from <https://doi.org/10.1038/s41467-023-37880-4>
 
 Known issues in v 1.0
 
@@ -187,7 +192,7 @@ if (!file.exists(paste0(outdir, "/ps_africa_treecover_2019_100m_v1.0.tif"))){
 
 #### Crop type and distribution
 
-Download the most recent version of `crop type and distribution` data by IFPRI (2024), more information is available at <https://mapspam.info>. The most recent version is available at <https://www.dropbox.com/sh/3j7l50i6uue0z1v/AABeqgE2IOv6_VV6sN_zOHAUa?dl=0&e=1>
+Download the most recent version of `crop type and distribution` data by IFPRI (2024), more information is available at <https://mapspam.info>, available at <https://www.dropbox.com/sh/3j7l50i6uue0z1v/AABeqgE2IOv6_VV6sN_zOHAUa?dl=0&e=1>
 
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
 library(RCurl)
@@ -226,7 +231,7 @@ cropHarvestedArea <- list.files(paste0(outdir, "/spam2020V0r1_global_harvested_a
 
 #### Protected areas
 
-Download the most recent version of `protected areas` data by UNEP-WCMC and IUCN (2023). The most recent version is available at <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>.
+Download the most recent version of `protected areas` data by UNEP-WCMC and IUCN (2023) from <https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA>.
 
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
 #Libraries
@@ -238,20 +243,23 @@ outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/ProtectedAreas");
 
 # Download the file
 download.file(
-  url = "https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_Oct2024_Public_shp.zip",
-  destfile = paste0(outdir, "/WDPA_Oct2024_Public_shp.zip"))
+  url = "https://d1gam3xoknrgr2.cloudfront.net/current/WDPA_WDOECM_Oct2024_Public_NGA_shp.zip",
+  destfile = paste0(outdir, "/WDPA_WDOECM_Oct2024_Public_NGA_shp.zip"))
 
-# Unzip the downloaded file (only the specific zip inside the archive)
-unzip(
-  zipfile = paste0(outdir, "/WDPA_Oct2024_Public_shp.zip"),
-  files = "WDPA_Oct2024_Public_shp_2.zip",
-  exdir = paste0(outdir))
+zipped_files <- c("WDPA_WDOECM_Oct2024_Public_NGA_shp_0.zip", "WDPA_WDOECM_Oct2024_Public_NGA_shp_1.zip", "WDPA_WDOECM_Oct2024_Public_NGA_shp_2.zip")
+
+for (zipped_file in zipped_files){
+  # Unzip the downloaded file (only the specific zip inside the archive)
+  unzip(
+    zipfile = paste0(outdir, "/WDPA_WDOECM_Oct2024_Public_NGA_shp.zip"),
+    files = paste0(zipped_file),
+    exdir = paste0(outdir))}
 
 # List all files in the folder
 all_files <- list.files(paste0(outdir), full.names = TRUE)
 
 # Identify files to remove (all files except the one to keep)
-files_to_remove <- all_files[!basename(all_files) %in% "WDPA_Oct2024_Public_shp_2.zip"]
+files_to_remove <- all_files[!basename(all_files) %in% zipped_files]
 
 # Remove the files
 file.remove(files_to_remove)
@@ -259,14 +267,33 @@ file.remove(files_to_remove)
 # List all files in the folder
 all_files <- list.files(paste0(outdir), full.names = TRUE)
 
-# Unzip the second archive
-unzip(zipfile = paste0(outdir, "/WDPA_Oct2024_Public_shp_2.zip"),
-      exdir = paste0(outdir, "/"))
+for(zipped_file in zipped_files){
+  
+  file_name = basename(paste0(outdir, "/", zipped_file))
+  folder_name <- sub("\\.zip$", "", file_name)
+  
+  # Unzip the second archive
+  unzip(
+    zipfile = paste0(outdir, "/", file_name),
+    exdir = paste0(outdir, "/", folder_name))
+}
+
+# Use list.files() to search for files that end with "NGA_shp-polygons.shp"
+shp_files <- list.files(outdir, pattern = "NGA_shp-polygons\\.shp$", recursive = TRUE, full.names = TRUE)
+
+# Read all shapefiles into a list of sf objects
+shp_files <- lapply(shp_files, sf::st_read)
+
+# Combine all shapefiles into one
+WDPA_WDOECM_Oct2024_Public_NGA <- do.call(rbind, shp_files)
+
+# Write combined file
+sf::st_write(WDPA_WDOECM_Oct2024_Public_NGA, paste0(outdir, "/WDPA_WDOECM_Oct2024_Public_NGA.shp"))
 ```
 
 #### Above ground dry matter productivity
 
-Download the most recent version of `Above ground dry matter productivity` data by Copernicus (2024). The most recent version is available at <https://land.copernicus.eu/en/products/vegetation/dry-matter-productivity-v1-0-300m#download>.
+Download the most recent version of `Above ground dry matter productivity` data by Copernicus (2024) from <https://land.copernicus.eu/en/products/vegetation/dry-matter-productivity-v1-0-300m#download>.
 
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
 library(RCurl)
@@ -284,23 +311,74 @@ download.file(
 dmp_manifest <- readLines(paste0(outdir, "/manifest_clms_global_dmp_300m_v1_10daily_netcdf_latest.txt"))
 
 # Select files of interest
-dmp_manifest_list <- grep("2023", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+dmp_manifest_list <- grep("RT6_2023", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
 
 for (i in dmp_manifest_list){
   # Extract the file name
-  file_name <- basename(i)
+  file_name <- basename(sub("OLCI_V1.*", "OLCI_V1", i))
+  
   if(!file.exists(paste0(outdir, "/", file_name))){
     cat("Downloading: ", file_name, "\n")
-    download.file(url = i, destfile = paste0(outdir, "/", file_name))
+    download.file(url = i, destfile = paste0(outdir, "/", file_name, ".1.2.nc"))
   }else {
     cat("File already exists: ", file_name, "\n")
   }
 }
 ```
 
+#### Phenonology
+
+Download `phenology` data from <https://www.earthdata.nasa.gov/>.
+
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+library(httr)
+library(rvest)
+
+outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis"); dir.create(outdir, F, T)
+
+# Modis URL
+url <- "https://e4ftl01.cr.usgs.gov/MOTA/MCD12Q2.061/2020.01.01/"
+
+# Get the HTML content of the URL
+page <- read_html(url)
+
+# Extract href links
+links <- page %>% html_nodes("a") %>% html_attr("href")
+
+# Filter the links based on the specified patterns
+pattern <- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"
+hdf_links <- links[grep(pattern, links)]
+hdf_links <- hdf_links[grep("\\.hdf$", hdf_links)]
+
+for (file in hdf_links){
+  if (!file.exists(paste0(outdir, "/", file))) {
+    
+    # Define your Earthdata credentials
+    username <- Sys.getenv("EARTHDATA_USERNAME") # replace with your Earthdata username
+    password <- Sys.getenv("EARTHDATA_PASSWORD") # replace with your Earthdata password
+    
+    username <- "ymutua@gmail.com"
+    password <- "4$$8Daktari4338"
+    
+    download.file(
+      url = paste0(url, file), 
+      destfile = paste0(outdir, "/", file, "a"), 
+      method = "curl", 
+      extra = paste("-u", username, ":", password), 
+      quiet = TRUE)
+    
+    cat("Downloading: ", file, "\n")
+    download.file(url = paste0("https://", username, ":", password, "@", url, file), 
+                  destfile = paste0(outdir, "/", file, "a"), quiet = TRUE)
+  }else {
+    cat("File already exists: ", file, "\n")
+  }
+}
+```
+
 #### Burned areas
 
-Download the most recent version of `burned areas` data by UNEP-WCMC and IUCN (2023). The most recent version is available at <https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m>.
+Download the most recent version of `burned areas` data by UNEP-WCMC and IUCN (2023) from <https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m>.
 
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
 library(RCurl)
@@ -333,7 +411,7 @@ for (i in dmp_manifest_list){
 
 #### Feed parameters
 
-We have compiled a list of `feed parameters` for use in ruminant feed balance modelling. The files are available here <https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd>
+We have compiled a list of `feed parameters` for use in ruminant feed balance modelling. The files are available at <https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd>
 
 ```{r message=FALSE, warning=FALSE}
 library(googledrive)
@@ -464,7 +542,7 @@ for (speciesCategory in speciesCategories){
 
 #### Livestock parameters
 
-We have compiled a list of `livestock parameters` for use in ruminant feed balance modelling. The files are available here <https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd>
+We have compiled a list of `livestock parameters` for use in ruminant feed balance modelling. The files are available at <https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd>
 
 ```{r message=FALSE, warning=FALSE}
 library(googledrive)

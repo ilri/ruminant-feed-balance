@@ -1,20 +1,21 @@
-library(raster)
-#library(sp)
-#library(sf)
-library(gdalUtils)
+#Libraries
+library(terra)
 
-#rasterOptions(maxmemory = 1e+60)
+# study area
+region <- "Nigeria"
 
+root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+indir <- paste0(root, "/src/1Data-download/SpatialData/inputs/ProtectedAreas")
+outdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/ProtectedAreas"); dir.create(outdir, F, T)
 
-setwd("")
+# load livelihoods vectors
+wdpaNGA <- vect(paste0(indir, "/WDPA_WDOECM_Oct2024_Public_NGA.shp"))
 
-proPath <- 'SpatialData/inputs/ProtectedAreas/'
+# reference raster
+r <- rast(ext(wdpaNGA), resolution = 0.00297619, crs = crs(wdpaNGA))
 
-filenamesTifInter <- list.files(path = proPath ,pattern="*.tif$",full.names = T)
-filenamesTifInter2 <- list.files(path = proPath ,pattern="*.tif$",full.names = F)
+# rasterize the SpatVector
+wdpaNGA <- rasterize(wdpaNGA, r, field = "STATUS_YR")
 
-
-##@Resample and crop with gdal?
-for(i in 1:length(filenamesTifInter)){
-  gdalwarp(srcfile = filenamesTifInter[i], dstfile = paste0(proPath, filenamesTifInter2[i]), overwrite = T, tr = c(0.00297619, 0.00297619), r = "bilinear", cutline = "/exports/eddie/scratch/sfraval/feed-surfaces/SpatialData/inputs/aoi1.shp", crop_to_cutline = T) #0.00297619, 0.00297619
-}  
+# Write output
+writeRaster(wdpaNGA, paste0(outdir, "/WDPAGlobal.tif"), overwrite=TRUE)
