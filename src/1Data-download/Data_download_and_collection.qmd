@@ -346,9 +346,12 @@ page <- read_html(url)
 links <- page %>% html_nodes("a") %>% html_attr("href")
 
 # Filter the links based on the specified patterns
-pattern <- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"
+#pattern <- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"
+pattern <- "h18v07|h18v08|h19v07|h19v08"
 hdf_links <- links[grep(pattern, links)]
 hdf_links <- hdf_links[grep("\\.hdf$", hdf_links)]
+
+link <- paste0(url, hdf_links[4])
 
 for (file in hdf_links){
   if (!file.exists(paste0(outdir, "/", file))) {
@@ -356,9 +359,6 @@ for (file in hdf_links){
     # Define your Earthdata credentials
     username <- Sys.getenv("EARTHDATA_USERNAME") # replace with your Earthdata username
     password <- Sys.getenv("EARTHDATA_PASSWORD") # replace with your Earthdata password
-    
-    username <- "ymutua@gmail.com"
-    password <- "4$$8Daktari4338"
     
     download.file(
       url = paste0(url, file), 
