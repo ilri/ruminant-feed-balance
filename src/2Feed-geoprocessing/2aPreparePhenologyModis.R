@@ -8,10 +8,11 @@ library(sf)
 #memory.limit(size=64000)
 
 rasterOptions(maxmemory = 1e+60)
-
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
-
 phenPath <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis"); dir.create(outdir, F, T)
+
+# read AOI
+aoi_path <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp")
 
 filenames <- list.files(path = phenPath,pattern=".hdf$",full.names = T)
 
@@ -46,29 +47,22 @@ for (filename in filenames){
 
 ##Reproject all rasters
 filenamesTif <- list.files(path = paste0(phenPath) ,pattern=".tif$",full.names = T)
-#filenamesTif2 <- list.files(path = paste0(phenPath) ,pattern=".tif$",full.names = F)
 
-dir.create(paste0(phenPath,"/intermediate/"))
-
-#for(i in 1:length(filenamesTif)){
-#gdalwarp(srcfile = filenamesTif[i], dstfile = paste0(phenPath, "/intermediate/", filenamesTif2[i]), overwite = T, s_srs = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs", t_srs = "+proj=longlat +datum=WGS84 +no_defs", r = "bilinear")
-
-#}
+phenPathOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis"); dir.create(phenPathOut, F, T)
+dir.create(paste0(phenPathOut,"/intermediate/"))
 
 phaseList <- c("greenup1", "maturity1", "peak1", "senescence1", "dormancy1", "numcycles", "greenup2", "maturity2", "peak2", "senescence2", "dormancy2")
 for(i in 1:length(phaseList)){
-  gdalwarp(srcfile = filenamesTif[grep(pattern = phaseList[i],  filenamesTif)], dstfile = paste0(phenPath, "/intermediate/", phaseList[i], ".tif"), overwite = T, s_srs = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs", t_srs = "+proj=longlat +datum=WGS84 +no_defs", r = "bilinear")
+  gdalwarp(srcfile = filenamesTif[grep(pattern = phaseList[i],  filenamesTif)], dstfile = paste0(phenPathOut, "/intermediate/", phaseList[i], ".tif"), overwite = T, s_srs = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs", t_srs = "+proj=longlat +datum=WGS84 +no_defs", r = "bilinear")
   
 }
 
 #intermedatePath <- list.files(path = paste0(phenPath, "/intermediate/") ,pattern=".tif$",full.names = T)
-filenamesTifInter <- list.files(path = paste0(phenPath, "/intermediate/") ,pattern=".tif$",full.names = T)
-filenamesTifInter2 <- list.files(path = paste0(phenPath, "/intermediate/") ,pattern=".tif$",full.names = F)
+filenamesTifInter <- list.files(path = paste0(phenPathOut, "/intermediate/"), pattern=".tif$",full.names = T)
+#filenamesTifInter2 <- list.files(path = paste0(phenPathOut, "/intermediate/"), pattern=".tif$",full.names = F)
 
-dir.create(paste0(phenPath,"/outputTif/"))
+dir.create(paste0(phenPathOut,"/outputTif/"))
 ##@Resample and crop with gdal?
 for(i in 1:length(filenamesTifInter)){
-  gdalwarp(srcfile = filenamesTifInter[i], dstfile = paste0(phenPath, "/outputTif/", "pheno", toupper(substr(filenamesTifInter2[i], 1, 1)), substr(filenamesTifInter2[i], 2, nchar(filenamesTifInter2[i]))), overwite = T, tr = c(0.002976190476204010338, 0.002976190476189799483), r = "bilinear", cutline = "/exports/eddie/scratch/sfraval/feed-surfaces/SpatialData/inputs/aoi1.shp", crop_to_cutline = T) #0.00297619, 0.00297619
+  gdalwarp(srcfile = filenamesTifInter[i], dstfile = paste0(phenPathOut, "/outputTif/", "pheno", toupper(substr(basename(filenamesTifInter[i]), 1, 1)), substr(basename(filenamesTifInter[i]), 2, nchar(basename(filenamesTifInter[i])))), overwite = T, tr = c(0.002976190476204010338, 0.002976190476189799483), r = "bilinear", cutline = aoi_path, crop_to_cutline = T, overwrite = TRUE) #0.00297619, 0.00297619
 }  
-
-

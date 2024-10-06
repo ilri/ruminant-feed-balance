@@ -17,5 +17,5 @@ filenamesTifInter <- list.files(path = proPath ,pattern="*.tif$",full.names = T)
 
 ##@Resample and crop with gdal?
 for(i in 1:length(filenamesTifInter)){
-  gdalwarp(srcfile = filenamesTifInter[i], dstfile = paste0(outdir, "/", basename(filenamesTifInter)), overwrite = T, tr = c(0.00297619, 0.00297619), r = "bilinear", cutline = aoi_path, crop_to_cutline = T) #0.00297619, 0.00297619
+  gdalwarp(srcfile = filenamesTifInter[i], dstfile = paste0(outdir, "/", basename(filenamesTifInter[i])), overwrite = T, tr = c(0.00297619, 0.00297619), r = "bilinear", cutline = aoi_path, crop_to_cutline = T) #0.00297619, 0.00297619
 } 
