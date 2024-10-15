@@ -18,6 +18,7 @@ pathLU <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeas
 filesLU <- list.files(path = pathLU, pattern = ".tif$", full.names = T)
 
 pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/intermediate"); dir.create(pathSPAMInter, F, T)
 #From SPAM documentation: *_TA	all technologies together, ie complete crop; *_TI	irrigated portion of crop; *_TH	rainfed high inputs portion of crop; *_TL	rainfed low inputs portion of crop; *_TS	rainfed subsistence portion of crop; *_TR	rainfed portion of crop (= TA - TI, or TH + TL + TS)
 #end of file name should be physical area_cropname_a -> last a standing for all tech together.
 filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
@@ -43,4 +44,4 @@ iSPAMnonFeedFrac <- (iSPAMnonFeedArea / iSPAMtotalArea)
 iSPAMnonFeedFrac <- classify(iSPAMnonFeedFrac, cbind(NA, NA, 0), right=FALSE) # Replace missing values with 0
 iSPAMAnimalDigestCropFrac <- 1 - iSPAMnonFeedFrac
 
-iSPAMAnimalDigestCropFrac <- writeRaster(iSPAMAnimalDigestCropFrac, paste0(pathSPAM, "/animal_digest_frac.tif"), overwrite = T)
+iSPAMAnimalDigestCropFrac <- writeRaster(iSPAMAnimalDigestCropFrac, paste0(pathSPAMInter, "/animal_digest_frac.tif"), overwrite = T)

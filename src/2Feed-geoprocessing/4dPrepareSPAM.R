@@ -10,13 +10,14 @@ library(terra)
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
 spamPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/intermediate")
 
 # read AOI
 aoi <- vect(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
 
-dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP_2023/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
 
-sPamfiles <- list.files(path = spamPath, pattern="*frac.tif$",full.names = T)
+sPamfiles <- list.files(path = pathSPAMInter, pattern="*frac.tif$",full.names = T)
 #filenamesTifInter2 <- list.files(path = spamPath ,pattern="*frac.tif$",full.names = F)
 
 lapply(sPamfiles, function(sPamfile){
@@ -24,6 +25,7 @@ lapply(sPamfiles, function(sPamfile){
   
   isPamFile <- rast(sPamfile)
   isPamFile <- crop(isPamFile, ext(dmpTemp))
+  isPamFile <- mask(isPamFile, mask = dmpTemp)
   
   names(isPamFile) <- sPamfile_name
   varnames(isPamFile) <- sPamfile_name

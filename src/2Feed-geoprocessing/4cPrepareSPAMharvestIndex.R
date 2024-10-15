@@ -1,6 +1,7 @@
 gc()
 library(dplyr)
-library(terra)
+library(raster)
+library(rgdal)
 library(readr)
 
 #args <- commandArgs(TRUE)
@@ -9,8 +10,8 @@ library(readr)
 
 #Runs with 16gb ram and 40+gb hdd space
 #rasterOptions(tmpdir = EDDIE_TMP)
-terraOptions(memmax = 1e+60)
-terraOptions(todisk = TRUE)
+rasterOptions(maxmemory = 1e+60)
+rasterOptions(todisk = TRUE)
 #memory.limit(size = 56000) #Windows specific
 
 # root folder
@@ -20,10 +21,11 @@ root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 cropHI <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv"))
 
 pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/intermediate"); dir.create(pathSPAMInter, F, T)
 #From SPAM documentation: *_TA	all technologies together, ie complete crop; *_TI	irrigated portion of crop; *_TH	rainfed high inputs portion of crop; *_TL	rainfed low inputs portion of crop; *_TS	rainfed subsistence portion of crop; *_TR	rainfed portion of crop (= TA - TI, or TH + TL + TS)
 #end of file name should be physical area_cropname_a -> last a standing for all tech together.
 filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
-stSPAM <- rast(filesSPAM)
+stSPAM <- stack(filesSPAM)
 gc()
 
 #@Fill NAs of SPAM layers? At the moment all crops are assumed to be animal digestable if NA
@@ -37,36 +39,30 @@ crops <-sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM)
 #   unique()
 
 tmpCropIndex <- grep(pattern = paste(crops, collapse = "|"), names(stSPAM))
-iSPAMcropArea <- app(stSPAM[[tmpCropIndex]], fun = sum, na.rm=TRUE)
+#iSPAMcropArea <- overlay(stSPAM[[tmpCropIndex]], fun = sum, na.rm=TRUE) #this could not work??
+iSPAMcropArea <- calc(stack(stSPAM[[tmpCropIndex]]), fun = sum, na.rm = TRUE)
 
 print("past 1")
 
-stHI <- rast()
-stSPAMcropProp <- rast()
+stHI <- stack()
+stSPAMcropProp <- stack()
 gc()
 for(i in 1: length(crops)){
   tmpCropIndex <- grep(pattern = paste(crops[i], collapse = "|"), names(stSPAM))
-  #iSPAMtmpArea <- app(stSPAM[[tmpCropIndex]], fun = sum, na.rm=TRUE)
-  iSPAMtmpArea <- stSPAM[[tmpCropIndex]]
+  iSPAMtmpArea <- overlay(stSPAM[[tmpCropIndex]], fun = sum, na.rm=TRUE)
   icrop <- stSPAM[[tmpCropIndex]]
   icrop[icrop >0] <- (1 - cropHI$harvest_index[cropHI$codeSPAM == crops[i]])
-  stHI <- c(stHI, icrop)
+  stHI <- stack(stHI, icrop)
   #stHI <- stack(stHI, overlay(iSPAMtmpArea, fun = function((x){ifelse(!is.na(x), (1 - cropHI$harvest_index[cropHI$name == crops[i]]), NA)}))
   
-  #stSPAMcropProp <- stack(stSPAMcropProp, overlay(iSPAMtmpArea, iSPAMcropArea, fun = function(x, y){(x/y)}))
-  stSPAMcropProp <- c(stSPAMcropProp, app(c(iSPAMtmpArea, iSPAMcropArea), fun = function(x){(x[[1]]/x[[2]])}))
-  gc()
-
+  stSPAMcropProp <- stack(stSPAMcropProp, overlay(iSPAMtmpArea, iSPAMcropArea, fun = function(x, y){(x/y)}))
+  
   print(paste("Loop", i))
 }
 
-# Not sure why this returns zero values
-#iSPAMcropResFrac<- weighted.mean(stHI, stSPAMcropProp, na.rm = T)
-iSPAMcropResFrac <- stHI
-iSPAMcropResFrac <- classify(iSPAMcropResFrac, cbind(NA, NA, 0.8), right=FALSE) #Replace NA with 0.8 - assume that 80% is available for animals
+iSPAMcropResFrac <- weighted.mean(stHI, stSPAMcropProp, na.rm = T)
+iSPAMcropResFrac <- reclassify(iSPAMcropResFrac, cbind(NA, NA, 0.8), right=FALSE) #Replace NA with 0.8 - assume that 80% is available for animals
 
 print("past mean")
 
-writeRaster(iSPAMcropResFrac, paste0(pathSPAM, "/crop_res_frac.tif"), overwrite = T)
-
-unlink(file.path("/home/s2255815/scratch/AUTemp", "*"), recursive = TRUE)
+writeRaster(iSPAMcropResFrac, paste0(pathSPAMInter, "/crop_res_frac.tif"), overwrite = T)

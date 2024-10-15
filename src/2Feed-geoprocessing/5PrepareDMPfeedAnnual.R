@@ -172,20 +172,30 @@ for(i in 1:length(names(stDMP))){
   
   iDMPGrassGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassWet)
   writeRaster(iDMPGrassGrowing, paste0(FeedQuantityOutdir, "/grassWetDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+  rm(iDMPGrassGrowing)
+  gc()
   
   iDMPGrassDry <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassDry)
   writeRaster(iDMPGrassDry, paste0(FeedQuantityOutdir, "/grassDryDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+  rm(iDMPGrassDry)
+  gc()
 
   iDMPBrowse <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, rNonProtectedAreas, fun = funGrowingBrowse)
   writeRaster(iDMPBrowse, paste0(FeedQuantityOutdir, "/browseDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+  rm(iDMPBrowse)
+  gc()
 
   iDMPCropGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, iSPAMAnimalDigestCropFrac, residueFrac, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingCrops) 
   writeRaster(iDMPCropGrowing, paste0(FeedQuantityOutdir, "/cropDMP", datesDMP[i], ".tif"), overwrite = TRUE)
+  rm(iDMPCropGrowing)
+  gc()
 
   iDMPAftermath <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAftermath)
-  writeRaster(iDMPGrassDry, paste0(FeedQuantityOutdir, "/aftermathDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+  writeRaster(iDMPAftermath, paste0(FeedQuantityOutdir, "/aftermathDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+  rm(iDMPAftermath)
+  gc()
   print(paste("cycle", i))
-  rm(iDMPGrassGrowing, iDMPGrassDry, iDMPBrowse, iDMPCropGrowing, iDMPAftermath);gc()
+
 }
 
 #rm(list = ls())
