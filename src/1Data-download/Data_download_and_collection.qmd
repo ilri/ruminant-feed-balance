@@ -99,6 +99,7 @@ plot_grid(p0, p1, labels = NULL)
 ```
 
 #### Ruminant systems aggregation zones
+
 We use FEWSNET livelihood zones, the most recent version is available on <https://drive.google.com/file/d/1FwbhyjxjpuCFZ6hMcdQFIG4tdLoe9WV4/view?usp=sharing>, and download the data.
 
 ```{r message=FALSE, warning=FALSE}
@@ -114,6 +115,7 @@ drive_download(public_file, path = paste0(outdir, "/livelihood_zones.gpkg"), ove
 ```
 
 We then load the data as an `sf` and plot it.
+
 ```{r message=FALSE}
 library(ggplot2)
 library(sf)
@@ -206,14 +208,14 @@ download.file(
 
 # Unzip the downloaded file (only the specific zip inside the archive)
 unzip(zipfile = paste0(outdir, "/spam2020V1r0_global.zip"),
-      files = "spam2020V0r1_global_harvested_area.zip",
+      files = "spam2020V0r1_global_physical_area.zip",
       exdir = paste0(outdir))
 
 # List all files in the folder
 all_files <- list.files(paste0(outdir), full.names = TRUE)
 
 # Identify files to remove (all files except the one to keep)
-files_to_remove <- all_files[!basename(all_files) %in% "spam2020V0r1_global_harvested_area.zip"]
+files_to_remove <- all_files[!basename(all_files) %in% "spam2020V0r1_global_physical_area.zip"]
 
 # Remove the files
 file.remove(files_to_remove)
@@ -222,11 +224,11 @@ file.remove(files_to_remove)
 all_files <- list.files(paste0(outdir), full.names = TRUE)
 
 # Unzip the second archive
-unzip(zipfile = paste0(outdir, "/spam2020V0r1_global_harvested_area.zip"),
+unzip(zipfile = paste0(outdir, "/spam2020V0r1_global_physical_area.zip"),
       exdir = paste0(outdir, "/"))
 
 # List all files in the folder
-cropHarvestedArea <- list.files(paste0(outdir, "/spam2020V0r1_global_harvested_area"), full.names = TRUE)
+cropPhysicalArea <- list.files(paste0(outdir, "/spam2020V0r1_global_physical_area"), full.names = TRUE)
 ```
 
 #### Protected areas
@@ -300,9 +302,9 @@ library(RCurl)
 
 options(timeout=3600)
 
-outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/Feed/DMP"); dir.create(outdir, F, T)
+outdir <- paste0("/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/Geodata/DMP"); dir.create(outdir, F, T)
 
-# Doanload manifest
+# Download manifest
 download.file(
   url <- "https://globalland.vito.be/download/manifest/dmp_300m_v1_10daily_netcdf/manifest_clms_global_dmp_300m_v1_10daily_netcdf_latest.txt",
   destfile = paste0(outdir, "/manifest_clms_global_dmp_300m_v1_10daily_netcdf_latest.txt"))
@@ -311,15 +313,34 @@ download.file(
 dmp_manifest <- readLines(paste0(outdir, "/manifest_clms_global_dmp_300m_v1_10daily_netcdf_latest.txt"))
 
 # Select files of interest
-dmp_manifest_list <- grep("RT6_2023", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+#dmp_manifest_list <- grep("RT6_2023", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+
+# Combine the patterns to search for
+patterns <- "RT5_2020|RT6_2020|RT6_2021|RT2_202211100000|RT2_202211200000|RT2_202211300000|RT2_202212100000|RT2_202212200000|RT2_202212310000|RT6_2022|RT6_2023"
+
+# Use grep to search for any of the patterns in dmp_manifest
+dmp_manifest_list <- grep(patterns, dmp_manifest, value=TRUE) #select a file for each day
+
+# Define files to exclude
+exclude_patterns <- "RT5_202007100000|RT5_202007200000|RT5_202007310000|RT5_202008100000|RT5_202008200000|RT5_202008310000|RT6_202211100000|RT6_202211200000"
+
+# Exclude the specific files from the results
+dmp_manifest_list <- grep(exclude_patterns, dmp_manifest_list, invert=TRUE, value=TRUE)
 
 for (i in dmp_manifest_list){
   # Extract the file name
-  file_name <- basename(sub("OLCI_V1.*", "OLCI_V1", i))
+  #file_name <- basename(sub("OLCI_V1.*", "OLCI_V1", i))
+  
+  file_name_base <- basename(i)
+  
+  filenamep1 <- substr(file_name_base, 1, 13)
+  filenamep2 <- substr(file_name_base, 18, 29)
+  
+  file_name <- paste0(filenamep1, "RT6_", filenamep2, "_GLOBE_OLCI_V1.1.2.nc")
   
   if(!file.exists(paste0(outdir, "/", file_name))){
     cat("Downloading: ", file_name, "\n")
-    download.file(url = i, destfile = paste0(outdir, "/", file_name, ".1.2.nc"))
+    download.file(url = i, destfile = paste0(outdir, "/", file_name))
   }else {
     cat("File already exists: ", file_name, "\n")
   }
@@ -378,7 +399,7 @@ for (file in hdf_links){
 
 #### Burned areas
 
-Download the most recent version of `burned areas` data by UNEP-WCMC and IUCN (2023) from <https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m>.
+Download the most recent version of `burned areas` data by UNEP-WCMC and IUCN (2023) from <https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-monthly-300m>.
 
 ```{r message=FALSE, warning=FALSE, eval=FALSE}
 library(RCurl)
@@ -389,14 +410,14 @@ outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/Burned"); dir.cre
 
 # Doanload manifest
 download.file(
-  url <- "https://globalland.vito.be/download/manifest/ba_300m_v3_daily_netcdf/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt",
-  destfile = paste0(outdir, "/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt"))
+  url <- "https://globalland.vito.be/download/manifest/ba_300m_v3_monthly_netcdf/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt",
+  destfile = paste0(outdir, "/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
 
 # Read in manifest
-dmp_manifest <- readLines(paste0(outdir, "/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt"))
+dmp_manifest <- readLines(paste0(outdir, "/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
 
 # Select files of interest
-dmp_manifest_list <- grep("2023", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+dmp_manifest_list <- grep("NTC_2020", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
 
 for (i in dmp_manifest_list){
   # Extract the file name

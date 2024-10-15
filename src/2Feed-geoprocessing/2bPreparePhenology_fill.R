@@ -1,59 +1,33 @@
-library(raster)
-library(gdalUtils)
-#library(rgdal)
-#library(ncdf4)
-#library(ncdf.helpers)
-
-#Runs with 16gb ram and 40+gb hdd space
-#rasterOptions(tmpdir = EDDIE_TMP)
-rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
-rasterOptions(todisk = TRUE)
+library(terra)
 
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 phenPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis")
 
-#intermedatePath <- list.files(path = paste0(phenPath, "/outputTif/") ,pattern=".tif$",full.names = T)
-filenamesTifInter <- list.files(path = paste0(phenPath, "/outputTif/") ,pattern=".tif$",full.names = T)
-#filenamesTifInter2 <- list.files(path = paste0(phenPath, "/outputTif/") ,pattern=".tif$",full.names = F)
+dir.create(paste0(phenPath,"/outputTif/"), F, T)
+
+filenamesTifInter <- list.files(path = paste0(phenPath, "/intermediate/"), pattern="^pheno.*\\.tif$",full.names = T)
 
 #interpolate, resample and crop all rasters
 width = 19
 
-phenoGreenup1 <- raster(filenamesTifInter[grep(pattern = "Greenup1.tif", filenamesTifInter)])
-phenoGreenup1 <- focal(phenoGreenup1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
-phenoGreenup1 <- focal(phenoGreenup1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-phenoGreenup1 <- focal(phenoGreenup1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-writeRaster(phenoGreenup1, paste0(phenPath, "/outputTif/phenoGreenup1.tif"), overwrite = T)
-rm(phenoGreenup1)  
+dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+
+phenoFiles <- gsub('.{4}$', '', basename(filenamesTifInter))
+
+lapply(phenoFiles, function(phenoFile){
+  iphenoFile <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/intermediate/", phenoFile, ".tif"))
+  iphenoFile <- focal(iphenoFile, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
+  iphenoFile <- focal(iphenoFile, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
+  iphenoFile <- focal(iphenoFile, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
   
-    
-phenoPeak1 <- raster(filenamesTifInter[grep(pattern = "Peak1", filenamesTifInter)])
-phenoPeak1 <- focal(phenoPeak1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
-phenoPeak1 <- focal(phenoPeak1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-phenoPeak1 <- focal(phenoPeak1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-writeRaster(phenoPeak1, paste0(phenPath, "/outputTif/phenoPeak1.tif"), overwrite = T)
-rm(phenoPeak1)
-
-
-phenoSenescence1 <- raster(filenamesTifInter[grep(pattern = "Senescence1", filenamesTifInter)])
-phenoSenescence1 <- focal(phenoSenescence1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
-phenoSenescence1 <- focal(phenoSenescence1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-phenoSenescence1 <- focal(phenoSenescence1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-writeRaster(phenoSenescence1, paste0(phenPath, "/outputTif/phenoSenescence1.tif"), overwrite = T)
-rm(phenoSenescence1)
- 
-
-phenoMaturity1 <- raster(filenamesTifInter[grep(pattern = "Maturity1", filenamesTifInter)])  
-phenoMaturity1 <- focal(phenoMaturity1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
-phenoMaturity1 <- focal(phenoMaturity1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-phenoMaturity1 <- focal(phenoMaturity1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-writeRaster(phenoMaturity1, paste0(phenPath, "/outputTif/phenoMaturity1.tif"), overwrite = T)
-rm(phenoMaturity1)
-
-
-phenoDormancy1 <- raster(filenamesTifInter[grep(pattern = "Dormancy1", filenamesTifInter)]) 
-phenoDormancy1 <- focal(phenoDormancy1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE) #!!!Very rough interpolation
-phenoDormancy1 <- focal(phenoDormancy1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-phenoDormancy1 <- focal(phenoDormancy1, w=matrix(1,nrow=width, ncol=width), fun=mean, NAonly=TRUE, na.rm=TRUE)
-writeRaster(phenoDormancy1, paste0(phenPath, "/outputTif/phenoDormancy1.tif"), overwrite = T)
-rm(phenoDormancy1)
+  iphenoFile <- crop(iphenoFile, ext(iphenoFile))
+  iphenoFile <- resample(iphenoFile, dmpTemp, method="near")
+  iphenoFile <- mask(iphenoFile, mask = dmpTemp)
+  iphenoFile <- app(iphenoFile, fun = function(x) as.integer(round(x)))
+  
+  names(iphenoFile) <- phenoFile; varnames(iphenoFile) <-phenoFile
+  
+  writeRaster(iphenoFile, paste0(phenPath, "/outputTif/", phenoFile, ".tif"), overwrite = T)
+  rm(iphenoFile)
+  gc()
+})

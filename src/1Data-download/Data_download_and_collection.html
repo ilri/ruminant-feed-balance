@@ -403,14 +403,14 @@ Available layers:
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Unzip the downloaded file (only the specific zip inside the archive)</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="at">zipfile =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/spam2020V1r0_global.zip"</span>),</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">files =</span> <span class="st">"spam2020V0r1_global_harvested_area.zip"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">files =</span> <span class="st">"spam2020V0r1_global_physical_area.zip"</span>,</span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">exdir =</span> <span class="fu">paste0</span>(outdir))</span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># List all files in the folder</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>all_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(outdir), <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify files to remove (all files except the one to keep)</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>files_to_remove <span class="ot">&lt;-</span> all_files[<span class="sc">!</span><span class="fu">basename</span>(all_files) <span class="sc">%in%</span> <span class="st">"spam2020V0r1_global_harvested_area.zip"</span>]</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>files_to_remove <span class="ot">&lt;-</span> all_files[<span class="sc">!</span><span class="fu">basename</span>(all_files) <span class="sc">%in%</span> <span class="st">"spam2020V0r1_global_physical_area.zip"</span>]</span>
 <span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove the files</span></span>
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(files_to_remove)</span>
@@ -419,11 +419,11 @@ Available layers:
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>all_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(outdir), <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Unzip the second archive</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="at">zipfile =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/spam2020V0r1_global_harvested_area.zip"</span>),</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="at">zipfile =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/spam2020V0r1_global_physical_area.zip"</span>),</span>
 <span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">exdir =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/"</span>))</span>
 <span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co"># List all files in the folder</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>cropHarvestedArea <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/spam2020V0r1_global_harvested_area"</span>), <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>cropPhysicalArea <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/spam2020V0r1_global_physical_area"</span>), <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="protected-areas" class="level4">
@@ -540,19 +540,19 @@ Available layers:
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>links <span class="ot">&lt;-</span> page <span class="sc">%&gt;%</span> <span class="fu">html_nodes</span>(<span class="st">"a"</span>) <span class="sc">%&gt;%</span> <span class="fu">html_attr</span>(<span class="st">"href"</span>)</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the links based on the specified patterns</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>pattern <span class="ot">&lt;-</span> <span class="st">"h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>hdf_links <span class="ot">&lt;-</span> links[<span class="fu">grep</span>(pattern, links)]</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>hdf_links <span class="ot">&lt;-</span> hdf_links[<span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">.hdf$"</span>, hdf_links)]</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (file <span class="cf">in</span> hdf_links){</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/"</span>, file))) {</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define your Earthdata credentials</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    username <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"EARTHDATA_USERNAME"</span>) <span class="co"># replace with your Earthdata username</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    password <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"EARTHDATA_PASSWORD"</span>) <span class="co"># replace with your Earthdata password</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    username <span class="ot">&lt;-</span> <span class="st">"ymutua@gmail.com"</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    password <span class="ot">&lt;-</span> <span class="st">"4$$8Daktari4338"</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#pattern &lt;- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>pattern <span class="ot">&lt;-</span> <span class="st">"h18v07|h18v08|h19v07|h19v08"</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>hdf_links <span class="ot">&lt;-</span> links[<span class="fu">grep</span>(pattern, links)]</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>hdf_links <span class="ot">&lt;-</span> hdf_links[<span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">.hdf$"</span>, hdf_links)]</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>link <span class="ot">&lt;-</span> <span class="fu">paste0</span>(url, hdf_links[<span class="dv">4</span>])</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (file <span class="cf">in</span> hdf_links){</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/"</span>, file))) {</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define your Earthdata credentials</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    username <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"EARTHDATA_USERNAME"</span>) <span class="co"># replace with your Earthdata username</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    password <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"EARTHDATA_PASSWORD"</span>) <span class="co"># replace with your Earthdata password</span></span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(</span>
 <span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">url =</span> <span class="fu">paste0</span>(url, file), </span>
@@ -572,7 +572,7 @@ Available layers:
 </section>
 <section id="burned-areas" class="level4">
 <h4 class="anchored" data-anchor-id="burned-areas">Burned areas</h4>
-<p>Download the most recent version of <code>burned areas</code> data by UNEP-WCMC and IUCN (2023) from <a href="https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m" class="uri">https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m</a>.</p>
+<p>Download the most recent version of <code>burned areas</code> data by UNEP-WCMC and IUCN (2023) from <a href="https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-monthly-300m" class="uri">https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-monthly-300m</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RCurl)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -582,11 +582,11 @@ Available layers:
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Doanload manifest</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  url <span class="ot">&lt;-</span> <span class="st">"https://globalland.vito.be/download/manifest/ba_300m_v3_daily_netcdf/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt"</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">destfile =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt"</span>))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  url <span class="ot">&lt;-</span> <span class="st">"https://globalland.vito.be/download/manifest/ba_300m_v3_monthly_netcdf/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">destfile =</span> <span class="fu">paste0</span>(outdir, <span class="st">"/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"</span>))</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in manifest</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>dmp_manifest <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/manifest_clms_global_ba_300m_v3_daily_netcdf_latest.txt"</span>))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>dmp_manifest <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="fu">paste0</span>(outdir, <span class="st">"/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"</span>))</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Select files of interest</span></span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>dmp_manifest_list <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"2023"</span>, dmp_manifest, <span class="at">fixed=</span><span class="cn">TRUE</span>, <span class="at">value=</span><span class="cn">TRUE</span>) <span class="co">#select a file for each day</span></span>
