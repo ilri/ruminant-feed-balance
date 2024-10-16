@@ -11,7 +11,7 @@ outdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/ProtectedAre
 # load livelihoods vectors
 wdpaNGA <- vect(paste0(indir, "/WDPA_WDOECM_Oct2024_Public_NGA.shp"))
 
-# reference raster
+# reference raster?
 #r <- rast(ext(wdpaNGA), resolution = 0.00297619, crs = crs(wdpaNGA))
 dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
 

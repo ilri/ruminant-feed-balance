@@ -29,7 +29,8 @@ library(rgdal)
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
 cropOutdir <- paste0(root, "/src/3Balance-estimates/Nigeria/SpatialData/inputs/Cropping_days"); dir.create(cropOutdir, F, T)
-FeedQuantityOutdir <- paste0(root, "/src/3Balance-estimates/Nigeria/SpatialData/inputs/Feed_quantity"); dir.create(FeedQuantityOutdir, F, T)
+FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/Feed_quantity"); dir.create(FeedQuantityOutdir, F, T)
+FeedQuantityMeansOutdir <- paste0(root, "/src/3Balance-estimates/Nigeria/SpatialData/inputs/Feed_quantity"); dir.create(FeedQuantityMeansOutdir, F, T)
 
 # read AOI
 aoi <- readOGR(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
@@ -201,25 +202,22 @@ for(i in 1:length(names(stDMP))){
 #rm(list = ls())
 gc()
 
-iDMPgrassWet <- stack(list.files(path = "SpatialData/inputs/Feed_quantity/",pattern="grassWet",full.names = T))
+iDMPgrassWet <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassWet",full.names = T))
 DMPgrassmeanWet <- mean(iDMPgrassWet, na.rm = T)
-writeRaster(DMPgrassmeanWet, 'SpatialData/inputs/Feed_quantity/DMPgrWetmean_2014.tif', overwrite = TRUE)
+writeRaster(DMPgrassmeanWet, paste0(FeedQuantityMeansOutdir, "/DMPgrassWetmean_2014.tif"), overwrite = TRUE)
 
-iDMPgrassDry <- stack(list.files(path = "SpatialData/inputs/Feed_quantity/",pattern="grassDry",full.names = T))
+iDMPgrassDry <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassDry",full.names = T))
 DMPgrassmeanDry <- mean(iDMPgrassDry, na.rm = T)
-writeRaster(DMPgrassmeanDry, 'SpatialData/inputs/Feed_quantity/DMPgrDrymean_2014.tif', overwrite = TRUE)
+writeRaster(DMPgrassmeanDry, paste0(FeedQuantityMeansOutdir, "/DMPgrassDrymean_2014.tif"), overwrite = TRUE)
 
-iDMPbrowse <- stack(list.files(path = "SpatialData/inputs/Feed_quantity/",pattern="browse",full.names = T))
+iDMPbrowse <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="browse",full.names = T))
 DMPbrowsemean <- mean(iDMPbrowse, na.rm = T)
-writeRaster(DMPbrowsemean, 'SpatialData/inputs/Feed_quantity/DMPbrmean_2014.tif', overwrite = TRUE)
+writeRaster(DMPbrowsemean, paste0(FeedQuantityMeansOutdir, "/DMPbrowsemean_2014.tif"), overwrite = TRUE)
 
-iDMPCropGrowing <- stack(list.files(path = "SpatialData/inputs/Feed_quantity/",pattern="crop",full.names = T))
+iDMPCropGrowing <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="crop",full.names = T))
 DMPcropmean <- mean(iDMPCropGrowing, na.rm = T)
-writeRaster(DMPcropmean, 'SpatialData/inputs/Feed_quantity/DMPcrmean_2014.tif', overwrite = TRUE)
+writeRaster(DMPcropmean, paste0(FeedQuantityMeansOutdir, "/DMPcropmean_2014.tif"), overwrite = TRUE)
 
-iDMPAftermath <- stack(list.files(path = "SpatialData/inputs/Feed_quantity/",pattern="aftermath",full.names = T))
+iDMPAftermath <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="aftermath",full.names = T))
 DMPAftermean <- mean(iDMPAftermath, na.rm = T)
-writeRaster(DMPAftermean, 'SpatialData/inputs/Feed_quantity/DMPafmean_2014.tif', overwrite = TRUE)
-
-
-
+writeRaster(DMPAftermean, paste0(FeedQuantityMeansOutdir, "/DMPaftermean_2014.tif"), overwrite = TRUE)

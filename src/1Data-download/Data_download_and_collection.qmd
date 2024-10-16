@@ -355,44 +355,42 @@ Download `phenology` data from <https://www.earthdata.nasa.gov/>.
 library(httr)
 library(rvest)
 
-outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis"); dir.create(outdir, F, T)
+yearList <- c("2020", "2021", "2022", "2023")
 
-# Modis URL
-url <- "https://e4ftl01.cr.usgs.gov/MOTA/MCD12Q2.061/2020.01.01/"
+for(year in yearList){
 
-# Get the HTML content of the URL
-page <- read_html(url)
+  outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis/", year); dir.create(outdir, F, T)
+  
+  # Modis URL
+  url <- paste0("https://e4ftl01.cr.usgs.gov/MOTA/MCD12Q2.061/", year, ".01.01/")
+  
+  # Get the HTML content of the URL
+  page <- read_html(url)
 
-# Extract href links
-links <- page %>% html_nodes("a") %>% html_attr("href")
+  # Extract href links
+  links <- page %>% html_nodes("a") %>% html_attr("href")
 
-# Filter the links based on the specified patterns
-#pattern <- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"
-pattern <- "h18v07|h18v08|h19v07|h19v08"
-hdf_links <- links[grep(pattern, links)]
-hdf_links <- hdf_links[grep("\\.hdf$", hdf_links)]
+  # Filter the links based on the specified patterns
+  #pattern <- "h20v07|h20v08|h20v09|h21v07|h21v08|h21v09|h21v10|h22v07|h22v08|h22v09"
+  pattern <- "h18v07|h18v08|h19v07|h19v08"
+  hdf_links <- links[grep(pattern, links)]
+  hdf_links <- hdf_links[grep("\\.hdf$", hdf_links)]
 
-link <- paste0(url, hdf_links[4])
-
-for (file in hdf_links){
+  #paste0(url, hdf_links[1])
+  
+  for (file in hdf_links){
   if (!file.exists(paste0(outdir, "/", file))) {
     
     # Define your Earthdata credentials
     username <- Sys.getenv("EARTHDATA_USERNAME") # replace with your Earthdata username
     password <- Sys.getenv("EARTHDATA_PASSWORD") # replace with your Earthdata password
     
-    download.file(
-      url = paste0(url, file), 
-      destfile = paste0(outdir, "/", file, "a"), 
-      method = "curl", 
-      extra = paste("-u", username, ":", password), 
-      quiet = TRUE)
-    
     cat("Downloading: ", file, "\n")
     download.file(url = paste0("https://", username, ":", password, "@", url, file), 
-                  destfile = paste0(outdir, "/", file, "a"), quiet = TRUE)
+                  destfile = paste0(outdir, "/", file), quiet = TRUE)
   }else {
     cat("File already exists: ", file, "\n")
+    }
   }
 }
 ```
@@ -406,26 +404,31 @@ library(RCurl)
 
 options(timeout=3600)
 
-outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/Burned"); dir.create(outdir, F, T)
-
 # Doanload manifest
 download.file(
   url <- "https://globalland.vito.be/download/manifest/ba_300m_v3_monthly_netcdf/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt",
-  destfile = paste0(outdir, "/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
+  destfile = paste0(root, "/src/1Data-download/SpatialData/inputs/Burned/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
 
 # Read in manifest
-dmp_manifest <- readLines(paste0(outdir, "/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
+dmp_manifest <- readLines(paste0(root, "/src/1Data-download/SpatialData/inputs/Burned/manifest_clms_global_ba_300m_v3_monthly_netcdf_latest.txt"))
 
-# Select files of interest
-dmp_manifest_list <- grep("NTC_2020", dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+yearList <- c("2020", "2021", "2022", "2023")
 
-for (i in dmp_manifest_list){
-  # Extract the file name
-  file_name <- basename(i)
-  if(!file.exists(paste0(outdir, "/", file_name))){
-    download.file(url = i, destfile = paste0(outdir, "/", file_name))
-  }else {
-    cat("File already exists:", file_name, "\n")
+for(year in yearList){
+  
+  outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/Burned/", year); dir.create(outdir, F, T)
+  
+  # Select files of interest
+  dmp_manifest_list <- grep(paste0("NTC_", year), dmp_manifest, fixed=TRUE, value=TRUE) #select a file for each day
+  for (i in dmp_manifest_list){
+    # Extract the file name
+    file_name <- basename(i)
+    if(!file.exists(paste0(outdir, "/", file_name))){
+      download.file(url = i, destfile = paste0(outdir, "/", file_name))
+      
+    }else{
+      cat("File already exists:", file_name, "\n")
+    }
   }
 }
 ```
