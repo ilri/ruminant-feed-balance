@@ -29,6 +29,7 @@ lapply(yearList, function(year){
       
       iBurned <- raster::raster(nc_file, varname="day_of_burn", ncdf=TRUE)
       iBurned <- iBurned %>% rast()
+      #iBurned <- project(iBurned, dmpTemp)
       iBurned <- crop(iBurned, ext(dmpTemp))
       iBurned <- resample(iBurned, dmpTemp, method="near", threads=TRUE)
       iBurned <- mask(iBurned, mask = dmpTemp)

@@ -1,3 +1,4 @@
+gc()
 library(terra)
 
 # root folder

@@ -59,6 +59,7 @@ for(i in 1: length(crops)){
   
   print(paste("Loop", i))
 }
+gc()
 
 iSPAMcropResFrac <- weighted.mean(stHI, stSPAMcropProp, na.rm = T)
 iSPAMcropResFrac <- reclassify(iSPAMcropResFrac, cbind(NA, NA, 0.8), right=FALSE) #Replace NA with 0.8 - assume that 80% is available for animals

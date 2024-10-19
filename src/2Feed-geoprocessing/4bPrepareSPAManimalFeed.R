@@ -3,7 +3,7 @@ library(dplyr)
 library(readr)
 library(terra)
 
-args <- commandArgs(TRUE)
+#args <- commandArgs(TRUE)
 
 #EDDIE_TMP <- as.character(args[1])
 

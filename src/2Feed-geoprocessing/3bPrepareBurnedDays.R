@@ -19,8 +19,7 @@ lapply(yearList, function(year){
   
   #year <- "2020"
   
-  burnedOut <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/Burned/", year); dir.create(burnedOut, F, T)
-  
+  burnedOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Burned/", year); dir.create(burnedOut, F, T)
   pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
   filesPhenology <- list.files(path = pathPhen,pattern=".tif$",full.names = T)
   pathBurn <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Burned/", year)
@@ -44,22 +43,25 @@ lapply(yearList, function(year){
   gc()
   
   ##Crop to test area
-  stLU <- extend(stLU, extent(stBurn[[1]]))
-  stLU <- crop(stLU, extent(stBurn[[1]]))
-  stLU <- mask(stLU, aoi)
+  # stLU <- extend(stLU, extent(stBurn[[1]]))
+  # stLU <- crop(stLU, extent(stBurn[[1]]))
+  # stLU <- mask(stLU, aoi)
   #stPhen <- resample(stPhen, stBurn[[1]], method = "ngb")
-  stPhen <- extend(stPhen, extent(stBurn[[1]]))
-  stPhen <- crop(stPhen, extent(stBurn[[1]]))
+  # stPhen <- extend(stPhen, extent(stBurn[[1]]))
+  # stPhen <- crop(stPhen, extent(stBurn[[1]]))
   #stPhen <- mask(stPhen, aoi)
   #rNonProtectedAreas <- resample(rNonProtectedAreas, stBurn[[1]], method = "ngb")
-  rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stBurn[[1]]))
-  rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stBurn[[1]]))
+  # rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stBurn[[1]]))
+  # rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stBurn[[1]]))
   #rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
   print("past 0")
   gc()
   
   names(stBurn) <- paste0("d", datesBurndiff)
-  stBurn <- reclassify(stBurn, c(100, 255, NA)) #NA values are 254 
+  # cellStats(is.na(stBurn[[1]]), sum)
+  # stBurn <- reclassify(stBurn, c(100, 255, NA)) #NA values are 254 
+  stBurn <- reclassify(stBurn, c(-Inf, 0, 0, 367, Inf, 0))
+  stBurn <- stack(stBurn)
   gc()
   
   stLU$LUtree300 <- reclassify(stLU$LUtree300, c(-Inf, 0, 0, 200, Inf, 0)) 
@@ -69,18 +71,37 @@ lapply(yearList, function(year){
   gc()
   
   #####Estimate total Burn dekads
-  funBurnGrass <- function(burnBin, crops, grass, forest, shrub, nonprotected, greenup, senesence, greenup2, senesence2) {ifelse((senesence >= datesBurndiff[i] & (grass+shrub) >0.25) | (greenup2 <= datesBurndiff[i] & senesence2 >= datesBurndiff[i] & (grass+shrub) >0.25), burnBin, NA) } 
-  funBurnCrops <- function(burnBin, crops, greenup, senesence, greenup2, senesence2) {ifelse((senesence < datesBurndiff[i] & senesence + 60 > datesBurndiff[i] & crops > 0.25) | (senesence2 < datesBurndiff[i] & crops > 0.25), burnBin, NA) } 
+  #funBurnGrass <- function(burnBin, crops, grass, forest, shrub, nonprotected, greenup, senesence, greenup2, senesence2) {ifelse((senesence >= datesBurndiff[i] & (grass+shrub) >0.25) | (greenup2 <= datesBurndiff[i] & senesence2 >= datesBurndiff[i] & (grass+shrub) >0.25), burnBin, NA) } 
+  
+  funBurnGrass <- function(burnBin, grass, shrub, greenup, senesence, greenup2, senesence2, burndate) {
+    funBurnGrass1 <- overlay(senesence, grass, shrub, fun = function(a, b, c) {return((a >= burndate) & ((b + c) > 0.25))})
+    funBurnGrass2 <- overlay(greenup2, senesence2, grass, shrub, fun = function(d, e, f, g) {return((d <= burndate) & (e >= burndate) & ((f + g) > 0.25))})
+    funBurnGrass3 <- funBurnGrass1 | funBurnGrass2
+    result <- mask(burnBin, funBurnGrass3, maskvalue = 0, updatevalue = NA)
+    return(result)}
+  
+  #funBurnCrops <- function(burnBin, crops, greenup, senesence, greenup2, senesence2) {ifelse((senesence < datesBurndiff[i] & senesence + 60 > datesBurndiff[i] & crops > 0.25) | (senesence2 < datesBurndiff[i] & crops > 0.25), burnBin, NA) } 
+  
+  funBurnCrops <- function(burnBin, crops, greenup, senesence, greenup2, senesence2, burndate) {
+    funBurnCrops1 <- overlay(senesence, crops, fun = function(a, b) {return((a < burndate & a + 60 > burndate) & (b > 0.25))})
+    funBurnCrops2 <- overlay(senesence2, crops, fun = function(d, e) {return((d < burndate) & (e > 0.25))})
+    funBurnCrops3 <- funBurnCrops1 | funBurnCrops2
+    result <- mask(burnBin, funBurnCrops3, maskvalue = 0, updatevalue = NA)
+    return(result)}
   
   iBurnGrass <- stack()
   iBurnCrops <- stack()
   for(i in 1:length(names(stBurn))){
-    
-    iBurnGrass <- stack(iBurnGrass, overlay(stBurn[[i]], stLU$LUcrops300, stLU$LUgrass300, stLU$LUtree300, stLU$LUshrub300, rNonProtectedAreas, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funBurnGrass))
+
+    #iBurnGrass <- stack(iBurnGrass, overlay(stBurn[[i]], stLU$LUcrops300, stLU$LUgrass300, stLU$LUtree300, stLU$LUshrub300, rNonProtectedAreas, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funBurnGrass))
     #writeRaster(iDMP, paste0('SpatialData/inputs/Feed_quantity/totalDMP', datesDMP[i], '.tif'), overwrite = TRUE)  
     
-    iBurnCrops <- stack(iBurnCrops, overlay(stBurn[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funBurnCrops))
+    iBurnGrass <- stack(iBurnGrass, funBurnGrass(stBurn[[i]], stLU$LUgrass300, stLU$LUshrub300, stPhen$phenoGreenup1,stPhen$phenoSenescence1, stPhen$phenoGreenup2,stPhen$phenoSenescence2, datesBurndiff[i]))
+    
+    #iBurnCrops <- stack(iBurnCrops, overlay(stBurn[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funBurnCrops))
     #writeRaster(iDMPCropGrowing, paste0('SpatialData/inputs/Feed_quantity/cropDMP', datesDMP[i], '.tif'), overwrite = TRUE)
+    
+    iBurnCrops <- stack(iBurnCrops, funBurnCrops(stBurn[[i]], stLU$LUcrops300, stPhen$phenoGreenup1,stPhen$phenoSenescence1, stPhen$phenoGreenup2,stPhen$phenoSenescence2, datesBurndiff[i]))
     
     print(paste("cycle", i))
     gc()
@@ -88,12 +109,16 @@ lapply(yearList, function(year){
   
   gc()
   
-  burnGrassDekads <- sum(iBurnGrass, na.rm = T)
-  writeRaster(burnGrassDekads, paste0(burnedOut, "/burnGrassDekads.tif"), overwrite = TRUE)
-  rm(burnGrassDekads)
+  #burnGrassMonths <- sum(iBurnGrass, na.rm = T)
+  burnGrassMonths <- calc(iBurnGrass, fun = function(x) {sum(x > 1, na.rm = TRUE)})
+  writeRaster(burnGrassMonths, paste0(burnedOut, "/burnGrassMonths.tif"), overwrite = TRUE)
+  rm(burnGrassMonths)
   
-  burnCropDekads <- sum(iBurnCrops, na.rm = T)
-  writeRaster(burnCropDekads, paste0(burnedOut, "/burnCropsDekads.tif"), overwrite = TRUE)
+  #burnCropMonths <- sum(iBurnCrops, na.rm = T)
+  burnCropMonths <- calc(iBurnCrops, fun = function(x) {sum(x > 1, na.rm = TRUE)})
+  writeRaster(burnCropMonths, paste0(burnedOut, "/burnCropMonths.tif"), overwrite = TRUE)
+  rm(burnCropMonths)
   gc()
   
 })
+

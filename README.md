@@ -1,4 +1,4 @@
-# Feed balances for ruminant livestock at national scale: case studies in Ethiopia and Burkina Faso
+# Feed balances for ruminant livestock at national scale: case studies in Ethiopia, Burkina Faso and Nigeria
  
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

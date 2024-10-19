@@ -74,23 +74,19 @@ library(sf)
 outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound"); dir.create(outdir, F, T)
 outdir2 <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound"); dir.create(outdir2, F, T)
 
+admin_levels <- c("0", "1", "2")
+for(admin_level in admin_levels){
+  aoi <- geodata::gadm(country = "NGA", level=admin_level, path = paste0(outdir), version="latest") %>% sf::st_as_sf()
+  write_sf(aoi, paste0(outdir, "/gadm40_BFA_", admin_level, ".shp"), append = FALSE)
+  write_sf(aoi, paste0(outdir2, "/aoi", admin_level, ".shp"), append = FALSE)
+}
 
-# Level 0
-aoi0 <- geodata::gadm(country = "NGA", level=0, path = paste0(outdir), version="latest") %>% 
-  sf::st_as_sf()
-
-write_sf(aoi0, paste0(outdir2, "/aoi0.shp"), append = FALSE)
-
-# Level 1
-aoi1 <- geodata::gadm(country = "NGA", level=1, path = paste0(outdir), version="latest") %>% 
-  sf::st_as_sf()
-
-write_sf(aoi1, paste0(outdir2, "/aoi1.shp"), append = FALSE)
-
+aoi0 <- read_sf(paste0(outdir2, "/aoi0.shp"))
 p0 <- ggplot() + 
   geom_sf(data = aoi0, colour = "black", show.legend = F) + 
   coord_sf(xlim = c(2.1, 15.1), ylim = c(3.8, 14.3), expand = FALSE)
 
+aoi1 <- read_sf(paste0(outdir2, "/aoi1.shp"))
 p1 <- ggplot() + 
   geom_sf(data = aoi1, colour = "black", show.legend = F) + 
   coord_sf(xlim = c(2.1, 15.1), ylim = c(3.8, 14.3), expand = FALSE)
@@ -100,37 +96,44 @@ plot_grid(p0, p1, labels = NULL)
 
 #### Ruminant systems aggregation zones
 
-We use FEWSNET livelihood zones, the most recent version is available on <https://drive.google.com/file/d/1FwbhyjxjpuCFZ6hMcdQFIG4tdLoe9WV4/view?usp=sharing>, and download the data.
+We use FEWSNET livelihood zones, the most recent version is available on <https://shapefiles.fews.net/LHZ/NG_LHZ_2018.zip>
 
 ```{r message=FALSE, warning=FALSE}
-library(googledrive)
+library(RCurl)
 library(sf)
 
 outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/AggregationZones"); dir.create(outdir, F, T)
 
+download.file(
+  url = paste0("https://shapefiles.fews.net/LHZ/NG_LHZ_2018.zip"),
+  destfile = paste0(outdir, "/NG_LHZ_2018.zip"), quiet = TRUE)
+
+unzip(zipfile = paste0(outdir, "/NG_LHZ_2018.zip"), exdir = paste0(outdir, "/"))
+
+# Other zonations maps
+library(googledrive)
 drive_deauth()
 drive_user()
-public_file <-  drive_get(as_id("1FwbhyjxjpuCFZ6hMcdQFIG4tdLoe9WV4"))
-drive_download(public_file, path = paste0(outdir, "/livelihood_zones.gpkg"), overwrite = TRUE)
+public_file <-  drive_get(as_id("10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT"))
+drive_download(public_file, path = paste0(outdir, "/Ecological_and_Feed_Distribution.zip"), overwrite = TRUE)
+
+unzip(zipfile = paste0(outdir, "/Ecological_and_Feed_Distribution.zip"), exdir = paste0(outdir, "/"))
 ```
 
-We then load the data as an `sf` and plot it.
+```{r include=FALSE}
+# We then load the data as an `sf` and plot it.
 
-```{r message=FALSE}
 library(ggplot2)
 library(sf)
 
-# which layers are available in the GeoPackage?
-st_layers(paste0(outdir, "/livelihood_zones.gpkg"))
-
 # Read in data as sf
-lhz <- st_read(paste0(outdir, "/livelihood_zones.gpkg"), layer = "livelihood_zones", quiet = TRUE)
+lhz <- st_read(paste0(outdir, "/NG_LHZ_2018.shp"), quiet = TRUE)
 
 ggplot() + 
   geom_sf(data = aoi0, colour = "black", show.legend = F) + 
-  geom_sf(data = lhz, aes(fill = grouping)) + 
+  geom_sf(data = lhz, aes(fill = LZNAMEEN)) + 
   coord_sf(xlim = c(2.1, 15.1), ylim = c(3.8, 14.3), expand = FALSE) + 
-  labs(fill = "Region") #+ themeLabs + theme(legend.position="bottom")   
+  labs(fill = "Region") #+ themeLabs + theme(legend.position="bottom") 
 ```
 
 #### Land use
