@@ -15,6 +15,7 @@ options(scipen = 999)
 # install.packages("dplyr")
 # install.packages("tidyr")
 # install.packages("purrr")
+# install.packages("tidyterra")
 
 # Load libraries
 library(terra)
@@ -23,6 +24,7 @@ library(sf)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(tidyterra)
 #library(exactextractr) #For zonal statistics
 
 rasterOptions(tmpdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp") # Process needs > 40GB of temporary disk space
@@ -76,7 +78,7 @@ lv <- c(lv, aez)
 glps <- rast(paste0(spatialDir, "/inputs/GLPS/glps.tif"))
 glps <- terra::resample(glps, lv, method = 'near')
 glps <- terra::crop(glps, aez, mask = T)
-periurban <- glps %>% mutate(CLASSNAME = ifelse(as.character(CLASSNAME) == "Urban", 1, 0)) # Convert urban areas to 1, other areas to 0
+periurban <- glps %>% tidyterra::mutate(CLASSNAME = ifelse(as.character(CLASSNAME) == "Urban", 1, 0)) # Convert urban areas to 1, other areas to 0
 
 #periurban <- periurban == 13
 lv <- c(lv, periurban)
@@ -596,7 +598,7 @@ for(year in yearList){
   terra::writeRaster(sum(MERhorse, MERdonkey, na.rm = T), paste0(spatialDir, "/outputs/horseDonkeyMER_MJ_", year, ".tif"), overwrite = T)
   
   MERcattle <- sum(MERtotalYr_DS_Sahel_cattle, MERtotalYr_DS_Savannah_cattle, MERtotalYr_DS_Lowlands_cattle, MERtotalYr_DS_Periurban_cattle, MERtotalYr_WS_Sahel_cattle, MERtotalYr_WS_Savannah_cattle, MERtotalYr_WS_Lowlands_cattle, MERtotalYr_WS_Periurban_cattle, na.rm = T)
-  terra::writeRaster(MERcattle, paste0(spatialDir, "/outputs/cattleMER_", year, ".tif"), overwrite = T)
+  terra::writeRaster(MERcattle, paste0(spatialDir, "/outputs/cattleMER_MJ_", year, ".tif"), overwrite = T)
   
   MERshoats <- sum(MERtotalYr_DS_Sahel_shoats, MERtotalYr_DS_Savannah_shoats, MERtotalYr_DS_Lowlands_shoats, MERtotalYr_DS_Periurban_shoats, MERtotalYr_WS_Sahel_shoats, MERtotalYr_WS_Savannah_shoats, MERtotalYr_WS_Lowlands_shoats, MERtotalYr_WS_Periurban_shoats, na.rm = T)
   terra::writeRaster(MERshoats, paste0(spatialDir, "/outputs/shoatsMER_MJ_", year, ".tif"), overwrite = T)

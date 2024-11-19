@@ -15,6 +15,7 @@ options(scipen = 999)
 # install.packages("dplyr")
 # install.packages("tidyr")
 # install.packages("purrr")
+# install.packages("tidyterra")
 
 # Load libraries
 library(terra)
@@ -23,6 +24,7 @@ library(sf)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(tidyterra)
 #library(exactextractr) #For zonal statistics
 
 rasterOptions(tmpdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp") # Process needs > 40GB of temporary disk space
@@ -46,7 +48,7 @@ LivestockParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/Lives
 param_MEAll <- read.csv(paste0(LivestockParams_dir, "/Livestock_energy_requirement.csv"), stringsAsFactors = F)
 #param_ME <- pivot_longer(select(param_ME, -X), cols = c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat"))
 
-MERstats <- c("Minimum", "Maximum")
+MERstats <- c("min", "max")
 for(MERstat in MERstats){
   
   param_ME <- pivot_longer(param_MEAll, cols = c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat")) %>% 
@@ -598,13 +600,13 @@ for(MERstat in MERstats){
     MERdonkey <- (((87/1000) * (126^0.75)) * 8.3 * lvDonkey * 365) +  (0.9*(((87/1000) * (126^0.75)) * 8.3 * lvDonkey * 180))
     
     MERcattle <- sum(MERtotalYr_DS_Sahel_cattle, MERtotalYr_DS_Savannah_cattle, MERtotalYr_DS_Lowlands_cattle, MERtotalYr_DS_Periurban_cattle, MERtotalYr_WS_Sahel_cattle, MERtotalYr_WS_Savannah_cattle, MERtotalYr_WS_Lowlands_cattle, MERtotalYr_WS_Periurban_cattle, na.rm = T)
-    terra::writeRaster(MERcattle, paste0(spatialDir, "/outputs/cattleMER_", year, "_",MERstat,".tif"), overwrite = T)
+    terra::writeRaster(MERcattle, paste0(spatialDir, "/outputs/cattleMER_",MERstat,"_MJ", year, ".tif"), overwrite = T)
     
     MERshoats <- sum(MERtotalYr_DS_Sahel_shoats, MERtotalYr_DS_Savannah_shoats, MERtotalYr_DS_Lowlands_shoats, MERtotalYr_DS_Periurban_shoats, MERtotalYr_WS_Sahel_shoats, MERtotalYr_WS_Savannah_shoats, MERtotalYr_WS_Lowlands_shoats, MERtotalYr_WS_Periurban_shoats, na.rm = T)
-    terra::writeRaster(MERshoats, paste0(spatialDir, "/outputs/shoatsMER_MJ_", year, "_",MERstat,".tif"), overwrite = T)
+    terra::writeRaster(MERshoats, paste0(spatialDir, "/outputs/shoatsMER_",MERstat, "_MJ", year,".tif"), overwrite = T)
     
     MERall <- sum(MERhorse, MERdonkey, MERtotalYr_DS_Sahel_cattle, MERtotalYr_DS_Sahel_shoats, MERtotalYr_DS_Savannah_cattle, MERtotalYr_DS_Savannah_shoats, MERtotalYr_DS_Periurban_cattle, MERtotalYr_DS_Periurban_shoats, MERtotalYr_WS_Sahel_cattle, MERtotalYr_WS_Sahel_shoats, MERtotalYr_WS_Savannah_cattle, MERtotalYr_WS_Savannah_shoats, MERtotalYr_WS_Periurban_cattle, MERtotalYr_WS_Periurban_shoats, na.rm = T)
-    terra::writeRaster(MERall, paste0(spatialDir, "/outputs/livestockMER_MJ_", year, "_",MERstat,".tif"), overwrite = T)
+    terra::writeRaster(MERall, paste0(spatialDir, "/outputs/livestockMER_",MERstat, "_MJ", year, ".tif"), overwrite = T)
     
     cat("Completed: ",  MERstat, "Energy Requirements --", year, "\n")
     

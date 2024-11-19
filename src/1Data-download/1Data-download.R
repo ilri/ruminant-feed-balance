@@ -14,6 +14,7 @@
 # install.packages("rvest")
 # install.packages("googledrive")
 # install.packages("tidyverse")
+# install.packages("FAOSTAT")
 
 # Load required packages
 library(geodata)
@@ -24,6 +25,7 @@ library(rvest)
 library(googledrive)
 library(tidyverse)
 library(rvest)
+library(FAOSTAT)
 
 # Setting the working directory
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
@@ -414,6 +416,50 @@ for (speciesCategory in speciesCategories){
     }else {cat("File already exists:", file_name, "\n")}
   }
 }
+
+# Download livestok population from FAOSTATS
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/LivestockParams"); dir.create(outdir, F, T)
+
+# Load crop and livestock production data
+cl_production <- get_faostat_bulk(code = "QCL", data_folder = outdir)
+
+# Unzip the second archive
+file_path <- paste0(paste0(outdir, "/Production_Crops_Livestock_E_All_Data_(Normalized).zip"))
+file_name <- sub("\\.zip$", "", basename(file_path))
+unzip(zipfile = paste0(file_path), exdir = paste0(outdir, "/", file_name))
+
+FAOLivestock <- read_csv(paste0(outdir, "/", file_name, "/Production_Crops_Livestock_E_All_Data_(Normalized).csv")) %>% 
+  filter(Item %in% c("Cattle", "Goats", "Sheep"), Area == "Nigeria", Year %in% c("2020", "2021", "2022", "2023"))
+
+# Calculate growth rates and estimate 2023 population
+FAOLivestock_2023 <- FAOLivestock %>%
+  group_by(Item) %>%
+  arrange(Year) %>%
+  mutate(growth_rate = (Value - lag(Value)) / lag(Value)) %>%
+  filter(!is.na(growth_rate)) %>% # Remove NA growth rates
+  summarize(Year = 2023, Value = last(Value) * (1 + last(growth_rate)), .groups = "drop") %>% 
+  mutate(`Area Code`=159, `Area Code (M49)`="'566", Area="Nigeria", `Item Code` = case_when(Item == "Cattle" ~ 866,
+                                                                                            Item == "Sheep" ~ 976,
+                                                                                            Item == "Goats" ~ 1016,
+                                                                                            TRUE ~ NA),
+         `Item Code (CPC)` = case_when(Item == "Cattle" ~ "'02111",
+                                 Item == "Sheep" ~ "'02122",
+                                 Item == "Goats" ~ "'02123",
+                                 TRUE ~ NA),
+         `Element Code`=5111, Element = "Stocks", `Year Code`=2023, Unit="An", Flag="B", Note=NA,
+         Value = round(Value, 0)) %>% 
+  dplyr::select(`Area Code`, `Area Code (M49)`, Area, `Item Code`, `Item Code (CPC)`, Item, `Element Code`, Element, `Year Code`, Year, Unit, Value, Flag, Note)
+
+# Add 2023 data to the original dataframe
+FAOLivestock_2023 <- bind_rows(FAOLivestock, FAOLivestock_2023)
+
+write_csv(FAOLivestock_2023, paste0(outdir, "/FAOSTAT_livestock_data.csv"), append = FALSE)
+
+# List all files in the current directory
+FAO_items <- list.files(paste0(outdir), pattern = "Production_Crops", full.names = TRUE)
+
+# Remove files and folders
+sapply(FAO_items, function(FAO_item) {if (file.info(FAO_item)$isdir) {unlink(FAO_item, recursive = TRUE)} else {file.remove(FAO_item)}})
 
 #### Livestock production systems----------------------------------------------------------------------------
 # Available here https://drive.google.com/drive/folders/1QW7duDNsccAalfpUaV6VSfjeX_VGzrna?usp=sharing
