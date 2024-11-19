@@ -1,22 +1,30 @@
-gc()
-# library(raster)
-# #library(sp)
-# #library(sf)
-# library(gdalUtils)
+# Prepare crop fraction layers
+# Author: Simon Fraval
+# Last modified by John Mutua on 12/11/2024
+
+# # Install required packages
+# install.packages("terra")
+
+# Load libraries
 library(terra)
 
-#rasterOptions(maxmemory = 1e+60)
+terraOptions(tempdir = "/home/s2255815/scratch/AUTemp")
+terraOptions(memfrac=0.5)
+terraOptions(todisk=TRUE)
 
 # root folder
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
-spamPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
-pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/intermediate")
+# country
+country <- "Nigeria"
+
+spamPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/intermediate")
 
 # read AOI
-aoi <- vect(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
+aoi <- vect(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
 
-dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+dmpTemp <- terra::rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
 
 sPamfiles <- list.files(path = pathSPAMInter, pattern="*frac.tif$",full.names = T)
 #filenamesTifInter2 <- list.files(path = spamPath ,pattern="*frac.tif$",full.names = F)

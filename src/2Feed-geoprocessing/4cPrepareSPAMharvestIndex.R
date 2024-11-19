@@ -1,15 +1,21 @@
-gc()
+# Prepare SPAM harvest index
+# Author: Simon Fraval
+# Last modified by John Mutua on 11/11/2024
+
+# # Install required packages
+# install.packages("terra")
+# install.packages("dplyr")
+# install.packages("readr")
+# install.packages("rgdal")
+
+# Load libraries
 library(dplyr)
 library(raster)
 library(rgdal)
 library(readr)
 
-#args <- commandArgs(TRUE)
-
-#EDDIE_TMP <- as.character(args[1])
-
 #Runs with 16gb ram and 40+gb hdd space
-#rasterOptions(tmpdir = EDDIE_TMP)
+rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
 rasterOptions(maxmemory = 1e+60)
 rasterOptions(todisk = TRUE)
 #memory.limit(size = 56000) #Windows specific
@@ -17,11 +23,14 @@ rasterOptions(todisk = TRUE)
 # root folder
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
+# country
+country <- "Nigeria"
+
 #setwd("/exports/eddie/scratch/sfraval/feed-surfaces/")
 cropHI <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv"))
 
-pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
-pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/intermediate"); dir.create(pathSPAMInter, F, T)
+pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/intermediate")
 #From SPAM documentation: *_TA	all technologies together, ie complete crop; *_TI	irrigated portion of crop; *_TH	rainfed high inputs portion of crop; *_TL	rainfed low inputs portion of crop; *_TS	rainfed subsistence portion of crop; *_TR	rainfed portion of crop (= TA - TI, or TH + TL + TS)
 #end of file name should be physical area_cropname_a -> last a standing for all tech together.
 filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)

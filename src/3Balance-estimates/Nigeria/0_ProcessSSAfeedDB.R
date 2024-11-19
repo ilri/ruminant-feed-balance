@@ -1,5 +1,13 @@
-li
-brary(readr)
+# Prepare feed quality data
+# Author: Simon Fraval
+# Last modified by John Mutua on 12/11/2024
+
+# # Install required packages
+# install.packages("readr")
+# install.packages("dplyr")
+
+# Load libraries
+library(readr)
 library(dplyr)
 
 # root folder

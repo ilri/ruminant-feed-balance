@@ -1,12 +1,28 @@
+# Fill phenology layers
+# Author: Simon Fraval
+# Last modified by John Mutua on 11/11/2024
+
+# # Install required packages
+# install.packages("raster")
+# install.packages("stars")
+# install.packages("sf")
+# install.packages("exactextractr")
+# install.packages("terra")
+# install.packages("gdalUtils")
+
+# Load libraries
 library(terra)
+
+# study area
+country <- "Nigeria"
 
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
 yearList <- c("2020", "2021", "2022", "2023")
 
-for (year in yearList){
+for (year in yearList[2:4]){
   
-  phenPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/", year)
+  phenPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/PhenologyModis/", year)
 
   dir.create(paste0(phenPath,"/outputTif/"), F, T)
   
@@ -15,7 +31,7 @@ for (year in yearList){
   #interpolate, resample and crop all rasters
   width = 19
   
-  dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+  dmpTemp <- terra::rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
   
   phenoFiles <- gsub('.{4}$', '', basename(filenamesTifInter))
   
@@ -38,3 +54,13 @@ for (year in yearList){
     gc()
   })
 }
+
+# library(tidyterra)
+# library(sf)
+# library(ggplot2)
+# aoi1 <- read_sf(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi1.shp"))
+# phenoGreenup1 <- rast(paste0(phenPath, "/outputTif/phenoGreenup1.tif"))
+# ggplot() + geom_sf(data = aoi1, colour = "black", show.legend = F) + 
+#   geom_spatraster(data = phenoGreenup1) + 
+#   geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + 
+#   scale_fill_gradient(low = "#CDDF4A", high = "#0BAE1C", na.value = NA, name="Date")

@@ -1,15 +1,41 @@
+# Prepare crop ME
+# Author: Simon Fraval
+# Last modified by John Mutua on 12/11/2024
+
+# # Install required packages
+# install.packages("raster")
+# install.packages("stars")
+# install.packages("sf")
+# install.packages("dplyr")
+# install.packages("exactextractr")
+
+# Load libraries
 library(raster)
 library(stars)
 library(sf)
 library(dplyr)
 library(exactextractr)
+#library(terra)
 
-aoi3 <- st_read('SpatialData/inputs/gadm40_BFA_3.shp')
+rasterOptions(tmpdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp") # Process needs > 40GB of temporary disk space
+rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
+rasterOptions(todisk = TRUE)
 
-cropHI <- read.csv('CropParams/crop_harvest index.csv', stringsAsFactors = F)
+# root folder
+root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+
+country <- "Nigeria"
+
+# paths
+spatialDir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData")
+CropParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams")
+
+aoi2 <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/aoi2.shp"))
+
+cropHI <- read.csv(paste0(CropParams_dir, "/crop_harvest index.csv"), stringsAsFactors = F)
 cropHI$utilMax <- ifelse(cropHI$codeSPAM %in% c("swpo", "grou"), 1, ifelse(cropHI$codeSPAM %in% c("bana", "sugc"), 0.3, 0.6))
 
-feedQuality_SSA <- read.csv('CropParams/feedQuality_SSAdb.csv', stringsAsFactors = F)
+feedQuality_SSA <- read.csv(paste0(CropParams_dir, "/feedQuality_NGA_SSAdb.csv"), stringsAsFactors = F)
 #If ME is NA then estimate DE and ME from IVDMD & OM #NRC (2001) using IVDMD as a proxy for IVOMD
 feedQuality_SSA <- feedQuality_SSA[!is.na(feedQuality_SSA$IVDMD),]
 DMI <- 5 #DMI has minimal effect on ME_DE. Set at a reasonable value
@@ -21,7 +47,7 @@ feedQuality_SSA$MEseo <- feedQuality_SSA$DE * feedQuality_SSA$ME_DE # Seo et al.
 feedQuality_item <- group_by(feedQuality_SSA, codeSPAM)
 feedQuality_item <- summarise(feedQuality_item, ME_sd = sd(MEseo, na.rm = T), ME_min = min(MEseo, na.rm = T), ME_max = max(MEseo, na.rm = T), ME = mean(MEseo, na.rm = T), CP = mean(CP, na.rm = T), NDF = mean(NDF, na.rm =T), IVDMD = mean(IVDMD, na.rm = T), n = n())
 
-feedQuality_EQUIP <- read.csv('CropParams/feedQuality_EQUIP.csv', stringsAsFactors = F)
+feedQuality_EQUIP <- read.csv(paste0(CropParams_dir, "/feedQuality_EQUIP.csv"), stringsAsFactors = F)
 feedQuality_EQUIP <- feedQuality_EQUIP[feedQuality_EQUIP$IVOMD > 10,]
 DMI <- 5 #DMI has minimal effect on ME_DE. Set at a reasonable value
 OM <- 0.9
@@ -41,9 +67,9 @@ feedQuality_EQUIP_item <- feedQuality_EQUIP_item[feedQuality_EQUIP_item$codeSPAM
 
 feedQuality_item <- bind_rows(feedQuality_item, feedQuality_EQUIP_item)
 
-feedQuality_item <- rbind(feedQuality_item, c("smil", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA))
-feedQuality_item <- rbind(feedQuality_item, c("ocer", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA))
-feedQuality_item <- rbind(feedQuality_item, c("oleg", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA))
+feedQuality_item<- rbind(feedQuality_item, c("smil", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA, NA))
+feedQuality_item <- rbind(feedQuality_item, c("ocer", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$ME[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA, NA))
+feedQuality_item <- rbind(feedQuality_item, c("oleg", feedQuality_item$ME_sd[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME_min[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME_max[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$ME[feedQuality_item$codeSPAM == "cowp"], feedQuality_item$CP[feedQuality_item$codeSPAM == "pmil"], feedQuality_item$NDF[feedQuality_item$codeSPAM == "pmil"], NA, NA))
 feedQuality_item$ME_min[feedQuality_item$codeSPAM == "rice"] <- 5.91 #From SSA feed DB - excluding outlier Gambia https://feedsdatabase.ilri.org/search/Rice%20straw?title=rice&field_scientific_name_value=&field_feed_type_tid=All&field_country_tid=All&combine=
 feedQuality_item$ME_max[feedQuality_item$codeSPAM == "rice"] <- 8.42 #From SSA feed DB - excluding outlier Gambia
 feedQuality_item$ME[feedQuality_item$codeSPAM == "rice"] <- 6.76 #From SSA feed DB - excluding outlier Gambia
@@ -58,14 +84,18 @@ feedQuality_item$ME_min <- as.numeric(feedQuality_item$ME_min)
 feedQuality_item$ME_max <- as.numeric(feedQuality_item$ME_max)
 #!'sunf' and other oil crops not included
 
-write.csv(feedQuality_item, 'CropParams/feedQuality_item.csv')
+write.csv(feedQuality_item, paste0(CropParams_dir, "/feedQuality_item.csv"))
 
-stSPAM <- stack(list.files(path = 'SpatialData/inputs/SPAM2017/', pattern = "_A_clip.tif$", full.names = T) )
+stSPAM <- stack(list.files(path = paste0(spatialDir, "/inputs/SPAM2020"), pattern = "_a.tif$", full.names = T))
 iSPAMcropArea <- sum(stSPAM, na.rm = T)
-
+gc()
 
 #Crop specific harvest index recipricol, utilisation and ME
-crops <- toupper(c('bana','barl','bean','cass','chic','cowp','grou','lent','maiz','ocer','opul','orts','pmil','pige','plnt','pota','rape','rice','sesa','smil','sorg','soyb','sugb','sugc','sunf','swpo','temf','trof','vege','whea','yams'))
+#crops <- toupper(c('bana','barl','bean','cass','chic','cowp','grou','lent','maiz','ocer','opul','orts','pmil','pige','plnt','pota','rape','rice','sesa','smil','sorg','soyb','sugb','sugc','sunf','swpo','temf','trof','vege','whea','yams'))
+pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
+crops <-sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM)
+
 tmpCropIndex <- grep(pattern = paste(crops, collapse = "|"), names(stSPAM))
 stCropMEmean <- stack()
 stCropMEmin <- stack()
@@ -108,36 +138,49 @@ stCropMEmin <- reclassify(stCropMEmin, c(-Inf, 0, NA))
 stCropMEmax <- reclassify(stCropMEmax, c(-Inf, 0, NA))
 stSPAMcropProp <- reclassify(stSPAMcropProp, c(-Inf, 0, NA))
 cropMEmean <- weighted.mean(stCropMEmean, stSPAMcropProp, na.rm = T)
-cropMEsd <- weighted.mean( (stCropMEmean-cropMEmean)^2, stSPAMcropProp, na.rm = T)
+cropMEsd <- weighted.mean((stCropMEmean-cropMEmean)^2, stSPAMcropProp, na.rm = T)
 cropMEmin <- weighted.mean(stCropMEmin, stSPAMcropProp, na.rm = T)
 cropMEmax <- weighted.mean(stCropMEmax, stSPAMcropProp, na.rm = T)
 
-#Aggregate at the 3rd admin level and then export raster
-aoi3$cropMEmean <- exact_extract(cropMEmean, aoi3, fun = "mean")
-aoi3$cropMEmin <- exact_extract(cropMEmin, aoi3, fun = "mean")
-aoi3$cropMEmax <- exact_extract(cropMEmax, aoi3, fun = "mean")
+#Aggregate at the 2nd admin level and then export raster
+aoi2$cropMEmean <- exact_extract(cropMEmean, aoi2, fun = "mean")
+aoi2$cropMEmin <- exact_extract(cropMEmin, aoi2, fun = "mean")
+aoi2$cropMEmax <- exact_extract(cropMEmax, aoi2, fun = "mean")
 
-feedCropBurn <- stars::read_stars('SpatialData/inputs/Burned/burnCropsDekads.tif')
-st_rasterize(sf = aoi3[, "cropMEmean"], template = feedCropBurn, file = "SpatialData/intermediate/cropMEmean.tif")
-st_rasterize(sf = aoi3[, "cropMEmin"], template = feedCropBurn, file = "SpatialData/intermediate/cropMEmin.tif")
-st_rasterize(sf = aoi3[, "cropMEmax"], template = feedCropBurn, file = "SpatialData/intermediate/cropMEmax.tif")
+yearList <- c("2020", "2021", "2022", "2023")
 
-
+# Loop through years and create ME layers
+for(year in yearList){
+  cropMEdir <- paste0(spatialDir, "/intermediate/Crop_ME/", year); dir.create(cropMEdir, F, T)
+  
+  feedCropBurn <- stars::read_stars(paste0(spatialDir, "/inputs/Burned/", year, "/burnCropMonths.tif"))
+  
+  st_rasterize(sf = aoi2[, "cropMEmean"], template = feedCropBurn, file = paste0(cropMEdir, "/cropMEmean.tif"))
+  st_rasterize(sf = aoi2[, "cropMEmin"], template = feedCropBurn, file = paste0(cropMEdir, "/cropMEmin.tif"))
+  st_rasterize(sf = aoi2[, "cropMEmax"], template = feedCropBurn, file = paste0(cropMEdir, "/cropMEmax.tif"))
+}
 
 stCropME_HI_utilmean <- reclassify(stCropME_HI_utilmean, c(-Inf, 0, NA))
 stCropME_HI_utilmin <- reclassify(stCropME_HI_utilmin, c(-Inf, 0, NA))
 stCropME_HI_utilmax <- reclassify(stCropME_HI_utilmax, c(-Inf, 0, NA))
 cropME_HI_utilmean <- weighted.mean(stCropME_HI_utilmean, stSPAMcropProp, na.rm = T)
-cropME_HI_utilsd <- weighted.mean( (stCropME_HI_utilmean-cropME_HI_utilmean)^2, stSPAMcropProp, na.rm = T)
+cropME_HI_utilsd <- weighted.mean((stCropME_HI_utilmean-cropME_HI_utilmean)^2, stSPAMcropProp, na.rm = T)
 cropME_HI_utilmin <- weighted.mean(stCropME_HI_utilmin, stSPAMcropProp, na.rm = T)
 cropME_HI_utilmax <- weighted.mean(stCropME_HI_utilmax, stSPAMcropProp, na.rm = T)
 
-#Aggregate at the 3rd admin level and then export raster
-aoi3$cropME_HI_utilmean <- exact_extract(cropME_HI_utilmean, aoi3, fun = "mean")
-aoi3$cropME_HI_utilmin <- exact_extract(cropME_HI_utilmin, aoi3, fun = "mean")
-aoi3$cropME_HI_utilmax <- exact_extract(cropME_HI_utilmax, aoi3, fun = "mean")
+#Aggregate at the 2nd admin level and then export raster
+aoi2$cropME_HI_utilmean <- exact_extract(cropME_HI_utilmean, aoi2, fun = "mean")
+aoi2$cropME_HI_utilmin <- exact_extract(cropME_HI_utilmin, aoi2, fun = "mean")
+aoi2$cropME_HI_utilmax <- exact_extract(cropME_HI_utilmax, aoi2, fun = "mean")
 
-st_rasterize(sf = aoi3[, "cropME_HI_utilmean"], template = feedCropBurn, file = "SpatialData/intermediate/cropME_HI_utilmean.tif")
-st_rasterize(sf = aoi3[, "cropME_HI_utilmin"], template = feedCropBurn, file = "SpatialData/intermediate/cropME_HI_utilmin.tif")
-st_rasterize(sf = aoi3[, "cropME_HI_utilmax"], template = feedCropBurn, file = "SpatialData/intermediate/cropME_HI_utilmax.tif")
-
+# Loop through years and create ME-util layers
+for(year in yearList){
+  
+  cropMEdir <- paste0(spatialDir, "/intermediate/Crop_ME/", year); dir.create(cropMEdir, F, T)
+  
+  feedCropBurn <- stars::read_stars(paste0(spatialDir, "/inputs/Burned/", year, "/burnCropMonths.tif"))
+  
+  st_rasterize(sf = aoi2[, "cropME_HI_utilmean"], template = feedCropBurn, file = paste0(cropMEdir, "/cropME_HI_utilmean.tif"))
+  st_rasterize(sf = aoi2[, "cropME_HI_utilmin"], template = feedCropBurn, file = paste0(cropMEdir, "/cropME_HI_utilmin.tif"))
+  st_rasterize(sf = aoi2[, "cropME_HI_utilmax"], template = feedCropBurn, file = paste0(cropMEdir, "/cropME_HI_utilmax.tif"))
+}

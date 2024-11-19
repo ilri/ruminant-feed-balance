@@ -1,3 +1,16 @@
+# Prepare phenology layers
+# Author: Simon Fraval
+# Last modified by John Mutua on 11/11/2024
+
+# # Install required packages
+# install.packages("raster")
+# install.packages("stars")
+# install.packages("sf")
+# install.packages("exactextractr")
+# install.packages("terra")
+# install.packages("gdalUtils")
+
+# Load libraries
 library(raster)
 library(gdalUtils)
 library(sf)
@@ -7,15 +20,18 @@ library(sf)
 
 #memory.limit(size=64000)
 
+# study area
+country <- "Nigeria"
+
 rasterOptions(maxmemory = 1e+60)
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
 # read AOI
-aoi_path <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp")
+aoi_path <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp")
 
 yearList <- c("2020", "2021", "2022", "2023")
 
-for(year in yearList[3:4]){
+for(year in yearList[2:4]){
   
   phenPath <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis/", year)
   
@@ -53,7 +69,7 @@ for(year in yearList[3:4]){
   ##Reproject all rasters
   filenamesTif <- list.files(path = paste0(phenPath), pattern=".tif$",full.names = T)
   
-  phenPathOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/", year); dir.create(phenPathOut, F, T)
+  phenPathOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/PhenologyModis/", year); dir.create(phenPathOut, F, T)
   dir.create(paste0(phenPathOut,"/intermediate/"), F, T)
   
   phaseList <- c("greenup1", "maturity1", "peak1", "senescence1", "dormancy1", "numcycles", "greenup2", "maturity2", "peak2", "senescence2", "dormancy2")

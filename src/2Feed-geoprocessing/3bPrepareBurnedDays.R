@@ -1,6 +1,20 @@
+# Prepare burned layers
+# Author: Simon Fraval
+# Last modified by John Mutua on 11/11/2024
+
+# # Install required packages
+# install.packages("dplyr")
+# install.packages("raster")
+# install.packages("rgdal")
+
+# Load libraries
 library(dplyr)
 library(raster)
 library(rgdal)
+
+rasterOptions(maxmemory = 1e+60)
+rasterOptions(todisk=TRUE)
+rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
 
 # root folder
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
@@ -9,29 +23,29 @@ root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 country <- "Nigeria"
 
 # read AOI
-aoi <- readOGR(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
+aoi <- readOGR(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
 
-dmpTemp <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+dmpTemp <- terra::rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
 
 yearList <- c("2020", "2021", "2022", "2023")
 
-lapply(yearList, function(year){
+lapply(yearList[2:4], function(year){
   
   #year <- "2020"
   
-  burnedOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Burned/", year); dir.create(burnedOut, F, T)
-  pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
+  burnedOut <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Burned/", year); dir.create(burnedOut, F, T)
+  pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
   filesPhenology <- list.files(path = pathPhen,pattern=".tif$",full.names = T)
-  pathBurn <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Burned/", year)
+  pathBurn <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Burned/", year)
   filesBurn <- list.files(path = pathBurn,pattern=".tif$",full.names = T)#[1:36] #Only 2015
   #datesBurn <- as.vector(sapply(filesBurn, function(x) substr(x, start =(nchar(x) - 37), stop = (nchar(x) -30)))) #(nchar(x) - 41), stop = (nchar(x) -34))
   datesBurn <- sub(".*NTC_(.{8}).*", "\\1", filesBurn)
   datesBurn <- as.Date(datesBurn, "%Y%m%d")
   datesBurndiff <- as.numeric(datesBurn - as.Date("1970/01/01")) #convert to same date format as Modis phenology
-  pathLU <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/LandUse")
+  pathLU <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/LandUse")
   filesLU <- list.files(path = pathLU, pattern = "300.tif$", full.names = T)
   
-  rProtectedAreas <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
+  rProtectedAreas <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
   rNonProtectedAreas <- calc(rProtectedAreas, fun = function(x){ifelse(x == 0, 1, 0)})
   rm(rProtectedAreas)
   
@@ -40,27 +54,26 @@ lapply(yearList, function(year){
   stPhen <- stack(filesPhenology)
   stBurn <- stack(filesBurn)
   
-  gc()
-  
-  ##Crop to test area
+  # gc()
+  # 
+  # #Crop to test area
   # stLU <- extend(stLU, extent(stBurn[[1]]))
   # stLU <- crop(stLU, extent(stBurn[[1]]))
   # stLU <- mask(stLU, aoi)
-  #stPhen <- resample(stPhen, stBurn[[1]], method = "ngb")
+  # stPhen <- resample(stPhen, stBurn[[1]], method = "ngb")
   # stPhen <- extend(stPhen, extent(stBurn[[1]]))
   # stPhen <- crop(stPhen, extent(stBurn[[1]]))
-  #stPhen <- mask(stPhen, aoi)
-  #rNonProtectedAreas <- resample(rNonProtectedAreas, stBurn[[1]], method = "ngb")
+  # stPhen <- mask(stPhen, aoi)
+  # rNonProtectedAreas <- resample(rNonProtectedAreas, stBurn[[1]], method = "ngb")
   # rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stBurn[[1]]))
   # rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stBurn[[1]]))
-  #rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
+  # rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
   print("past 0")
   gc()
   
   names(stBurn) <- paste0("d", datesBurndiff)
-  # cellStats(is.na(stBurn[[1]]), sum)
-  # stBurn <- reclassify(stBurn, c(100, 255, NA)) #NA values are 254 
-  stBurn <- reclassify(stBurn, c(-Inf, 0, 0, 367, Inf, 0))
+  #stBurn <- reclassify(stBurn, c(100, 255, NA)) #NA values are 254 
+  #stBurn <- reclassify(stBurn, c(-Inf, 0, 0, 367, Inf, 0))
   stBurn <- stack(stBurn)
   gc()
   
@@ -121,4 +134,3 @@ lapply(yearList, function(year){
   gc()
   
 })
-

@@ -1,24 +1,13 @@
-#     .-.                                    ,-.
-#  .-(   )-.                              ,-(   )-.
-# (     __) )-.                        ,-(_      __)
-#  `-(       __)                      (_    )  __)-'
-#  - -  :   :  - - Dry matter feed potential
-#      / `-' \     v0.1
-#    ,    |   .    Simon Fraval
-#         .        R 3.6.1           _
-#                                  >')
-#                                  (\\         (W)
-#                                   = \     -. `|'
-#                                   = ,-      \(| ,-
-#                                 ( |/  _______\|/____
-#                                \|,-'::::::::::::::
-#            _                 ,----':::::::::::::::::
-#         {><_'c   _      _.--':MJP:::::::::::::::::::
-#__,'`----._,-. {><_'c  _-':::::::::::::::::::::::::::
-#:.:.:.:.:.:.:.\_    ,-'.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:
-#.:.:.:.:.:.:.:.:`--'.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.
-#.....................................................
-gc()
+# Prepare dry matter feed potential
+# Author: Simon Fraval
+# Last modified by John Mutua on 12/11/2024
+
+# # Install required packages
+# install.packages("dplyr")
+# install.packages("raster")
+# install.packages("rgdal")
+
+# Load libraries
 yearOffset <- (0*365) # Base year = 2019
 
 library(dplyr)
@@ -26,27 +15,29 @@ library(raster)
 library(rgdal)
 
 #rasterOptions(tmpdir = EDDIE_TMP)
+rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
 rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
 rasterOptions(todisk = TRUE)
 
 # root folder
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 
-# read AOI
-aoi <- readOGR(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/AdminBound/aoi0.shp"))
-
 country <- "Nigeria"
+
+# read AOI
+aoi <- readOGR(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
+
 yearList <- c("2020", "2021", "2022", "2023")
 
 lapply(yearList, function(year){
   
-  cropOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Cropping_days"); dir.create(cropOutdir, F, T)
-  FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/Feed_quantity/", year); dir.create(FeedQuantityOutdir, F, T)
+  cropOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Cropping_days"); dir.create(cropOutdir, F, T)
+  FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/Feed_quantity/", year); dir.create(FeedQuantityOutdir, F, T)
   
-  pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
+  pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
   filesPhenology <- list.files(path = pathPhen,pattern=".tif$", full.names = T)
   
-  pathDMP <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/DMP")
+  pathDMP <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP")
   filesDMP <- list.files(path = pathDMP, pattern = paste0("RT6_", year, ".*\\.tif$"), full.names = TRUE)
   stDMP <- stack(filesDMP)
   
@@ -54,15 +45,15 @@ lapply(yearList, function(year){
   datesDMP <- sub(".*RT6_(.{8}).*", "\\1", filesDMP)
   datesDMP <- as.Date(datesDMP, "%Y%m%d")
   datesDMPdiff <- as.numeric(datesDMP - as.Date("1970/01/01")) #convert to same date format as Modis phenology
-  pathLU <-  paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Feed_DrySeason/LandUse")
+  pathLU <-  paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/LandUse")
   filesLU <- list.files(path = pathLU, pattern = "300.tif$", full.names = T)
-  pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020")
+  pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
   #From SPAM documentation: *_TA	all technologies together, ie complete crop; *_TI	irrigated portion of crop; *_TH	rainfed high inputs portion of crop; *_TL	rainfed low inputs portion of crop; *_TS	rainfed subsistence portion of crop; *_TR	rainfed portion of crop (= TA - TI, or TH + TL + TS)
   #end of file name should be physical area_cropname_a -> last a standing for all tech together.
   filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
-  iSPAMAnimalDigestCropFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/animal_digest_frac.tif"))
+  iSPAMAnimalDigestCropFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/animal_digest_frac.tif"))
   
-  rProtectedAreas <- stack(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
+  rProtectedAreas <- stack(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
   rNonProtectedAreas <- calc(rProtectedAreas, fun = function(x){ifelse(x == 0, 1, 0)})
   rm(rProtectedAreas)
   
@@ -143,7 +134,7 @@ lapply(yearList, function(year){
   browseForestFrac <- 1
   iResidueUtil <- 1 #max 0.6
   #iResidueUtil <- raster('SpatialData/inputs/SPAM2010cropspecies/crop_fed_frac.tif')
-  iSPAMHarvestResidueFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/SPAM2020/crop_res_frac.tif"))
+  iSPAMHarvestResidueFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/crop_res_frac.tif"))
   gc()
   
   #residueFrac <- calc(iSPAMHarvestResidueFrac, fun = function(x){x * iResidueUtil})
@@ -162,7 +153,7 @@ lapply(yearList, function(year){
   #stLU$LUgrass300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
   
   #shrubFrac <- raster('SpatialData/inputs/TreeCover/treecover_imp.tif')/100
-  shrubFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/TreeCover/treecover300m.tif"))/100
+  shrubFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/TreeCover/treecover300m.tif"))/100
   
   #shrubFrac[is.na(shrubFrac)] <- 0.13
   #shrubFrac <- reclassify(shrubFrac, c(NA, NA, 0.13), right = FALSE) 
