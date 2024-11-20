@@ -429,7 +429,7 @@ file_name <- sub("\\.zip$", "", basename(file_path))
 unzip(zipfile = paste0(file_path), exdir = paste0(outdir, "/", file_name))
 
 FAOLivestock <- read_csv(paste0(outdir, "/", file_name, "/Production_Crops_Livestock_E_All_Data_(Normalized).csv")) %>% 
-  filter(Item %in% c("Cattle", "Goats", "Sheep"), Area == "Nigeria", Year %in% c("2020", "2021", "2022", "2023"))
+  filter(Item %in% c("Cattle", "Goats", "Sheep"), Area == "Nigeria", Year %in% c("2019", "2020", "2021", "2022", "2023"))
 
 # Calculate growth rates and estimate 2023 population
 FAOLivestock_2023 <- FAOLivestock %>%
@@ -451,7 +451,16 @@ FAOLivestock_2023 <- FAOLivestock %>%
   dplyr::select(`Area Code`, `Area Code (M49)`, Area, `Item Code`, `Item Code (CPC)`, Item, `Element Code`, Element, `Year Code`, Year, Unit, Value, Flag, Note)
 
 # Add 2023 data to the original dataframe
-FAOLivestock_2023 <- bind_rows(FAOLivestock, FAOLivestock_2023)
+FAOLivestock_2023 <- bind_rows(FAOLivestock, FAOLivestock_2023) %>% 
+  mutate(Item = case_when(Item == "Cattle" ~ "Cattle", Item == "Sheep" ~ "Shoats", Item == "Goats" ~ "Shoats", TRUE ~ NA)) %>% 
+  group_by(Item, Year) %>% 
+  summarise(Value = sum(Value, na.rm = TRUE)) 
+
+FAOLivestock_2023 <- FAOLivestock_2023 %>% 
+  arrange(Item, Year) %>% 
+  group_by(Item) %>%
+  mutate(PcChange = (Value - lag(Value))/lag(Value)) %>%
+  ungroup() 
 
 write_csv(FAOLivestock_2023, paste0(outdir, "/FAOSTAT_livestock_data.csv"), append = FALSE)
 
