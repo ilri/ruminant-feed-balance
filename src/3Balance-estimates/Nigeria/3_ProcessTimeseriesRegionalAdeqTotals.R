@@ -79,4 +79,4 @@ tsSum$adeq_2021 <- tsSum$feedME_mean_2021 / tsSum$lvstReqME_2021
 tsSum$adeq_2022 <- tsSum$feedME_mean_2022 / tsSum$lvstReqME_2022
 tsSum$adeq_2023 <- tsSum$feedME_mean_2023 / tsSum$lvstReqME_2023
 
-write.csv(tsSum, paste0(Results_dir, "/totals_timeseries_region.csv"))
+write.csv(tsSum, paste0(Results_dir, "/totals_timeseries_region.csv"), row.names=FALSE)

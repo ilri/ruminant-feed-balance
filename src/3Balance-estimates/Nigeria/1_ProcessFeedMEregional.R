@@ -1,6 +1,6 @@
 gc()
 rm(list=ls())
-.libPaths(c(.libPaths()[2], .libPaths()[3]))
+.libPaths(c(.libPaths()[1], .libPaths()[2], .libPaths()[3]))
 # Prepare crop ME - Regional
 # Author: Simon Fraval
 # Last modified by John Mutua on 12/11/2024
@@ -13,6 +13,7 @@ options(scipen = 999)
 # install.packages("stars")
 # install.packages("sf")
 # install.packages("dplyr")
+# install.packages("tidyr")
 # install.packages("exactextractr")
 # install.packages("purrr")
 
@@ -62,13 +63,13 @@ for(year in yearList){
   dryDays <- 365 - croppingDays
   
   region <- raster(paste0(spatialDir, "/intermediate/regions.tif"))
-  grassMELowlands <- 6.8
+  grassMELowlands <- 6.5
   grassMESavannah <- 6.5
   grassMESahel <- 6.1
   grassME <- calc(region, fun = function(x){ifelse(x == 1, grassMELowlands, ifelse(x == 2, grassMESahel, grassMESavannah))})
   grassME <- raster::resample(grassME, feedCropBurn, method = "ngb")
   
-  browseMELowlands <- 8.5
+  browseMELowlands <- 8.1
   browseMESavannah <- 8.1
   browseMESahel <- 6
   browseME <- calc(region, fun = function(x){ifelse(x == 1, browseMELowlands, ifelse(x == 2, browseMESahel, browseMESavannah))})
@@ -202,7 +203,7 @@ for(year in yearList){
 
 # For zonal stats
 tsSumZone_combined <- map_dfr(tsSumZone_List, ~ .x)
-write.csv(tsSumZone_combined, paste0(Results_dir, "/disaggregated_timeseries.csv"))
+write.csv(tsSumZone_combined, paste0(Results_dir, "/disaggregated_timeseries.csv"), row.names=FALSE)
 
 ##Export total feed ME for adequacy estimates
 feed_list <- c("crop", "grass", "browse", "after")
@@ -218,4 +219,4 @@ tsSumRegion_combined <- map_dfr(tsSumRegion_List, ~ .x)
 outMEmean <- tsSumRegion_combined[tsSumRegion_combined$year == 2023,] %>% 
   rowwise() %>% 
   mutate(ME_all = sum(cropME_mean, grassME_mean, browseME_mean, afterME_mean) / sum(cropDM, grassDM, browseDM, afterDM), ME_crop = cropME_mean / cropDM, MEwet_all = sum(grassMEwet_mean, browseMEwet_mean) / sum(grassDMwet, browseDMwet), MEdry_all = sum(cropME_mean, grassMEdry_mean, browseMEdry_mean) / sum(cropDM, grassDMdry, browseDMdry, afterDM)) 
-write.csv(outMEmean, paste0(Results_dir, "/cropME_region.csv"))
+write.csv(outMEmean, paste0(Results_dir, "/cropME_region.csv"), row.names=FALSE)

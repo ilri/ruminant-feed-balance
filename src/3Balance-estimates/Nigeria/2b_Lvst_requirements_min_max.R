@@ -45,14 +45,16 @@ spatialDir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData")
 CropParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams")
 LivestockParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/LivestockParams")
 
-param_MEAll <- read.csv(paste0(LivestockParams_dir, "/Livestock_energy_requirement.csv"), stringsAsFactors = F)
+param_MEAll <- read.csv(paste0(LivestockParams_dir, "/Livestock_energy_requirement.csv"), stringsAsFactors = F) %>% filter(Statistic %in% c("Minimum", "Maximum", "All"))
 #param_ME <- pivot_longer(select(param_ME, -X), cols = c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat"))
 
 MERstats <- c("min", "max")
 for(MERstat in MERstats){
   
+  MERstat_selected <- ifelse(MERstat == "min", "Minimum", "Maximum")
+  
   param_ME <- pivot_longer(param_MEAll, cols = c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat")) %>% 
-    filter(Statistic %in% c(MERstat, "All"))
+    filter(Statistic %in% c(MERstat_selected, "All"))
   
   ##CSIRO, 2007, Nutrient Requirements of Domesticated Ruminants 
   #https://vdocuments.net/nutrient-requirements-of-domesticated-ruminants.html?page=1

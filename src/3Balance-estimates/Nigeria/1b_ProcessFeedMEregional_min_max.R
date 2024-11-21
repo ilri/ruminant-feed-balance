@@ -1,5 +1,6 @@
 gc()
 rm(list=ls())
+.libPaths(c(.libPaths()[1], .libPaths()[2], .libPaths()[3]))
 # Prepare crop ME - Regional - minimum, maximum
 # Author: Simon Fraval
 # Last modified by John Mutua on 12/11/2024
@@ -12,6 +13,7 @@ options(scipen = 999)
 # install.packages("stars")
 # install.packages("sf")
 # install.packages("dplyr")
+# install.packages("tidyr")
 # install.packages("exactextractr")
 # install.packages("purrr")
 
@@ -64,15 +66,15 @@ for(year in yearList){
   dryDays <- 365 - croppingDays
   
   region <- raster(paste0(spatialDir, "/intermediate/regions.tif"))
-  grassMELowlands <- 6.5
+  grassMELowlands <- 6.2
   grassMESavannah <- 6.2
   grassMESahel <- 5.8
   grassME <- calc(region, fun = function(x){ifelse(x == 1, grassMELowlands, ifelse(x == 2, grassMESahel, grassMESavannah))})
   grassME <- raster::resample(grassME, feedCropBurn, method = "ngb")
   
-  browseMELowlands <- 8.3
-  browseMESavannah <- 7.8
-  browseMESahel <- 5.7
+  browseMELowlands <- 8
+  browseMESavannah <- 8
+  browseMESahel <- 5.8
   browseME <- calc(region, fun = function(x){ifelse(x == 1, browseMELowlands, ifelse(x == 2, browseMESahel, browseMESavannah))})
   browseME <- raster::resample(browseME, feedCropBurn, method = "ngb")
   #browseMEmean <- 5
@@ -207,7 +209,6 @@ for(year in yearList){
   feedQuality_item <- read.csv(paste0(CropParams_dir, "/feedQuality_item.csv"))
   feedCropBurn <- raster(paste0(spatialDir, "/inputs/Burned/", year , "/burnCropMonths.tif"))
   
-  #croppingDays <- sum(raster('CropParams/phenoCroppingDays1.tif'), raster('CropParams/phenoCroppingDays2.tif'), na.rm = T)
   croppingDays <- raster(paste0(CropParams_dir, "/Cropping_days/croppingDays_", year, ".tif"))
   croppingDays <- reclassify(croppingDays, c(-Inf, 0, 0)) 
   croppingDays <- raster::resample(croppingDays, feedCropBurn, method = "ngb")
@@ -215,15 +216,15 @@ for(year in yearList){
   dryDays <- 365 - croppingDays
   
   region <- raster(paste0(spatialDir, "/intermediate/regions.tif"))
-  grassMELowlands <- 7.8
+  grassMELowlands <- 6.8
   grassMESavannah <- 6.8
-  grassMESahel <- 6.4
+  grassMESahel <- 6.2
   grassME <- calc(region, fun = function(x){ifelse(x == 1, grassMELowlands, ifelse(x == 2, grassMESahel, grassMESavannah))})
   grassME <- raster::resample(grassME, feedCropBurn, method = "ngb")
   
-  browseMELowlands <- 8.8
-  browseMESavannah <- 8.4
-  browseMESahel <- 6.3
+  browseMELowlands <- 8.2
+  browseMESavannah <- 8.2
+  browseMESahel <- 6.2
   browseME <- calc(region, fun = function(x){ifelse(x == 1, browseMELowlands, ifelse(x == 2, browseMESahel, browseMESavannah))})
   browseME <- raster::resample(browseME, feedCropBurn, method = "ngb")
   #browseMEmean <- 5
@@ -355,28 +356,37 @@ for(year in yearList){
 
 # For zonal stats
 ## Feed output
-tsSumZoneMean <- read.csv(paste0(Results_dir, "/disaggregated_timeseries.csv")) %>% dplyr::select(-1) %>% mutate(across(-1, as.numeric))
+tsSumZoneMean <- read.csv(paste0(Results_dir, "/disaggregated_timeseries.csv")) %>% mutate(across(-1, as.numeric))
 tsSumZoneMin <- map_dfr(tsSumZoneMin_List, ~ .x) %>% mutate(across(-1, as.numeric))
 tsSumZoneMeanMin <- tsSumZoneMean %>% mutate(across(everything(), ~ coalesce(.x, tsSumZoneMin[[cur_column()]])))
 tsSumZoneMax <- map_dfr(tsSumZoneMax_List, ~ .x) %>% mutate(across(-1, as.numeric))
 tsSumZoneMeanMinMax <- tsSumZoneMeanMin %>% mutate(across(everything(), ~ coalesce(.x, tsSumZoneMax[[cur_column()]])))
-write.csv(tsSumZoneMeanMinMax, paste0(Results_dir, "/disaggregated_timeseries.csv"))
+write.csv(tsSumZoneMeanMinMax, paste0(Results_dir, "/disaggregated_timeseries.csv"), row.names=FALSE)
 
-##Export total feed ME for adequacy estimates
+##Export total feed ME - minimum for adequacy estimates
 feed_list <- c("crop", "grass", "browse", "after")
 for (year in yearList){
   #tFeed <- stack(list.files(path = paste0(Outputs_dir), pattern = year, full.names = TRUE))
-  tFeed <- paste0(Outputs_dir, "/Feed_", feed_list, "_MJ", year, ".tif")
+  tFeed <- paste0(Outputs_dir, "/Feed_", feed_list, "_min_MJ", year, ".tif")
   tFeed <- sum(stack(tFeed), na.rm = T)
-  writeRaster(tFeed, paste0(Outputs_dir, "/Feed_total_mean_MJ", year, ".tif"), overwrite = T)
+  writeRaster(tFeed, paste0(Outputs_dir, "/Feed_total_min_MJ", year, ".tif"), overwrite = T)
+}
+
+##Export total feed ME - maximum for adequacy estimates
+feed_list <- c("crop", "grass", "browse", "after")
+for (year in yearList){
+  #tFeed <- stack(list.files(path = paste0(Outputs_dir), pattern = year, full.names = TRUE))
+  tFeed <- paste0(Outputs_dir, "/Feed_", feed_list, "_max_MJ", year, ".tif")
+  tFeed <- sum(stack(tFeed), na.rm = T)
+  writeRaster(tFeed, paste0(Outputs_dir, "/Feed_total_max_MJ", year, ".tif"), overwrite = T)
 }
 
 # For regional stats
-outMEmean <- read.csv(paste0(Results_dir, "/cropME_region.csv")) %>% dplyr::select(-1) %>% mutate(across(-1, as.numeric))
+outMEmean <- read.csv(paste0(Results_dir, "/cropME_region.csv")) %>% mutate(across(-1, as.numeric))
 tsSumRegionMin <- map_dfr(tsSumRegionMin_List, ~ .x) %>% filter(year == "2023") %>% mutate(across(-1, as.numeric))
 outMEmin <- tsSumRegionMin %>% rowwise() %>% mutate(ME_all_min = sum(cropME_min, grassME_min, browseME_min, afterME_min) / sum(cropDM, grassDM, browseDM, afterDM), ME_crop_min = cropME_min / cropDM, MEwet_all_min = sum(grassMEwet_min, browseMEwet_min) / sum(grassDMwet, browseDMwet), MEdry_all_min = sum(cropME_min, grassMEdry_min, browseMEdry_min) / sum(cropDM, grassDMdry, browseDMdry, afterDM)) 
 outMEmean <- bind_cols(outMEmean, select(outMEmin, ME_all_min, ME_crop_min, MEwet_all_min, MEdry_all_min))
 tsSumRegionMax <- map_dfr(tsSumRegionMax_List, ~ .x) %>% filter(year == "2023") %>% mutate(across(-1, as.numeric))
 outMEmax <- tsSumRegionMax %>% rowwise() %>% mutate(ME_all_max = sum(cropME_max, grassME_max, browseME_max, afterME_max) / sum(cropDM, grassDM, browseDM, afterDM), ME_crop_max = cropME_max / cropDM, MEwet_all_max = sum(grassMEwet_max, browseMEwet_max) / sum(grassDMwet, browseDMwet), MEdry_all_max = sum(cropME_max, grassMEdry_max, browseMEdry_max) / sum(cropDM, grassDMdry, browseDMdry, afterDM)) 
 outMEmean <- bind_cols(outMEmean, select(outMEmax, ME_all_max, ME_crop_max, MEwet_all_max, MEdry_all_max))
-write.csv(outMEmean, paste0(Results_dir, "/cropME_region.csv"))
+write.csv(outMEmean, paste0(Results_dir, "/cropME_region.csv"), row.names=FALSE)

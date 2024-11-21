@@ -29,7 +29,7 @@ library(tidyterra)
 
 rasterOptions(tmpdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp") # Process needs > 40GB of temporary disk space
 rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
-rasterOptions(todisk = TRUE)cat("Completed: ",  MERstat, "Energy Requirements --", year, "\n")
+rasterOptions(todisk = TRUE)
 
 terraOptions(tempdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
 terraOptions(memfrac=0.5)
