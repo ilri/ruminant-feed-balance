@@ -49,13 +49,13 @@ lhz_dest <- paste0(spatialDataOut, "/")
 file.copy(lhz_files, lhz_dest, overwrite = TRUE)
 
 # Feed parameters
-feedPar_src <- paste0(indir, "/1Data-download/Tables/inputs/CropParams")
+feedPar_src <- paste0(indir, "/1Data-download/Tables/inputs/", country, "/CropParams")
 feedPar_files <- list.files(path = feedPar_src, full.names = TRUE)
 feedPar_dest <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams"); dir.create(feedPar_dest, F, T)
 file.copy(feedPar_files, feedPar_dest, overwrite = TRUE)
 
 # Livestock parameters
-livePar_src <- paste0(indir, "/1Data-download/Tables/inputs/LivestockParams")
+livePar_src <- paste0(indir, "/1Data-download/Tables/inputs/", country, "/LivestockParams")
 livePar_files <- list.files(path = livePar_src, full.names = TRUE)
 livePar_dest <- paste0(root, "/src/3Balance-estimates/", country, "/LivestockParams"); dir.create(livePar_dest, F, T)
 file.copy(livePar_files, livePar_dest, overwrite = TRUE)

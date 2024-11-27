@@ -87,6 +87,25 @@ lapply(land_use_classes, function(land_use_class){
   }else{cat("File already exists: ", land_use_class, "\n")}
 })
 
+# Other land cover datasets - for use in creating cropland mask
+outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/LandCover"); dir.create(outdir, F, T)
+
+drive_deauth()
+drive_user()
+
+#folder link to id
+public_folder <- "https://drive.google.com/drive/folders/1SsZVX3LDuvGweJGe8sIeDR0me-WOqH45"
+folder_id <- drive_get(as_id(public_folder))
+
+#find files in folder
+public_files <- drive_ls(folder_id)
+
+for(i in 1:nrow(public_files)){
+  public_file <- public_files[i, ]
+  file_name <- public_file$name
+  drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
+}
+
 #### Tree cover----------------------------------------------------------------------------
 # Available here <https://doi.org/10.1038/s41467-023-37880-4>
 outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/TreeCover"); dir.create(outdir, F, T)
@@ -295,26 +314,26 @@ for(year in yearList){
 
 #### Feed parameters----------------------------------------------------------------------------
 # Available here https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd
-outdir <- paste0(root, "/src/1Data-download/Tables/inputs/CropParams"); dir.create(outdir, F, T)
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/CropParams"); dir.create(outdir, F, T)
 
 drive_deauth()
 drive_user()
 
 #folder link to id
-public_folder = "https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd"
-folder_id = drive_get(as_id(public_folder))
+public_folder <- "https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd"
+folder_id <- drive_get(as_id(public_folder))
 
 #find files in folder
-public_files = drive_ls(folder_id)
+public_files <- drive_ls(folder_id)
 
-for(i in seq_along(public_files)){
+for(i in 1:nrow(public_files)){
   public_file <- public_files[i, ]
   file_name <- public_file$name
   drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
 }
 
 # Or here https://feedsdatabase.ilri.org
-outdir <- paste0(root, "/src/1Data-download/Tables/inputs/CropParams"); dir.create(outdir, F, T)
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/CropParams"); dir.create(outdir, F, T)
 
 # countries <- c("Nigeria", "Cameroon", "Somalia", "Ethiopia")
 country_ids = c("All")#, "107", "112", "116", "117")
@@ -418,7 +437,7 @@ for (speciesCategory in speciesCategories){
 }
 
 # Download livestok population from FAOSTATS
-outdir <- paste0(root, "/src/1Data-download/Tables/inputs/LivestockParams"); dir.create(outdir, F, T)
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/LivestockParams"); dir.create(outdir, F, T)
 
 # Load crop and livestock production data
 cl_production <- get_faostat_bulk(code = "QCL", data_folder = outdir)
@@ -484,7 +503,7 @@ folder_id = drive_get(as_id(public_folder))
 #find files in folder
 public_files = drive_ls(folder_id)
 
-for(i in seq_along(public_files)){
+for(i in 1:nrow(public_files)){
   public_file <- public_files[i, ]
   file_name <- public_file$name
   drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
@@ -494,9 +513,10 @@ for(i in seq_along(public_files)){
   unzip(zipfile = paste0(outdir, "/", file_name), exdir = paste0(outdir, "/", folder_name))
 }
 
+
 #### Livestock parameters----------------------------------------------------------------------------
 # Available here https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd
-outdir <- paste0(root, "/src/1Data-download/Tables/inputs/LivestockParams"); dir.create(outdir, F, T)
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/LivestockParams"); dir.create(outdir, F, T)
 
 drive_deauth()
 drive_user()
@@ -508,7 +528,7 @@ folder_id = drive_get(as_id(public_folder))
 #find files in folder
 public_files = drive_ls(folder_id)
 
-for(i in seq_along(public_files)){
+for(i in 1:nrow(public_files)){
   public_file <- public_files[i, ]
   file_name <- public_file$name
   drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
