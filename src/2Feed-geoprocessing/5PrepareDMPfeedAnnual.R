@@ -1,3 +1,5 @@
+gc()
+rm(list=ls())
 # Prepare dry matter feed potential
 # Author: Simon Fraval
 # Last modified by John Mutua on 12/11/2024
@@ -15,7 +17,7 @@ library(raster)
 library(rgdal)
 
 #rasterOptions(tmpdir = EDDIE_TMP)
-rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
+rasterOptions(tmpdir="/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
 rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
 rasterOptions(todisk = TRUE)
 
@@ -60,7 +62,7 @@ lapply(yearList, function(year){
   print("past protected")
   
   stLU <- stack(filesLU)
-  #LUcrops300DEA <- raster(paste0(pathLU, "LUcrops300DEA.tif"))
+  LUcrops300DEA <- raster(paste0(pathLU, "/LUcrops300DEA.tif"))
   
   
   # stPhen <- stack(raster('SpatialData/inputs/Feed_DrySeason/PhenologyModis/outputTif/phenoGreenup1.tif'), 
@@ -74,27 +76,27 @@ lapply(yearList, function(year){
                   raster(grep("phenoSenescence2.tif", filesPhenology, value=TRUE)))
   gc()
   
-  # ##Crop land use to test area
-  # LUcrops300DEA <- extend(LUcrops300DEA, extent(stDMP[[1]]))
-  # LUcrops300DEA <- crop(LUcrops300DEA, extent(stDMP[[1]]))
-  # LUcrops300DEA <- mask(LUcrops300DEA, aoi)
-  # stLU <- extend(stLU, extent(stDMP[[1]]))
-  # stLU <- crop(stLU, extent(stDMP[[1]]))
-  # stLU <- mask(stLU, aoi)
-  # #stLU <- stack(stLU, LUcrops300DEA)
+  ##Crop land use to test area
+  LUcrops300DEA <- extend(LUcrops300DEA, extent(stDMP[[1]]))
+  LUcrops300DEA <- crop(LUcrops300DEA, extent(stDMP[[1]]))
+  LUcrops300DEA <- mask(LUcrops300DEA, aoi)
+  stLU <- extend(stLU, extent(stDMP[[1]]))
+  stLU <- crop(stLU, extent(stDMP[[1]]))
+  stLU <- mask(stLU, aoi)
+  #stLU <- stack(stLU, LUcrops300DEA)
   
-  # ##Revise grass and shrub area 
-  # diffCrop <- LUcrops300DEA - stLU$LUcrops300
+  ##Revise grass and shrub area
+  diffCrop <- LUcrops300DEA - stLU$LUcrops300
   stLU$LUgrassShrub300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
-  #stLU$LUgrassShrub300 <- stLU$LUgrassShrub300 - LUcrops300DEA
+  stLU$LUgrassShrub300 <- stLU$LUgrassShrub300 - LUcrops300DEA
   
-  # stLU$LUcrops300 <- LUcrops300DEA
+  stLU$LUcrops300 <- LUcrops300DEA
   
   # ##Crop phenology to test area
-  # #stPhen <- ext(stPhen, ext(stDMP[[1]]))
-  # stPhen <- crop(stPhen, ext(stDMP[[1]]))
-  # stPhen <- resample(stPhen, stDMP[[1]], method = "near")
-  #stPhen <- stPhen + yearOffset #!Change to + or - as needed
+  # stPhen <- extend(stPhen, extent(stDMP[[1]]))
+  # stPhen <- crop(stPhen, extent(stDMP[[1]]))
+  # stPhen <- resample(stPhen, stDMP[[1]], method = "ngb")
+  # stPhen <- stPhen + yearOffset #!Change to + or - as needed
   #stPhen$phenoGreenup2 <- overlay(stPhen$phenoGreenup2, stPhen$phenoGreenup1, stPhen$phenoSenescence2, fun = function(x, g1, s2){ifelse(x > max(datesDMPdiff)+30 & x-365 < g1 & s2-365 < g1, x-365, x)})
   #stPhen$phenoSenescence2 <- overlay(stPhen$phenoSenescence2, stPhen$phenoGreenup1, fun = function(x, g1){ifelse(x > max(datesDMPdiff)+30 & x-365 < g1, x-365, x)})
   

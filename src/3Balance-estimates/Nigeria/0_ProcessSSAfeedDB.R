@@ -1,6 +1,6 @@
 # Prepare feed quality data
-# Author: Simon Fraval
-# Last modified by John Mutua on 12/11/2024
+# Author: John Mutua
+# Last modified 12/11/2024
 
 # # Install required packages
 # install.packages("readr")

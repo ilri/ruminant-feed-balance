@@ -24,9 +24,9 @@ outdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, 
 dmpTemp <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
 
 LUcropsDEA <- rast(paste0(proPath, "/LUcropsDEA100m_NGA.tif"))
-LUcropsDEA <- project(LUcropsDEA, dmpTemp)
+LUcropsDEA <- terra::project(LUcropsDEA, dmpTemp)
 LUcropsDEA <- crop(LUcropsDEA, ext(dmpTemp))
 LUcropsDEA <- resample(LUcropsDEA, dmpTemp, method="near")
 LUcropsDEA <- mask(LUcropsDEA, mask = dmpTemp)
 
-writeRaster(LUcropsDEA, paste0(outdir, "/LUcropsDEA300m_NGA.tif"), overwrite=TRUE)
+writeRaster(LUcropsDEA, paste0(outdir, "/LUcrops300DEA.tif"), overwrite=TRUE)
