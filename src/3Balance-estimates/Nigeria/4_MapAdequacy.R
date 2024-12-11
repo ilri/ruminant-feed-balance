@@ -38,7 +38,7 @@ loadfonts(device = "all")
 #options(scipen=0, digits=6)
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 
@@ -111,27 +111,27 @@ tsSum_plot$value <- tsSum_plot$value/1000000
 tsSum_plot$lower <- tsSum_plot$lower/1000000
 tsSum_plot$upper <- tsSum_plot$upper/1000000
 
-tsSum_plot <- transform(tsSum_plot, zone=factor(zone,levels=c("(Agro)pastoral sahel", "Central mixed", "Southern mixed", "Lowland mixed")))
+tsSum_plot <- transform(tsSum_plot, zone=factor(zone,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 tsSum_plot <- transform(tsSum_plot, name=factor(name,levels= c("grassME_mean", "cropME_mean", "browseME_mean", "afterME_mean")))
-Fig1 <- ggplot(tsSum_plot[tsSum_plot$year == 2023,], aes(name, value, fill = name)) + geom_col(position = "identity") + geom_errorbar(aes(ymin = lower, ymax=upper)) + ylab("Energy available (TJ ME)") + xlab("Feed category") +  scale_fill_manual(name = "", labels = c("Grass", "Crop residue", "Browse", "Other biomass"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "afterME_mean" = "#000000", "browseME_mean" = "#FF0000")) + theme_classic() + theme(text=element_text(family="serif", size = 14), axis.text.x=element_blank (), strip.background = element_blank()) + facet_wrap(~zone, ncol = 4) #scale_colour_manual(name = "", labels = c("Crop", "Grass", "Livestock"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "lvstReq" = "#FF0101")) +
-ggsave(paste0(plotsDir, "/NGAFig1_1000.tiff"), Fig1, device = "tiff", dpi = 1000, width=85 * (14/5), height=20 * (14/5), units = "mm")
+Fig1 <- ggplot(tsSum_plot[tsSum_plot$year == 2023,], aes(name, value, fill = name)) + geom_col(position = "identity") + geom_errorbar(aes(ymin = lower, ymax=upper)) + ylab("Energy available (TJ ME)") + xlab("Feed category") +  scale_fill_manual(name = "", labels = c("Grass", "Crop residue", "Browse", "Other biomass"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "afterME_mean" = "#000000", "browseME_mean" = "#FF0000")) + theme_classic() + theme(text=element_text(family="serif", size = 12), axis.text.x=element_blank (), strip.background = element_blank()) + facet_wrap(~zone, ncol = 5) #scale_colour_manual(name = "", labels = c("Crop", "Grass", "Livestock"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "lvstReq" = "#FF0101")) +
+ggsave(paste0(plotsDir, "/NGAFig1_1000.tiff"), Fig1, device = "tiff", dpi = 1000, width=90 * (14/5), height=20 * (14/5), units = "mm")
 
 tsSum <- tsSum %>% rowwise() %>% mutate(totalME_mean = sum(cropME_mean, grassME_mean, browseME_mean, afterME_mean))
 tsSum <- tsSum %>% rowwise() %>% mutate(cropMEprop_mean = cropME_mean/ totalME_mean, grassMEprop_mean = grassME_mean / totalME_mean, browseMEprop_mean = browseME_mean / totalME_mean, afterMEprop_mean = afterME_mean / totalME_mean)
 
 tsSum_plot2 <- pivot_longer(dplyr::select(tsSum, zone, year, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean), cols = -c(zone, year))
-tsSum_plot2 <- transform(tsSum_plot2, zone=factor(zone,levels=c("(Agro)pastoral sahel", "Central mixed", "Southern mixed", "Lowland mixed")))
+tsSum_plot2 <- transform(tsSum_plot2, zone=factor(zone,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 tsSum_plot2 <- transform(tsSum_plot2, name=factor(name,levels=c("grassMEprop_mean", "cropMEprop_mean", "browseMEprop_mean", "afterMEprop_mean")))
-SI1 <- ggplot(tsSum_plot2, aes(year, value, colour = name, fill = name)) + geom_line() + scale_x_continuous(breaks=c(2020, 2021, 2022, 2023)) + scale_y_continuous(limits = c(0,1), breaks = c(0,0.2,0.4,0.6,0.8)) + ylab("Proportion of energy") + xlab("Year") +  scale_colour_manual(name = "", labels = c("Grass", "Crop residue", "Browse", "Other biomass"), values = c("cropMEprop_mean" = "#F8CA02", "grassMEprop_mean" = "#008D1F", "afterMEprop_mean" = "#000000", "browseMEprop_mean" = "#FF0000")) + theme_classic() + theme(text=element_text(family="serif", size = 14), strip.background = element_blank()) + facet_wrap(~zone, nrow = 1) #scale_colour_manual(name = "", labels = c("Crop", "Grass", "Livestock"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "lvstReq" = "#FF0101")) +
-ggsave(paste0(plotsDir, "/NGASI1.tiff"), SI1, device = "tiff", dpi = 300, width=85 * (14/5), height=20 * (14/5), units = "mm")
+SI1 <- ggplot(tsSum_plot2, aes(year, value, colour = name, fill = name)) + geom_line() + scale_x_continuous(breaks=c(2020, 2021, 2022, 2023)) + scale_y_continuous(limits = c(0,1), breaks = c(0,0.2,0.4,0.6,0.8)) + ylab("Proportion of energy") + xlab("Year") +  scale_colour_manual(name = "", labels = c("Grass", "Crop residue", "Browse", "Other biomass"), values = c("cropMEprop_mean" = "#F8CA02", "grassMEprop_mean" = "#008D1F", "afterMEprop_mean" = "#000000", "browseMEprop_mean" = "#FF0000")) + theme_classic() + theme(text=element_text(family="serif", size = 12), strip.background = element_blank(), panel.spacing = unit(6, "mm")) + facet_wrap(~zone, nrow = 1) #scale_colour_manual(name = "", labels = c("Crop", "Grass", "Livestock"), values = c("cropME_mean" = "#F8CA02", "grassME_mean" = "#008D1F", "lvstReq" = "#FF0101")) +
+ggsave(paste0(plotsDir, "/NGASI1.tiff"), SI1, device = "tiff", dpi = 300, width=90 * (14/5), height=20 * (14/5), units = "mm")
 
 #Table 2
 x <- select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
-x$aez <- c("sav", "sav", "sav", "sah")
-x <- group_by(x, aez)
+x$eco <- c("sav", "for", "sav", "sav", "sah")
+x <- group_by(x, eco)
 x <- summarise_all(select(x, -zone), sum)
 x <- x %>% rowwise() %>% mutate(cropMEprop_mean = cropME_mean/ totalME_mean, grassMEprop_mean = grassME_mean / totalME_mean, browseMEprop_mean = browseME_mean / totalME_mean, afterMEprop_mean = afterME_mean / totalME_mean)
-x <- select(x, c(aez, totalME_mean, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean))
+x <- select(x, c(eco, totalME_mean, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean))
 
 ######
 ##Livestock feed adequacy timeseries breakdown
@@ -146,10 +146,10 @@ tsSumRegMax <- pivot_longer(dplyr::select(tsSumReg, NAME_1, adeqMax_2020, adeqMa
 tsSumReg_plot <- cbind(tsSumReg_mean, select(tsSumRegMin, lower = value))
 tsSumReg_plot <- cbind(tsSumReg_plot, select(tsSumRegMax, upper = value))
 
-tsSumReg_plot <- transform(tsSumReg_plot, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Central mixed", "Southern mixed", "Lowland mixed")))
+tsSumReg_plot <- transform(tsSumReg_plot, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 
-Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,25), breaks = c(0,5,10,15,20,25)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 4)
-ggsave(paste0(plotsDir, "/NGAFig2_1000.tiff"), Fig2, device = "tiff", dpi = 1000, width=85 * (14/5), height=20 * (14/5), units = "mm")
+Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,10), breaks = c(0,5,10)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 5)
+ggsave(paste0(plotsDir, "/NGAFig2_1000.tiff"), Fig2, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
 
 
 ######
@@ -182,4 +182,3 @@ ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) +
 
 ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) + 
   geom_stars(data = st_as_stars(lvstIntake_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 6), breaks = c(0, 2, 4, 6), low = "#FFFFFF", high = "#F9A908", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
-

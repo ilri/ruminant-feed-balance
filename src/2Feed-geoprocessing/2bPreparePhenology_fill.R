@@ -16,7 +16,7 @@ library(terra)
 # study area
 country <- "Nigeria"
 
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 yearList <- c("2020", "2021", "2022", "2023")
 

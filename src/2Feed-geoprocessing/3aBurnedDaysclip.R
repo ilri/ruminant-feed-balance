@@ -20,7 +20,7 @@ library(terra)
 country <- "Nigeria"
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 # read AOI
 aoi <- read_sf(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))

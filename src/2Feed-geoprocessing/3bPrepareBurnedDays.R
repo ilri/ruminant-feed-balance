@@ -17,7 +17,7 @@ rasterOptions(todisk=TRUE)
 rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 # country
 country <- "Nigeria"

@@ -16,7 +16,7 @@ terraOptions(todisk=TRUE)
 country <- "Nigeria"
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 proPath <- paste0(root, "/src/1Data-download/SpatialData/inputs/LandCover")
 outdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/LandUse"); dir.create(outdir, F, T)
 

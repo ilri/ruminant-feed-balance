@@ -24,7 +24,7 @@ library(sf)
 country <- "Nigeria"
 
 rasterOptions(maxmemory = 1e+60)
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 # read AOI
 aoi_path <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp")

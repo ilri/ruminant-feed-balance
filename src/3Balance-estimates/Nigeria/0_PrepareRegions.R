@@ -11,8 +11,9 @@
 library(sf)
 library(dplyr)
 library(ggplot2)
+library(stars)
 
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 
@@ -35,14 +36,15 @@ ECOZONE <- ECOZONE %>%
                                  Ecological == "Mountain Vegetations" ~ "MOUVEG",
                                  Ecological == "Mangrove" ~ "MANGGR",
                                  TRUE ~ Ecological),
-         ECORegion = case_when(Ecological == "Sahel Savannah" ~ "Sahel",
-                               Ecological %in% c("Sudan Savannah", "Southern Guinea Savannah", "Northern Guinea Savannah", "Mountain Vegetations")  ~ "Savannah",
-                               Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove") ~ "Lowlands",
+         ECORegion = case_when(Ecological %in% c("Sahel Savannah", "Sudan Savannah") ~ "Dry Savannah",
+                               Ecological %in% c("Southern Guinea Savannah", "Northern Guinea Savannah", "Mountain Vegetations")  ~ "Wet Savannah",
+                               Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove") ~ "Forest",
                                TRUE ~ Ecological),
-         ECOZone = case_when(Ecological == "Sahel Savannah" ~ "(Agro)pastoral sahel",
-                             Ecological %in% c("Sudan Savannah", "Northern Guinea Savannah", "Mountain Vegetations")  ~ "Central mixed",
+         ECOZone = case_when(Ecological =="Sahel Savannah" ~ "(Agro)pastoral sahel",
+                             Ecological == "Sudan Savannah" ~ "Northern mixed",
+                             Ecological %in% c("Northern Guinea Savannah", "Mountain Vegetations")  ~ "Central mixed",
                              Ecological == "Southern Guinea Savannah" ~ "Southern mixed",
-                             Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove")  ~ "Lowland mixed",
+                             Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove")  ~ "Forest mixed",
                              TRUE ~ Ecological)
   )
 

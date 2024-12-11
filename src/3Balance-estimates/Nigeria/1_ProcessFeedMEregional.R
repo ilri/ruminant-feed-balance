@@ -31,7 +31,7 @@ rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
 rasterOptions(todisk = TRUE)
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 
@@ -63,24 +63,22 @@ for(year in yearList){
   dryDays <- 365 - croppingDays
   
   region <- raster(paste0(spatialDir, "/intermediate/regions.tif"))
-  grassMELowlands <- 6.5
-  grassMESavannah <- 6.5
-  grassMESahel <- 6.1
-  grassME <- calc(region, fun = function(x){ifelse(x == 1, grassMELowlands, ifelse(x == 2, grassMESahel, grassMESavannah))})
+  grassMEForest <- 7.9 #Adebayo et al 2020 https://njap.org.ng/index.php/njap/article/view/1264/1103 6.2-9.0 
+  grassMEWetSavannah <- 6.5 #Rahimi et al. 2021
+  grassMEDrySavannah <- 6.1 #Rahimi et al. 2021
+  grassME <- calc(region, fun = function(x){ifelse(x == 1, grassMEDrySavannah, ifelse(x == 2, grassMEForest, grassMEWetSavannah))})
   grassME <- raster::resample(grassME, feedCropBurn, method = "ngb")
   
-  browseMELowlands <- 8.1
-  browseMESavannah <- 8.1
-  browseMESahel <- 6
-  browseME <- calc(region, fun = function(x){ifelse(x == 1, browseMELowlands, ifelse(x == 2, browseMESahel, browseMESavannah))})
+  browseMEForest <- 9.8 #Anele et al. 2009 https://doi.org/10.1016/j.anifeedsci.2009.07.007 9.1-10.6
+  browseMEWetSavannah <- 8.1 #Rahimi et al. 2021
+  browseMEDrySavannah <- 6.0 #Rahimi et al. 2021
+  browseME <- calc(region, fun = function(x){ifelse(x == 1, browseMEDrySavannah, ifelse(x == 2, browseMEForest, browseMEWetSavannah))})
   browseME <- raster::resample(browseME, feedCropBurn, method = "ngb")
   #browseMEmean <- 5
   
   grassFracDry <- 0.33 
   grassFracWet <- 0.55 
   browseFrac <- 0.16
-  
-  #tCrop <- stack(list.files(path = 'SpatialData/inputs/Feed_quantity/',pattern="cropmean_2",full.names = T))
   
   tCrop <- raster(paste0(spatialDir, "/inputs/Feed_quantity/DMPcropmean_", year, ".tif"))
   tCrop <- reclassify(tCrop, c(-Inf, 0, 0)) 
@@ -124,26 +122,26 @@ for(year in yearList){
   
   ## Feed output
   #tsSum <- data.frame(region = c(rep("(Agro)pastoral Sahel", 6), rep("Central mixed", 6), rep("Cropping", 6), rep("North mixed", 6), rep("South mixed", 6)), year = c(2014:2019, 2014:2019, 2014:2019, 2014:2019, 2014:2019), lvstReq = NA, cropME_mean = NA, cropME_min = NA, cropME_max = NA, grassME_mean = NA, grassME_min = NA, grassME_max = NA, browseME_mean = NA, browseME_min = NA, browseME_max = NA, afterME_mean = NA, afterME_min = NA, afterME_max = NA)
-  tsSumZone <- data.frame(zone = c("(Agro)pastoral sahel", "Central mixed", "Lowland mixed", "Southern mixed"), year = year, lvstReq = NA, cropME_mean = NA, cropME_min = NA, cropME_max = NA, grassME_mean = NA, grassME_min = NA, grassME_max = NA, browseME_mean = NA, browseME_min = NA, browseME_max = NA, afterME_mean = NA, afterME_min = NA, afterME_max = NA)
-   
+  tsSumZone <- data.frame(zone = c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed"), year = year, lvstReq = NA, cropME_mean = NA, cropME_min = NA, cropME_max = NA, grassME_mean = NA, grassME_min = NA, grassME_max = NA, browseME_mean = NA, browseME_min = NA, browseME_max = NA, afterME_mean = NA, afterME_min = NA, afterME_max = NA)
+  
   cropME_mean <- exact_extract(tCrop, zones, "sum")
-  tsSumZone$cropME_mean <- as.numeric(c(cropME_mean[1], cropME_mean[2], cropME_mean[3], cropME_mean[4]))
+  tsSumZone$cropME_mean <- as.numeric(c(cropME_mean[1], cropME_mean[2], cropME_mean[3], cropME_mean[4], cropME_mean[5]))
   
   grassME_mean <- exact_extract(tGrass, zones, "sum")
-  tsSumZone$grassME_mean <- as.numeric(c(grassME_mean[1], grassME_mean[2], grassME_mean[3], grassME_mean[4]))
+  tsSumZone$grassME_mean <- as.numeric(c(grassME_mean[1], grassME_mean[2], grassME_mean[3], grassME_mean[4], grassME_mean[5]))
   
   browseME_mean <- exact_extract(tBrowse, zones, "sum")
-  tsSumZone$browseME_mean <- as.numeric(c(browseME_mean[1], browseME_mean[2], browseME_mean[3], browseME_mean[4]))
+  tsSumZone$browseME_mean <- as.numeric(c(browseME_mean[1], browseME_mean[2], browseME_mean[3], browseME_mean[4], browseME_mean[5]))
   
   afterME_mean <- exact_extract(tAfter, zones, "sum")
-  tsSumZone$afterME_mean <- as.numeric(c(afterME_mean[1], afterME_mean[2], afterME_mean[3], afterME_mean[4]))
+  tsSumZone$afterME_mean <- as.numeric(c(afterME_mean[1], afterME_mean[2], afterME_mean[3], afterME_mean[4], afterME_mean[5]))
   
   tsSumZone_List[[year]] <- tsSumZone
   
   cat("Completed processing zonal stats for: ", year, "\n")
   
   ##Calculate average ME
-  tsSumRegion <- data.frame(region = c("Lowlands", "Sahel", "Savannah"), year = year)
+  tsSumRegion <- data.frame(region = c("Dry Savannah", "Forest", "Wet Savannah"), year = year)
   #tsSum <- data.frame(region = c(rep("Highland (agro)pastoral", 6), rep("Highland mixed", 6), rep("Lowland (agro)pastoral", 6), rep("Lowland mixed", 6)), year = c(2014:2019, 2014:2019, 2014:2019, 2014:2019), lvstReq = NA, cropME_mean = NA, cropME_min = NA, cropME_max = NA, grassME_mean = NA, grassME_min = NA, grassME_max = NA, browseME_mean = NA, browseME_min = NA, browseME_max = NA, afterME_mean = NA, afterME_min = NA, afterME_max = NA, adeq_mean = NA, adeq_min = NA, adeq_max = NA)
   
   cropME_mean <- exact_extract(tCrop, regions, "sum")

@@ -10,7 +10,7 @@ library(terra)
 country <- "Nigeria"
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 indir <- paste0(root, "/src/1Data-download/SpatialData/inputs/GLW4")
 outdir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/GLW4"); dir.create(outdir, F, T)
 

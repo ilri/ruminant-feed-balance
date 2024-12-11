@@ -28,7 +28,7 @@ rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
 rasterOptions(todisk = TRUE)
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 

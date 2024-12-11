@@ -11,12 +11,12 @@ library(readr)
 library(dplyr)
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 
 # paths
-feedParOut <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams"); dir.create(feedPar_dest, F, T)
+feedParOut <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams"); dir.create(feedParOut, F, T)
 
 feedQuality <- read_csv(paste0(feedParOut, "/feedQuality_SSAdb.csv"))
 crop_classification <- read_csv(paste0(feedParOut, "/Crop classification_feed basket.csv"))

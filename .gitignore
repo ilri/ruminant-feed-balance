@@ -4,3 +4,4 @@ src/1Data-download/input_data.csv
 src/2Feed-geoprocessing/SpatialData/
 src/3Balance-estimates/Nigeria/SpatialData/
 src/3Balance-estimates/Nigeria/CropParams/
+.Rproj.user

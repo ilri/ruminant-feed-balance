@@ -17,7 +17,7 @@ options(scipen = 999)
 # Load libraries
 
 # root folder
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 country <- "Nigeria"
 

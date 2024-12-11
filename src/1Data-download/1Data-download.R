@@ -28,10 +28,7 @@ library(rvest)
 library(FAOSTAT)
 
 # Setting the working directory
-root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
-
-## For windows it would look like this
-# root <- "C:/Documents/AU_IBAR/ruminant-feed-balance"
+root <- "."
 
 #### Administrative boundaries----------------------------------------------------------------------------
 
