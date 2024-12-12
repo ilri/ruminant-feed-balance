@@ -65,28 +65,45 @@ rm(cattleIntake_model_MJ, shoatsIntake_model_MJ, horseDonkeyIntake_model_MJ)
 ## Adequacy outputs
 tFeed <- stack(list.files(path = paste0(spatialDir, "/outputs"), pattern="Feed_total_min_MJ",full.names = T))
 
-#totalDM_2019 <- (tCrop$Feed_crop_burn_MJ.6*croppingDays) + (tGrassWet$layer.6*croppingDays) + (tGrassDry$layer.6*dryDays) + (tBrowse$DMPbrowsemean_2019 * 365)
-zones <- bind_cols(select(zones, ECOZone), exact_extract(tLv, zones, fun = "sum"))
-zones <- bind_cols(zones, exact_extract(tFeed, zones, fun = "sum"))
-
-st_geometry(zones) <- NULL
-
-tsSum <- data.frame(zones)
-
-colnames(tsSum) <- c("NAME_1", "lvstReqMEmax_2020", "lvstReqMEmax_2021", "lvstReqMEmax_2022", "lvstReqMEmax_2023", "feedME_min_2020", "feedME_min_2021", "feedME_min_2022", "feedME_min_2023")
-
-tsSum$adeqMin_2020 <- tsSum$feedME_min_2020 / tsSum$lvstReqMEmax_2020
-tsSum$adeqMin_2021 <- tsSum$feedME_min_2021 / tsSum$lvstReqMEmax_2021
-tsSum$adeqMin_2022 <- tsSum$feedME_min_2022 / tsSum$lvstReqMEmax_2022
-tsSum$adeqMin_2023 <- tsSum$feedME_min_2023 / tsSum$lvstReqMEmax_2023
-
-tsSum_adeq <- read.csv(paste0(Results_dir, "/totals_timeseries_region.csv"))
-tsSum_adeq$adeqMin_2020 <- tsSum$adeqMin_2020
-tsSum_adeq$adeqMin_2021 <- tsSum$adeqMin_2021
-tsSum_adeq$adeqMin_2022 <- tsSum$adeqMin_2022
-tsSum_adeq$adeqMin_2023 <- tsSum$adeqMin_2023
-
-write.csv(tsSum_adeq, paste0(Results_dir, "/totals_timeseries_region.csv"),row.names=FALSE)
+#extract by aggregation zones
+aggregation_zones <- c("country", "region", "state")
+for(aggregation_zone in aggregation_zones){
+  
+  if(aggregation_zone == "country"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi0.shp"))
+    zones <- bind_cols(select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "region"){
+    zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
+    zones <- bind_cols(select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "state"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
+    zones <- bind_cols(select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }
+  
+  zones <- bind_cols(zones, exact_extract(terra::rast(tFeed), zones, fun = "sum"))
+  st_geometry(zones) <- NULL
+  tsSum <- data.frame(zones)
+  colnames(tsSum) <- c("NAME_1", "lvstReqMEmax_2020", "lvstReqMEmax_2021", "lvstReqMEmax_2022", "lvstReqMEmax_2023", "feedME_min_2020", "feedME_min_2021", "feedME_min_2022", "feedME_min_2023")
+  
+  tsSum$adeqMin_2020 <- tsSum$feedME_min_2020 / tsSum$lvstReqMEmax_2020
+  tsSum$adeqMin_2021 <- tsSum$feedME_min_2021 / tsSum$lvstReqMEmax_2021
+  tsSum$adeqMin_2022 <- tsSum$feedME_min_2022 / tsSum$lvstReqMEmax_2022
+  tsSum$adeqMin_2023 <- tsSum$feedME_min_2023 / tsSum$lvstReqMEmax_2023
+  
+  tsSum_adeq <- read.csv(paste0(Results_dir, "/totals_timeseries_", aggregation_zone, ".csv"))
+  tsSum_adeq$adeqMin_2020 <- tsSum$adeqMin_2020
+  tsSum_adeq$adeqMin_2021 <- tsSum$adeqMin_2021
+  tsSum_adeq$adeqMin_2022 <- tsSum$adeqMin_2022
+  tsSum_adeq$adeqMin_2023 <- tsSum$adeqMin_2023
+  
+  write.csv(tsSum_adeq, paste0(Results_dir, "/totals_timeseries_", aggregation_zone, ".csv"),row.names=FALSE)
+  
+  cat("Completed extracting minimum stats for: ", aggregation_zone, "\n")
+  
+}
 
 ###################
 # Process maximum
@@ -109,26 +126,42 @@ rm(cattleIntake_model_MJ, shoatsIntake_model_MJ, horseDonkeyIntake_model_MJ)
 ## Adequacy outputs
 tFeed <- stack(list.files(path = paste0(spatialDir, "/outputs"), pattern="Feed_total_max_MJ",full.names = T))
 
-zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
-
-zones <- bind_cols(select(zones, ECOZone), exact_extract(tLv, zones, fun = "sum"))
-zones <- bind_cols(zones, exact_extract(tFeed, zones, fun = "sum"))
-
-st_geometry(zones) <- NULL
-
-tsSum <- data.frame(zones)
-
-colnames(tsSum) <- c("NAME_1", "lvstReqMEmin_2020", "lvstReqMEmin_2021", "lvstReqMEmin_2022", "lvstReqMEmin_2023", "feedME_max_2020", "feedME_max_2021", "feedME_max_2022", "feedME_max_2023")
-
-tsSum$adeqMax_2020 <- tsSum$feedME_max_2020 / tsSum$lvstReqMEmin_2020
-tsSum$adeqMax_2021 <- tsSum$feedME_max_2021 / tsSum$lvstReqMEmin_2021
-tsSum$adeqMax_2022 <- tsSum$feedME_max_2022 / tsSum$lvstReqMEmin_2022
-tsSum$adeqMax_2023 <- tsSum$feedME_max_2023 / tsSum$lvstReqMEmin_2023
-
-tsSum_adeq <- read.csv(paste0(Results_dir, "/totals_timeseries_region.csv"))
-tsSum_adeq$adeqMax_2020 <- tsSum$adeqMax_2020
-tsSum_adeq$adeqMax_2021 <- tsSum$adeqMax_2021
-tsSum_adeq$adeqMax_2022 <- tsSum$adeqMax_2022
-tsSum_adeq$adeqMax_2023 <- tsSum$adeqMax_2023
-
-write.csv(tsSum_adeq, paste0(Results_dir, "/totals_timeseries_region.csv"),row.names=FALSE)
+#extract by aggregation zones
+aggregation_zones <- c("country", "region", "state")
+for(aggregation_zone in aggregation_zones){
+  
+  if(aggregation_zone == "country"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi0.shp"))
+    zones <- bind_cols(select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "region"){
+    zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
+    zones <- bind_cols(select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "state"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
+    zones <- bind_cols(select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }
+  
+  zones <- bind_cols(zones, exact_extract(terra::rast(tFeed), zones, fun = "sum"))
+  st_geometry(zones) <- NULL
+  tsSum <- data.frame(zones)
+  colnames(tsSum) <- c("NAME_1", "lvstReqMEmin_2020", "lvstReqMEmin_2021", "lvstReqMEmin_2022", "lvstReqMEmin_2023", "feedME_max_2020", "feedME_max_2021", "feedME_max_2022", "feedME_max_2023")
+  
+  tsSum$adeqMax_2020 <- tsSum$feedME_max_2020 / tsSum$lvstReqMEmin_2020
+  tsSum$adeqMax_2021 <- tsSum$feedME_max_2021 / tsSum$lvstReqMEmin_2021
+  tsSum$adeqMax_2022 <- tsSum$feedME_max_2022 / tsSum$lvstReqMEmin_2022
+  tsSum$adeqMax_2023 <- tsSum$feedME_max_2023 / tsSum$lvstReqMEmin_2023
+  
+  tsSum_adeq <- read.csv(paste0(Results_dir, "/totals_timeseries_", aggregation_zone, ".csv"))
+  tsSum_adeq$adeqMax_2020 <- tsSum$adeqMax_2020
+  tsSum_adeq$adeqMax_2021 <- tsSum$adeqMax_2021
+  tsSum_adeq$adeqMax_2022 <- tsSum$adeqMax_2022
+  tsSum_adeq$adeqMax_2023 <- tsSum$adeqMax_2023
+  
+  write.csv(tsSum_adeq, paste0(Results_dir, "/totals_timeseries_", aggregation_zone, ".csv"),row.names=FALSE)
+  
+  cat("Completed extracting maximum stats for: ", aggregation_zone, "\n")
+  
+}

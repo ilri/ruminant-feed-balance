@@ -39,8 +39,6 @@ LivestockParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/Lives
 Results_dir <- paste0(root, "/src/3Balance-estimates/", country, "/Results")
 Outputs_dir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/outputs")
 
-zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
-
 # Loop through years
 yearList <- c("2020", "2021", "2022", "2023")
 lv_List <- list()
@@ -64,19 +62,36 @@ rm(cattleIntake_model_MJ, shoatsIntake_model_MJ, horseDonkeyIntake_model_MJ)
 ## Adequacy outputs
 tFeed <- stack(list.files(path = paste0(spatialDir, "/outputs"), pattern="Feed_total_mean_MJ",full.names = T))
 
-#totalDM_2019 <- (tCrop$Feed_crop_burn_MJ.6*croppingDays) + (tGrassWet$layer.6*croppingDays) + (tGrassDry$layer.6*dryDays) + (tBrowse$DMPbrowsemean_2019 * 365)
-zones <- bind_cols(select(zones, ECOZone), exact_extract(tLv, zones, fun = "sum"))
-zones <- bind_cols(zones, exact_extract(tFeed, zones, fun = "sum"))
-
-st_geometry(zones) <- NULL
-
-tsSum <- data.frame(zones)
-
-colnames(tsSum) <- c("NAME_1", "lvstReqME_2020", "lvstReqME_2021", "lvstReqME_2022", "lvstReqME_2023", "feedME_mean_2020", "feedME_mean_2021", "feedME_mean_2022", "feedME_mean_2023")
-
-tsSum$adeq_2020 <- tsSum$feedME_mean_2020 / tsSum$lvstReqME_2020
-tsSum$adeq_2021 <- tsSum$feedME_mean_2021 / tsSum$lvstReqME_2021
-tsSum$adeq_2022 <- tsSum$feedME_mean_2022 / tsSum$lvstReqME_2022
-tsSum$adeq_2023 <- tsSum$feedME_mean_2023 / tsSum$lvstReqME_2023
-
-write.csv(tsSum, paste0(Results_dir, "/totals_timeseries_region.csv"), row.names=FALSE)
+#extract by aggregation zones
+aggregation_zones <- c("country", "region", "state")
+for(aggregation_zone in aggregation_zones){
+  
+  if(aggregation_zone == "country"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi0.shp"))
+    zones <- bind_cols(select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "region"){
+    zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
+    zones <- bind_cols(select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }else if(aggregation_zone == "state"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
+    zones <- bind_cols(select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    
+  }
+  
+  zones <- bind_cols(zones, exact_extract(terra::rast(tFeed), zones, fun = "sum"))
+  st_geometry(zones) <- NULL
+  tsSum <- data.frame(zones)
+  colnames(tsSum) <- c("NAME_1", "lvstReqME_2020", "lvstReqME_2021", "lvstReqME_2022", "lvstReqME_2023", "feedME_mean_2020", "feedME_mean_2021", "feedME_mean_2022", "feedME_mean_2023")
+  
+  tsSum$adeq_2020 <- tsSum$feedME_mean_2020 / tsSum$lvstReqME_2020
+  tsSum$adeq_2021 <- tsSum$feedME_mean_2021 / tsSum$lvstReqME_2021
+  tsSum$adeq_2022 <- tsSum$feedME_mean_2022 / tsSum$lvstReqME_2022
+  tsSum$adeq_2023 <- tsSum$feedME_mean_2023 / tsSum$lvstReqME_2023
+  
+  write.csv(tsSum, paste0(Results_dir, "/totals_timeseries_", aggregation_zone, ".csv"), row.names=FALSE)
+  
+  cat("Completed extracting stats for: ", aggregation_zone, "\n")
+  
+}
