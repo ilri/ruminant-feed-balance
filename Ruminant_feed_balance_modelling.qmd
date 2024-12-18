@@ -1,0 +1,124 @@
+---
+title: "Ruminant Feed Balance Modelling in R"
+format: pdf
+bibliography: references.bib
+editor: visual
+header-includes:
+  \usepackage{fvextra}
+  \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+  \usepackage{float}
+  \floatplacement{table}{H}
+  \renewcommand{\thesection}{\Roman{section}}
+---
+
+```{=latex}
+\vspace{-2.5cm}
+```
+### Introduction
+
+This course is designed to guide learners on ruminant feed balance modelling in R. The course gives an overview of the concept of feed balance modelling, and introduces the main modelling steps based by @fravalFeedBalancesRuminant2024. Learners are taught how to gather spatial and non-spatial data, pre-process it, and ultimately assess feed balances. The methodology has be implemented in Ethiopia, Burkina Faso and Nigeria. The codes and data in these course are for Nigeria. The course emphasizes practical learning, with learners working on hands-on sessions. Detailed explanations are provided, helping learners follow along with the material and providing a valuable resource for future reference.
+
+Feed balances are used to evaluate the adequacy of available livestock feed resources in meeting the dietary requirements of livestock [@mottetFeedBalancesSheet2024]. Feed resources typically include natural grasses, browse, crop by-products (e.g., crop residues), and agro-industrial by-products. Feed balance assessments are conducted at specific geographical scales and over defined time periods. In this course, we focus on estimating feed (energy) balance for ruminant livestock at the national scale, while ensuring relevance at sub-national levels and across different time frames.
+
+The course is organized into three workflows:
+
+-   `1Data-download`: For downloading data.
+-   `2Feed-geoprocessing`: For estimating feed availability.
+-   `3Balance-estimates`: For estimating feed balances.
+
+### Objectives
+
+The objectives of this course are to:-
+
+-   Teach participants where to collect spatial and non-spatial data required for livestock feed balance assessment for Nigeria.
+-   Teach participants how to import, edit, and export spatial and non-spatial data in preparation for feed balance modeling.
+-   Guide participants in evaluating livestock feed supply and determining livestock nutritional requirements.
+-   Equip participants with the skills to assess feed balances, allowing them to evaluate if livestock feed supply meets demand.
+
+### Learning Outcomes
+
+By the end of the course, learners will be able to:-
+
+-   Locate and collect essential spatial and non-spatial data for livestock feed balance assessment for Nigeria
+-   Import, edit, and export spatial and non-spatial data for use in livestock feed balance assessments.
+-   Assess livestock feed supply and determine livestock nutritional requirements.
+-   Evaluate feed supply against livestock requirements to assess feed balances.
+
+### Setting up R environment
+
+Learners will need to install the following free and open source software:-
+
+-   R programming language (4.4+) <https://cran.r-project.org>.
+-   R Studio Desktop <https://rstudio.com/products/rstudio/download/#download>.
+
+Next, we create a new folder and name it `feed-balance-modelling`. We assign the path to the folder the variable name `root`.
+
+```{r include = FALSE}
+root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
+```
+
+
+For Linux/Unix systems
+
+```{r eval=FALSE}
+# Linux systems
+root <- "/home/feed-balance-modelling"
+```
+
+For Windows systems
+
+```{r eval=FALSE}
+# Windows systems
+root <- "C:/Documents/feed-balance-modelling"
+```
+
+### Data Download
+
+This tutorial aims to guide learners through the key spatial and non-spatial data sources required for assessing feed balance. Learners will be introduced to a variety of datasets, and by the end of the tutorial, they will understand the necessary data requirements and know how to gather these datasets for feed balance modeling.
+
+The tutorial leverages freely available spatial and non-spatial data to perform feed balance modeling. Recent advancements in R packages have enabled streamlined access to spatial data, including administrative boundaries, climatic variables, and environmental datasets. To support this process, we provide brief, reproducible examples illustrating how to download and utilize such data for feed balance modeling.
+
+## Administrative boundaries
+
+We create a new folder under `feed-balance-modelling`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` R package. Here we use `geodata` to download the administrative boundaries for levels `0`, `1` and `2` for Nigeria from `GADM`, and store the data in `AdminBound` folder.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE}
+library(geodata)
+library(sf)
+
+country <- "Nigeria"
+
+outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country); dir.create(outdir, F, T)
+
+admin_levels <- c("0", "1", "2")
+for(admin_level in admin_levels){
+  aoi <- geodata::gadm(country = "NGA", level=admin_level, path = paste0(outdir), version="latest") %>% sf::st_as_sf()
+  write_sf(aoi, paste0(outdir, "/gadm40_NGA_", admin_level, ".shp"), append = FALSE)
+  write_sf(aoi, paste0(outdir, "/aoi", admin_level, ".shp"), append = FALSE)
+}
+
+```
+
+
+## Aggregation zones
+
+We use ecological and feed distribution zones as defined by the Nigeria's Federal Ministry of Agriculture and Food Security (FMAFS), the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
+
+```{r message=FALSE, warning=FALSE}
+library(googledrive)
+
+outdir <- paste0(root, "/src/1Data-download/SpatialData/inputs/AggregationZones"); dir.create(outdir, F, T)
+
+drive_deauth()
+drive_user()
+
+public_file <- drive_get(as_id("10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT"))
+drive_download(public_file, path = paste0(outdir, "/Ecological_and_Feed_Distribution.zip"), overwrite = TRUE)
+
+unzip(zipfile = paste0(outdir, "/Ecological_and_Feed_Distribution.zip"), exdir = paste0(outdir, "/"))
+```
+
+
+Extended workflows and detailed scripts for data downloading other datasets are available at <https://github.com/ilri/ruminant-feed-balance/tree/main/src/1Data-download>
+
+### References

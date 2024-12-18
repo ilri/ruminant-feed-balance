@@ -152,6 +152,36 @@ Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yin
 ggsave(paste0(plotsDir, "/NGAFig2_1000.tiff"), Fig2, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
 
 
+#plot by aggregation zones
+aggregation_zones <- c("region", "state")
+for(aggregation_zone in aggregation_zones){
+  
+  tsSumReg <- read.csv(paste0(Results_dir, "/totals_timeseries_", aggregation_zone,".csv"))
+  
+  if(aggregation_zone =="region"){
+    zones <- st_read(paste0(spatialDir, "/intermediate/zones.gpkg"))
+    zones <- zones %>% left_join(tsSumReg, by = c("ECOZone"="NAME_1")) %>% rename(NAME_1=ECOZone)
+    tsSumReg_mean <- pivot_longer(dplyr::select(zones, NAME_1, adeq_2020, adeq_2021, adeq_2022, adeq_2023), cols = -c(NAME_1, geom))
+  }else if(aggregation_zone =="state"){
+    zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
+    zones <- zones %>% left_join(tsSumReg, by = "NAME_1")
+    tsSumReg_mean <- pivot_longer(dplyr::select(zones, NAME_1, adeq_2020, adeq_2021, adeq_2022, adeq_2023), cols = -c(NAME_1, geometry))
+    }
+
+  tsSumReg_mean <- separate(tsSumReg_mean, name, c("name", "year"), "_")
+  tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Northern mixed", "Southern mixed", "Central mixed", "Forest mixed")))
+  
+  Fig3 <- ggplot(data = tsSumReg_plot) +
+    geom_sf(aes(fill = value)) +
+    facet_wrap(~ year, ncol = 4) +
+    scale_fill_gradient2(low = "darkred", mid = "white", high = "darkgreen", midpoint = 1, limits = c(floor(min(tsSumReg_plot$value, na.rm = TRUE)), ceiling(max(tsSumReg_plot$value, na.rm = TRUE))), space = "Lab", name = "", breaks = c(floor(min(tsSumReg_plot$value, na.rm = TRUE)), 1, ceiling(max(tsSumReg_plot$value, na.rm = TRUE))), labels = c("Negative balance", "0", "Positive balance")) +
+    labs(fill = "") + 
+    coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + 
+    theme_bw() +  
+    theme(panel.background = element_rect(fill = "white"), text = element_text(family = "arial", size = 12), panel.grid.minor = element_blank(), plot.background = element_rect(fill = "white"))
+  ggsave(paste0(plotsDir, "/NGAFig3_1000_", aggregation_zone, ".tiff"), Fig3, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
+}
+
 ######
 ##Mapping#
 sfZones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
