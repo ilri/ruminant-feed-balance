@@ -1,32 +1,46 @@
 ---
-title: "Ruminant Feed Balance Modelling in R"
-format: pdf
+title: ""
+format:
+  pdf:
+    include-in-header:
+      - text: |
+          \usepackage{afterpage}
+          \def\blankpage{%
+          \clearpage%
+          \thispagestyle{empty}%
+          \addtocounter{page}{-1}%
+          \null%
+          \clearpage}
+    number-sections: true
+    number-depth: 3
 bibliography: references.bib
-editor: visual
 header-includes:
+  \usepackage{fancyhdr}
+  \usepackage{graphicx}
+  \usepackage{eso-pic}
+  \usepackage{tikz}
   \usepackage{fvextra}
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
   \usepackage{float}
   \floatplacement{table}{H}
-  \renewcommand{\thesection}{\Roman{section}}
+  \renewcommand{\thesection}{\arabic{section}}
+  \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
+          \node at (current page.center) [yshift=4cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Ruminant Feed Balance Modelling in R}};
+          \node at (current page.south) [yshift=5cm] [anchor=north,yshift=-2cm] {\normalsize\textbf{January 2025}};
+          \end{tikzpicture}\clearpage}
 ---
 
-```{=latex}
-\vspace{-2.5cm}
-```
-### Introduction
+# Introduction
 
 This course is designed to guide learners on ruminant feed balance modelling in R. The course gives an overview of the concept of feed balance modelling, and introduces the main modelling steps based by @fravalFeedBalancesRuminant2024. Learners are taught how to gather spatial and non-spatial data, pre-process it, and ultimately assess feed balances. The methodology has be implemented in Ethiopia, Burkina Faso and Nigeria. The codes and data in these course are for Nigeria. The course emphasizes practical learning, with learners working on hands-on sessions. Detailed explanations are provided, helping learners follow along with the material and providing a valuable resource for future reference.
 
-Feed balances are used to evaluate the adequacy of available livestock feed resources in meeting the dietary requirements of livestock [@mottetFeedBalancesSheet2024]. Feed resources typically include natural grasses, browse, crop by-products (e.g., crop residues), and agro-industrial by-products. Feed balance assessments are conducted at specific geographical scales and over defined time periods. In this course, we focus on estimating feed (energy) balance for ruminant livestock at the national scale, while ensuring relevance at sub-national levels and across different time frames.
+\newpage
 
-The course is organized into three workflows:
+# Background
 
--   `1Data-download`: For downloading data.
--   `2Feed-geoprocessing`: For estimating feed availability.
--   `3Balance-estimates`: For estimating feed balances.
+Feed balances are used to evaluate the adequacy of available livestock feed resources in meeting the dietary requirements of livestock [@mottetFeedBalancesSheet2024]. Feed resources typically include natural grasses, browse, crop by-products (e.g., crop residues), and agro-industrial by-products. Feed balance assessments are conducted at specific geographical scales and over defined time periods. In this course, we focus on estimating feed (energy) balance for ruminant livestock at the national scale, while ensuring relevance at sub-national levels and across different time frames. 
 
-### Objectives
+## Objectives
 
 The objectives of this course are to:-
 
@@ -35,7 +49,7 @@ The objectives of this course are to:-
 -   Guide participants in evaluating livestock feed supply and determining livestock nutritional requirements.
 -   Equip participants with the skills to assess feed balances, allowing them to evaluate if livestock feed supply meets demand.
 
-### Learning Outcomes
+## Learning Outcomes
 
 By the end of the course, learners will be able to:-
 
@@ -44,19 +58,28 @@ By the end of the course, learners will be able to:-
 -   Assess livestock feed supply and determine livestock nutritional requirements.
 -   Evaluate feed supply against livestock requirements to assess feed balances.
 
-### Setting up R environment
+## Approach 
+
+The approach involves estimating (i) feed availability using freely accessible geospatial data and (ii) ruminant livestock feed requirements, both assessed over time. Figure 1 provides an overview of the feed balance model design.
+
+![Feed balance model for ruminant livestock. A minus (−) indicates excluded biomass, while an asterisk (\*) denotes inclusion of feed concentration values in subsequent calculations. ME = Metabolizable Energy.](FeedBal_model.png)
+
+The course is organized into three workflows: `1Data-download` for downloading data, `2Feed-geoprocessing` for estimating feed availability and `3Balance-estimates` for estimating feed balances.
+
+\newpage
+
+# Setting up R environment
 
 Learners will need to install the following free and open source software:-
 
 -   R programming language (4.4+) <https://cran.r-project.org>.
--   R Studio Desktop <https://rstudio.com/products/rstudio/download/#download>.
+-   R Studio Desktop (3.6+) <https://rstudio.com/products/rstudio/download/#download>.
 
-Next, we create a new folder and name it `feed-balance-modelling`. We assign the path to the folder the variable name `root`.
+Create a new folder within your work space and name it `feed-balance-modelling`. Using R, we assign the path to the folder the variable name `root`.
 
 ```{r include = FALSE}
 root <- "/home/s2255815/rdrive/AU_IBAR/ruminant-feed-balance"
 ```
-
 
 For Linux/Unix systems
 
@@ -72,7 +95,15 @@ For Windows systems
 root <- "C:/Documents/feed-balance-modelling"
 ```
 
-### Data Download
+Next, we set the country of interest.
+
+```{r}
+country <- "Nigeria"
+```
+
+\newpage
+
+# Data collation
 
 This tutorial aims to guide learners through the key spatial and non-spatial data sources required for assessing feed balance. Learners will be introduced to a variety of datasets, and by the end of the tutorial, they will understand the necessary data requirements and know how to gather these datasets for feed balance modeling.
 
@@ -99,7 +130,6 @@ for(admin_level in admin_levels){
 
 ```
 
-
 ## Aggregation zones
 
 We use ecological and feed distribution zones as defined by the Nigeria's Federal Ministry of Agriculture and Food Security (FMAFS), the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
@@ -118,7 +148,59 @@ drive_download(public_file, path = paste0(outdir, "/Ecological_and_Feed_Distribu
 unzip(zipfile = paste0(outdir, "/Ecological_and_Feed_Distribution.zip"), exdir = paste0(outdir, "/"))
 ```
 
+## Feed parameters
 
-Extended workflows and detailed scripts for data downloading other datasets are available at <https://github.com/ilri/ruminant-feed-balance/tree/main/src/1Data-download>
+Several feed parameters are needed for model parameterization. In this course, we estimate the metabolizable energy (ME) concentration of feeds using species-specific estimates derived from literature reviews and databases such as the Sub-Saharan Africa Feeds composition Database (Link: <https://feedsdatabase.ilri.org>. Feed quality parameters include metabolizable Energy (ME), neutral detergent fibre (NDF), in vitro organic matter digestibility (IVOMD), and crude protein (CP). To facilitate model parameterization, a comprehensive feed parameter file has been prepared and is available for download at: <https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd>
 
-### References
+```{r eval=FALSE}
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/CropParams"); dir.create(outdir, F, T)
+
+drive_deauth()
+drive_user()
+
+#folder link to id
+public_folder <- "https://drive.google.com/drive/folders/1SpB1p9i4MGU1gMahF4M3Uc-HZr8FGoqd"
+folder_id <- drive_get(as_id(public_folder))
+
+#find files in folder
+public_files <- drive_ls(folder_id)
+
+for(i in 1:nrow(public_files)){
+  public_file <- public_files[i, ]
+  file_name <- public_file$name
+  drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
+}
+```
+
+Other useful websites for feed parameters include:
+
+-   Feedipedia <https://www.feedipedia.org>
+-   Tropical forages <http://www.tropicalforages.info>
+
+## Livestock parameters
+
+Several livestock parameters are needed for model parameterization. In this course, we utilize the Gridded Livestock of the World (GLW) database [@gilbertGlobalDistributionData2018] to spatially disaggregate herds and flocks into species and categories including sheep, goats (adult and young), cattle (bulls, steers, cows, heifers, and calves), horses, and donkeys. We compile essential livestock parameters to characterize herd dynamics and productivity. These parameters include: live weight, age, daily weight gain, fertility rate, lactation length, daily milk yield, annual milk yield, daily walking distance, and proportion of population used for work. To facilitate model parameterization, a comprehensive feed parameter file has been prepared and is available for download at: <https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd>
+
+```{r eval=FALSE}
+outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/LivestockParams"); dir.create(outdir, F, T)
+
+drive_deauth()
+drive_user()
+  
+#folder link to id
+public_folder = "https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd"
+folder_id = drive_get(as_id(public_folder))
+
+#find files in folder
+public_files = drive_ls(folder_id)
+
+for(i in 1:nrow(public_files)){
+  public_file <- public_files[i, ]
+  file_name <- public_file$name
+  drive_download(public_file, path = paste0(outdir, "/", file_name), overwrite = TRUE)
+}
+```
+
+Extended workflows and detailed scripts for collating other required datasets are available at <https://github.com/ilri/ruminant-feed-balance/tree/main/src/1Data-download>
+
+# References
