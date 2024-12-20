@@ -1,0 +1,14 @@
+Dataset,Description,Availability,Spatial resolution,Year,Source
+Administrative boundaries,Administrative boundaries for target country,Global,NA,2023,https://gadm.org 
+Aggregation zones,Areas with similar livestock management practices,Regional,NA,2018,https://shapefiles.fews.net/LHZ/NG_LHZ_2018.zip
+Land use,Fractional cover of different land uses,Global,100 meter,2019,[@fravalFeedBalancesRuminant2024]
+Above ground dry matter productivity,Vegetation's overall growth rate,Global,300 meter,2020-2023,https://land.copernicus.eu/en/products/vegetation/dry-matter-productivity-v1-0-300m  
+Crop type and area,"Location, extent, and patterns of feedable crops",Global,10 kilometer,2020,https://mapspam.info 
+Phenolology,Seasonal pattern of variation in vegetated land surfaces observed from remote sensing,Global,500 meter,2020-2023,https://e4ftl01.cr.usgs.gov/MOTA/MCD12Q2.061/
+Burned areas,Burnt scars,Global,300 meter,2020-2023,https://land.copernicus.eu/en/products/vegetation/burnt-area-v3-1-daily-300m 
+Protected areas,Marine and terrestrial protected areas,Global,NA,2024,https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA 
+Tree cover,Forest and non-forest treecover,"Global, Regional",100 meter,2019,https://www.nature.com/articles/s41467-023-37880-4
+Harvest index,Ratio of harvested product dry weight to total above-ground biomass dry weight at plant maturity,Local,NA,2024,https://feastdata.ilri.org/
+Feed parameters,"Nutritional quality of feed items/type e.g., dry matter digestibility, crude protein",Local,NA,2024,https://feedsdatabase.ilri.org 
+Livestock population,Type and number of livestock,Global,10 kilometer,2020,https://data.apps.fao.org/catalog//iso/9d1e149b-d63f-4213-978b-317a8eb42d02 
+Livestock parameters,"Animal characteristics e.g.,  live weight, age",Local,NA,2024,

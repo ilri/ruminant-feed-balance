@@ -11,17 +11,26 @@ format:
           \addtocounter{page}{-1}%
           \null%
           \clearpage}
+          \usepackage{pdflscape}
+          \usepackage{array}
+          \usepackage{hyperref}
+          \usepackage{makecell}
+          \usepackage{ragged2e} 
     number-sections: true
     number-depth: 3
+crossref:
+  lof-title: "List of Figures"
 bibliography: references.bib
 header-includes:
   \usepackage{fancyhdr}
   \usepackage{graphicx}
+  \usepackage{pdflscape}      
+  \usepackage{hyperref}       
   \usepackage{eso-pic}
+  \usepackage{float}
   \usepackage{tikz}
   \usepackage{fvextra}
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
-  \usepackage{float}
   \floatplacement{table}{H}
   \renewcommand{\thesection}{\arabic{section}}
   \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
@@ -60,9 +69,9 @@ By the end of the course, learners will be able to:-
 
 ## Approach 
 
-The approach involves estimating (i) feed availability using freely accessible geospatial data and (ii) ruminant livestock feed requirements, both assessed over time. Figure 1 provides an overview of the feed balance model design.
+The approach involves estimating (i) feed availability using freely accessible geospatial data and (ii) ruminant livestock feed requirements, both assessed over time. @fig-FeedBal_model provides an overview of the feed balance model design.
 
-![Feed balance model for ruminant livestock. A minus (−) indicates excluded biomass, while an asterisk (\*) denotes inclusion of feed concentration values in subsequent calculations. ME = Metabolizable Energy.](FeedBal_model.png)
+![Feed balance model for ruminant livestock. A minus (−) indicates excluded biomass, while an asterisk (\*) denotes inclusion of feed concentration values in subsequent calculations. ME = Metabolizable Energy.](FeedBal_model.png){#fig-FeedBal_model}
 
 The course is organized into three workflows: `1Data-download` for downloading data, `2Feed-geoprocessing` for estimating feed availability and `3Balance-estimates` for estimating feed balances.
 
@@ -107,7 +116,49 @@ country <- "Nigeria"
 
 This tutorial aims to guide learners through the key spatial and non-spatial data sources required for assessing feed balance. Learners will be introduced to a variety of datasets, and by the end of the tutorial, they will understand the necessary data requirements and know how to gather these datasets for feed balance modeling.
 
-The tutorial leverages freely available spatial and non-spatial data to perform feed balance modeling. Recent advancements in R packages have enabled streamlined access to spatial data, including administrative boundaries, climatic variables, and environmental datasets. To support this process, we provide brief, reproducible examples illustrating how to download and utilize such data for feed balance modeling.
+The tutorial leverages freely available spatial and non-spatial data to perform feed balance modeling. Recent advancements in R packages have enabled streamlined access to spatial data, including administrative boundaries, climatic variables, and environmental datasets. The required data is listed in Table \ref{tbl:model-input-data}.
+
+
+\begin{landscape}
+\begin{table}[ht]
+\centering
+\caption{List of datasets required for feed balance modelling}
+\label{tbl:model-input-data} % Label for cross-referencing
+\begin{tabular}{|p{3cm}|p{7cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{Dataset} & \textbf{Description} & \textbf{Availability} & \textbf{Spatial resolution} & \textbf{Year} & \textbf{Source} \\
+\hline
+Administrative boundaries	& Administrative boundaries for target country	& Global	& NA	& 2023 & NA \\ 
+\hline
+Aggregation zones	& Areas with similar livestock management practices	& Regional	& NA	& 2018 & NA \\ 
+\hline
+Land use & Fractional cover of different land uses	& Global	& 100 meter	& 2019 & NA \\
+\hline
+Above ground dry matter productivity	& Vegetation's overall growth rate	& Global	& 300 meter	& 2020-2023 & NA \\
+\hline
+Crop type and area	& Location, extent, and patterns of feedable crops	& Global	& 10 kilometer	& 2020 & NA \\
+\hline
+Phenolology	& Seasonal pattern of variation in vegetated land surfaces observed from remote sensing	& Global	& 500 meter & 	2020-2023 & NA \\
+\hline
+Burned areas	& Burnt scars	& Global	& 300 meter	& 2020-2023 & NA \\
+\hline
+Protected areas	& Marine and terrestrial protected areas	& Global	& NA	& 2024 & NA \\
+\hline
+Tree cover	& Forest and non-forest tree cover	& Global, Regional	& 100 meter	& 2019 & NA \\
+\hline
+Crop harvest index	& Ratio of harvested product dry weight to total above-ground biomass dry weight at plant maturity	& Local	& NA &	2024 & NA \\
+\hline
+Feed parameters	& Nutritional quality of feed items/type e.g., dry matter digestibility, crude protein	& Local	& NA	& 2024 & NA \\
+\hline
+Livestock population	& Type and number of livestock	& Global & 10 kilometer	& 2020 & NA \\
+\hline
+Livestock parameters	& Animal characteristics e.g.,  live weight, age	& Local	& NA	& 2024 & NA \\
+\hline
+\end{tabular}
+\end{table}
+\end{landscape}
+
+We provide brief reproducible examples illustrating how to download and utilize such data for feed balance modeling.
 
 ## Administrative boundaries
 
@@ -202,5 +253,9 @@ for(i in 1:nrow(public_files)){
 ```
 
 Extended workflows and detailed scripts for collating other required datasets are available at <https://github.com/ilri/ruminant-feed-balance/tree/main/src/1Data-download>
+
+# Feed-geoprocessing
+
+
 
 # References
