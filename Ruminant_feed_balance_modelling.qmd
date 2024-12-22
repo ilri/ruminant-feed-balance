@@ -11,16 +11,12 @@ format:
           \addtocounter{page}{-1}%
           \null%
           \clearpage}
-          \usepackage{pdflscape}
-          \usepackage{array}
-          \usepackage{hyperref}
-          \usepackage{makecell}
-          \usepackage{ragged2e} 
     number-sections: true
     number-depth: 3
 crossref:
   lof-title: "List of Figures"
 bibliography: references.bib
+link-citations: true
 header-includes:
   \usepackage{fancyhdr}
   \usepackage{graphicx}
@@ -33,11 +29,19 @@ header-includes:
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
   \floatplacement{table}{H}
   \renewcommand{\thesection}{\arabic{section}}
-  \AtBeginDocument{\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]
-          \node at (current page.center) [yshift=4cm] [anchor=north,yshift=-2cm] {\Huge\textbf{Ruminant Feed Balance Modelling in R}};
-          \node at (current page.south) [yshift=5cm] [anchor=north,yshift=-2cm] {\normalsize\textbf{January 2025}};
-          \end{tikzpicture}\clearpage}
+  \AtBeginDocument{
+    \thispagestyle{empty}
+      \begin{tikzpicture}[remember picture,overlay]
+        \node at (current page.center) [yshift=4cm] [anchor=north,yshift=0cm] {\Huge\textbf{Ruminant Feed Balance Modelling in R}};
+        \node at (current page.south) [yshift=8cm] [anchor=north,yshift=0cm] {\normalsize\textbf{January 2025}};
+        \node at (current page.south) [yshift=3cm] [anchor=south,yshift=-1cm] {\includegraphics[width=18cm]{logos.png}};
+      \end{tikzpicture}
+      \clearpage}
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = TRUE, width = 90)
+```
 
 # Introduction
 
@@ -118,19 +122,18 @@ This tutorial aims to guide learners through the key spatial and non-spatial dat
 
 The tutorial leverages freely available spatial and non-spatial data to perform feed balance modeling. Recent advancements in R packages have enabled streamlined access to spatial data, including administrative boundaries, climatic variables, and environmental datasets. The required data is listed in Table \ref{tbl:model-input-data}.
 
-```{=tex}
 \begin{landscape}
 \begin{table}[ht]
 \centering
 \caption{List of datasets required for feed balance modelling}
-\label{tbl:model-input-data} % Label for cross-referencing
-\begin{tabular}{|p{3cm}|p{7cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|}
+\label{tbl:model-input-data}
+\begin{tabular}{|p{3cm}|p{6cm}|p{2cm}|p{2cm}|p{1.5cm}|p{2.8cm}|}
 \hline
 \textbf{Dataset} & \textbf{Description} & \textbf{Availability} & \textbf{Spatial resolution} & \textbf{Year} & \textbf{Source} \\
 \hline
-Administrative boundaries   & Administrative boundaries for target country  & Global    & NA    & 2023 & NA \\ 
+Administrative boundaries   & Administrative boundaries for target country  & Global    & NA    & 2023 & GADM (2024) \\ 
 \hline
-Aggregation zones   & Areas with similar livestock management practices & Regional  & NA    & 2018 & NA \\ 
+Aggregation zones   & Areas with similar livestock management practices & Regional  & NA    & 2018 & FMARD (2024) \\ 
 \hline
 Land use & Fractional cover of different land uses  & Global    & 100 meter & 2019 & NA \\
 \hline
@@ -157,12 +160,12 @@ Livestock parameters    & Animal characteristics e.g.,  live weight, age    & Lo
 \end{tabular}
 \end{table}
 \end{landscape}
-```
+
 We provide brief reproducible examples illustrating how to download and utilize such data for feed balance modeling.
 
 ## Administrative boundaries
 
-We create a new folder under `feed-balance-modelling`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` R package. Here we use `geodata` to download the administrative boundaries for levels `0`, `1` and `2` for Nigeria from `GADM`, and store the data in `AdminBound` folder.
+We create a new folder under `feed-balance-modelling`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` R package. Here we use `geodata` to download the administrative boundaries for levels `0`, `1` and `2` for Nigeria from `Database of Global Administrative Areas` [@gadmDatabaseGlobalAdministrative2024], and store the data in `AdminBound` folder.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE}
 library(geodata)
@@ -183,7 +186,7 @@ for(admin_level in admin_levels){
 
 ## Aggregation zones
 
-We use ecological and feed distribution zones as defined by the Nigeria's Federal Ministry of Agriculture and Food Security (FMAFS), the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
+We use ecological and feed distribution zones as defined by @fmardEcologialFeedDistribution2024, the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
 
 ```{r message=FALSE, warning=FALSE}
 library(googledrive)
@@ -256,7 +259,9 @@ Extended workflows and detailed scripts for collating other required datasets ar
 
 # Feed geoprocessing
 
-This tutorial aims to guide learners through the geo-processiong techniques used for making the datasets we collated in the previous session ready for feed balance modelling.
+This tutorial aims to guide learners through the geo-processiong techniques used for making the datasets we collated in the previous session ready for feed balance modelling. The workflow is comprised of R scripts that should be executed in numeric-alphabetic sequence - e.g 0a, 0b, 1, 2a, 2b etc.
+
+Here we provide brief reproducible examples illustrating execute some of the R scripts.
 
 ## Cropping rasters
 
@@ -322,13 +327,336 @@ wdpaNGA <- rasterize(wdpaNGA, dmpTemp, field = "STATUS_YR")
 writeRaster(wdpaNGA, paste0(outdir, "/WDPAGlobal.tif"), overwrite=TRUE)
 ```
 
-Additional workflows and detailed scripts for clipping other files are available at: 
+### Crop digestible fraction
+
+We derive `crop digestible` fraction layers by calculating feedable versus non-feedable crops on using the `crop type and distribution` layers.
+
+```{r eval=FALSE}
+# Load libraries
+library(terra)
+library(dplyr)
+library(readr)
+
+#Runs with 16gb ram and 40+gb hdd space
+terraOptions(tempdir = "/home/scratch/AUTemp")
+terraOptions(memfrac=0.5)
+terraOptions(todisk=TRUE)
+
+pathLU <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/LandUse")
+filesLU <- list.files(path = pathLU, pattern = ".tif$", full.names = T)
+
+pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/intermediate"); dir.create(pathSPAMInter, F, T)
+
+#end of file name should be physical area_cropname_a 
+filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
+
+#stSPAM <- stack(filesSPAM)
+stSPAM <- rast(filesSPAM)
+
+###Calculate non-feed crops proportion from SPAM model.
+tmpNonFeed <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv")) %>% filter(Excluded != "0") %>%
+  pull(codeSPAM) %>%
+  unique()
+tmpNonFeedIndex <- grep(pattern = paste(tmpNonFeed, collapse = "|"), names(stSPAM))
+iSPAMtotalArea <- app(stSPAM, fun = sum, na.rm=TRUE)
+iSPAMnonFeedArea <- app(stSPAM[[tmpNonFeedIndex]], fun = sum, na.rm=TRUE)
+
+iSPAMnonFeedFrac <- (iSPAMnonFeedArea / iSPAMtotalArea)
+iSPAMnonFeedFrac <- classify(iSPAMnonFeedFrac, cbind(NA, NA, 0), right=FALSE) # Replace missing values with 0
+iSPAMAnimalDigestCropFrac <- 1 - iSPAMnonFeedFrac
+
+iSPAMAnimalDigestCropFrac <- writeRaster(iSPAMAnimalDigestCropFrac, paste0(pathSPAMInter, "/animal_digest_frac.tif"), overwrite = T)
+```
+
+### Crop residue fraction
+
+We derive `crop residue` fraction layers by combining data on `crop type and distribution` with `harvest index` obtained from published sources.
+
+```{r eval=FALSE}
+# Load libraries
+library(dplyr)
+library(raster)
+library(rgdal)
+library(readr)
+
+#Runs with 16gb ram and 40+gb hdd space
+rasterOptions(tmpdir="/home/scratch/AUTemp")
+rasterOptions(maxmemory = 1e+60)
+rasterOptions(todisk = TRUE)
+
+#setwd("/exports/eddie/scratch/sfraval/feed-surfaces/")
+cropHI <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv"))
+
+pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/intermediate")
+
+#end of file name should be physical area_cropname_a
+filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
+stSPAM <- stack(filesSPAM)
+gc()
+
+crops <-sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM)
+
+tmpCropIndex <- grep(pattern = paste(crops, collapse = "|"), names(stSPAM))
+iSPAMcropArea <- calc(stack(stSPAM[[tmpCropIndex]]), fun = sum, na.rm = TRUE)
+
+print("past 1")
+
+stHI <- stack()
+stSPAMcropProp <- stack()
+gc()
+for(i in 1: length(crops)){
+  tmpCropIndex <- grep(pattern = paste(crops[i], collapse = "|"), names(stSPAM))
+  iSPAMtmpArea <- overlay(stSPAM[[tmpCropIndex]], fun = sum, na.rm=TRUE)
+  icrop <- stSPAM[[tmpCropIndex]]
+  icrop[icrop >0] <- (1 - cropHI$harvest_index[cropHI$codeSPAM == crops[i]])
+  stHI <- stack(stHI, icrop)
+  
+  stSPAMcropProp <- stack(stSPAMcropProp, overlay(iSPAMtmpArea, iSPAMcropArea, fun = function(x, y){(x/y)}))
+  
+  print(paste("Loop", i))
+}
+gc()
+
+iSPAMcropResFrac <- weighted.mean(stHI, stSPAMcropProp, na.rm = T)
+iSPAMcropResFrac <- reclassify(iSPAMcropResFrac, cbind(NA, NA, 0.8), right=FALSE) #Assume that 80% is available for animals
+
+print("past mean")
+
+writeRaster(iSPAMcropResFrac, paste0(pathSPAMInter, "/crop_res_frac.tif"), overwrite = T)
+```
+
+We calculate the proportion of feed items i.e., cereals, roots, legumes, and oil crops using the `crop area and distribution` data. We write the new layers in the `SPAM2020` folder.
+
+```{r eval=FALSE}
+# Load libraries
+library(terra)
+library(readr)
+
+terraOptions(tempdir = "/home/scratch/AUTemp")
+terraOptions(memfrac=0.5)
+terraOptions(todisk=TRUE)
+
+spamPath <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+
+cropLookup <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/Crop classification_feed basket.csv"))
+filesSPAM <- list.files(path = spamPath, pattern = "_a.tif$", full.names = T)
+stCrops <- rast(filesSPAM)
+
+# Index major feed types
+indexCere <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_grouped_NGA == "cere"], collapse = "|"), sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM))
+indexRoots <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_grouped_NGA == "roots"], collapse = "|"), sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM))
+indexLeg <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_grouped_NGA == "leg"], collapse = "|"), sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM))
+indexOilc <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_grouped_NGA == "oilc"], collapse = "|"), sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM))
+
+# Extraction area for major feed categories
+areaTotal <- app(stCrops, fun = sum, na.rm = T)
+areaCere <- app(stCrops[[indexCere]], fun = sum, na.rm = T)
+areaRoots <- app(stCrops[[indexRoots]], fun = sum, na.rm = T)
+areaLeg <- app(stCrops[[indexLeg]], fun = sum, na.rm = T)
+areaOilc <- app(stCrops[[indexOilc]], fun = sum, na.rm = T)
+
+# Calculate proportions
+propCere <- areaCere / areaTotal
+propRoots <- areaRoots / areaTotal
+propLeg <- areaLeg / areaTotal
+propOilc <- areaOilc / areaTotal
+
+# Write outputs
+writeRaster(propCere, paste0(spamPath, "/propCereSPAM.tif"), overwrite=TRUE)
+writeRaster(propRoots, paste0(spamPath, "/propRootsSPAM.tif"), overwrite=TRUE)
+writeRaster(propLeg, paste0(spamPath, "/propLegSPAM.tif"), overwrite=TRUE)
+writeRaster(propOilc, paste0(spamPath, "/propOilcSPAM.tif"), overwrite=TRUE)
+```
+
+Additional workflows and detailed scripts for preparing other files are available at:
 
 -   Landuse <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/1bPrepareLanduse_clip.R>
 -   Tree cover <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/1cPrepareTreeCover_clip.R>
 -   Digital Earth Africa land use <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/1dPrepareDEALanduse_clip.R>
+-   Phenology <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/2aPreparePhenologyModis.R>
 -   Burned area <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/3aBurnedDaysclip.R>
 -   SPAM <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/4aSPAMclip.R>
+-   Livestock population <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/6prepareLivestockPopulation.R>
+-   Livestock production systems <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/7prepareLivestockSystems.R>
+
+### Seasonal DM availability
+
+We calculate the number of cropping days in a year by analyzing phenology data (e.g., green-up and senescence dates), over a time series `2020-2013`. We then define `wet` and `dry` periods. Next, we combine `crop residue`, `browse`, `natural grass` fractions, and `DMP` data to estimate feed availability for `dry` and `wet` season over the time series.
+
+```{r eval=FALSE}
+yearOffset <- (0*365) # Base year = 2020
+
+# Load libraries
+
+library(dplyr)
+library(raster)
+library(rgdal)
+
+rasterOptions(tmpdir="/home/scratch/AUTemp")
+rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
+rasterOptions(todisk = TRUE)
+
+# read AOI
+aoi <- readOGR(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
+
+yearList <- c("2020", "2021", "2022", "2023")
+
+lapply(yearList, function(year){
+  
+  cropOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Cropping_days"); dir.create(cropOutdir, F, T)
+  FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/Feed_quantity/", year); dir.create(FeedQuantityOutdir, F, T)
+  
+  pathPhen <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/PhenologyModis/", year, "/outputTif")
+  filesPhenology <- list.files(path = pathPhen,pattern=".tif$", full.names = T)
+  
+  pathDMP <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP")
+  filesDMP <- list.files(path = pathDMP, pattern = paste0("RT6_", year, ".*\\.tif$"), full.names = TRUE)
+  stDMP <- stack(filesDMP)
+  
+  datesDMP <- sub(".*RT6_(.{8}).*", "\\1", filesDMP)
+  datesDMP <- as.Date(datesDMP, "%Y%m%d")
+  datesDMPdiff <- as.numeric(datesDMP - as.Date("1970/01/01")) #convert to same date format as Modis phenology
+  pathLU <-  paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/LandUse")
+  filesLU <- list.files(path = pathLU, pattern = "300.tif$", full.names = T)
+  pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
+  
+  #end of file name should be physical area_cropname_a
+  filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
+  iSPAMAnimalDigestCropFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/animal_digest_frac.tif"))
+  
+  rProtectedAreas <- stack(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/ProtectedAreas/WDPAGlobal.tif"))
+  rNonProtectedAreas <- calc(rProtectedAreas, fun = function(x){ifelse(x == 0, 1, 0)})
+  rm(rProtectedAreas)
+  
+  print("past protected")
+  
+  stLU <- stack(filesLU)
+  LUcrops300DEA <- raster(paste0(pathLU, "/LUcrops300DEA.tif"))
+  
+  stPhen <- stack(raster(grep("phenoGreenup1.tif", filesPhenology, value=TRUE)), 
+                  raster(grep("phenoSenescence1.tif", filesPhenology, value=TRUE)), 
+                  raster(grep("phenoGreenup2.tif", filesPhenology, value=TRUE)), 
+                  raster(grep("phenoSenescence2.tif", filesPhenology, value=TRUE)))
+  gc()
+  
+  ##Crop land use to test area
+  LUcrops300DEA <- extend(LUcrops300DEA, extent(stDMP[[1]]))
+  LUcrops300DEA <- crop(LUcrops300DEA, extent(stDMP[[1]]))
+  LUcrops300DEA <- mask(LUcrops300DEA, aoi)
+  stLU <- extend(stLU, extent(stDMP[[1]]))
+  stLU <- crop(stLU, extent(stDMP[[1]]))
+  stLU <- mask(stLU, aoi)
+  
+  ##Revise grass and shrub area
+  diffCrop <- LUcrops300DEA - stLU$LUcrops300
+  stLU$LUgrassShrub300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
+  stLU$LUgrassShrub300 <- stLU$LUgrassShrub300 - LUcrops300DEA
+  
+  stLU$LUcrops300 <- LUcrops300DEA
+  
+  stPhen$phenoGreenup2 <- calc(stPhen$phenoGreenup2, fun = function(x){ifelse(x > max(datesDMPdiff)+30, NA, x)})
+  stPhen$phenoSenescence2 <- calc(stPhen$phenoSenescence2, fun = function(x){ifelse(x > max(datesDMPdiff)+30, NA, x)})
+  stPhen$phenoGreenup1 <- calc(stPhen$phenoGreenup1, fun = function(x){ifelse(x < min(datesDMPdiff)-30, NA, x)})
+  stPhen$phenoSenescence1 <- calc(stPhen$phenoSenescence1, fun = function(x){ifelse(x < min(datesDMPdiff)-30, NA, x)})
+  gc()
+  
+  growing2 <- (stPhen$phenoSenescence2 - stPhen$phenoGreenup2)
+  growing2 <- reclassify(growing2, c(365, Inf, 0))
+  growingDays <- sum((stPhen$phenoSenescence1 - stPhen$phenoGreenup1), growing2, na.rm = T)
+  growingDays <- reclassify(growingDays, c(300, Inf, 300))
+  gc()
+  
+  writeRaster(growingDays, paste0(cropOutdir, "/croppingDays_", year, ".tif"), overwrite = T)
+  
+  print("past 0")
+  
+  names(stDMP) <- paste0("d", datesDMPdiff)
+  
+  stLU$LUtree300 <- reclassify(stLU$LUtree300, c(-Inf, 0, 0, 200, Inf, 0)) 
+  stLU$LUtree300[is.na(stLU$LUtree300)] <- 0
+  
+  print("past 1")
+  
+  #####Estimate total DMP per ha
+  grassFracDry <- 1# 0.33 #max 0.55
+  grassFracWet <- 1# 0.55 #max 0.55
+  browseShrubFrac <- 1 #0.38 #max 0.38
+  browseForestFrac <- 1
+  iResidueUtil <- 1 #max 0.6
+  iSPAMHarvestResidueFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/crop_res_frac.tif"))
+  gc()
+  
+  print("past overlay 1")
+  
+  residueFrac <- iSPAMHarvestResidueFrac
+
+  shrubFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/TreeCover/treecover300m.tif"))/100
+  
+  gc()
+  
+  funGrowingGrassWet <- function(dmp, crops, grassShrub, forest, shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*grassShrub*grassFracWet*(1-shrubFrac))+(dmp*9*forest*grassFracWet*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingGrassDry <- function(dmp, crops, grassShrub, forest,  shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*grassShrub*grassFracDry*(1-shrubFrac))+(dmp*9*forest*grassFracDry*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingBrowse <- function(dmp, crops, grassShrub, forest,  shrubFrac, nonprotected) {(dmp*9*grassShrub*shrubFrac*browseShrubFrac)+(dmp*9*forest*nonprotected*shrubFrac*browseForestFrac)} 
+  funGrowingCrops <- function(dmp, crops, greenup, senesence, feedFrac, resFrac, greenup2, senesence2) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingAftermath <- function(dmp, crops, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  
+  for(i in 1:length(names(stDMP))){
+    
+    iDMPGrassGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassWet)
+    writeRaster(iDMPGrassGrowing, paste0(FeedQuantityOutdir, "/grassWetDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+    rm(iDMPGrassGrowing)
+    gc()
+    
+    iDMPGrassDry <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassDry)
+    writeRaster(iDMPGrassDry, paste0(FeedQuantityOutdir, "/grassDryDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+    rm(iDMPGrassDry)
+    gc()
+    
+    iDMPBrowse <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, rNonProtectedAreas, fun = funGrowingBrowse)
+    writeRaster(iDMPBrowse, paste0(FeedQuantityOutdir, "/browseDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+    rm(iDMPBrowse)
+    gc()
+    
+    iDMPCropGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, iSPAMAnimalDigestCropFrac, residueFrac, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingCrops) 
+    writeRaster(iDMPCropGrowing, paste0(FeedQuantityOutdir, "/cropDMP", datesDMP[i], ".tif"), overwrite = TRUE)
+    rm(iDMPCropGrowing)
+    gc()
+    
+    iDMPAftermath <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAftermath)
+    writeRaster(iDMPAftermath, paste0(FeedQuantityOutdir, "/aftermathDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+    rm(iDMPAftermath)
+    gc()
+    print(paste("cycle", i))
+    
+  }
+  
+  gc()
+  
+  iDMPgrassWet <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassWet",full.names = T))
+  DMPgrassmeanWet <- mean(iDMPgrassWet, na.rm = T)
+  writeRaster(DMPgrassmeanWet, paste0(FeedQuantityOutdir, "/DMPgrassWetmean_", year, ".tif"), overwrite = TRUE)
+  
+  iDMPgrassDry <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassDry",full.names = T))
+  DMPgrassmeanDry <- mean(iDMPgrassDry, na.rm = T)
+  writeRaster(DMPgrassmeanDry, paste0(FeedQuantityOutdir, "/DMPgrassDrymean_", year, ".tif"), overwrite = TRUE)
+  
+  iDMPbrowse <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="browse",full.names = T))
+  DMPbrowsemean <- mean(iDMPbrowse, na.rm = T)
+  writeRaster(DMPbrowsemean, paste0(FeedQuantityOutdir, "/DMPbrowsemean_", year, ".tif"), overwrite = TRUE)
+  
+  iDMPCropGrowing <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="crop",full.names = T))
+  DMPcropmean <- mean(iDMPCropGrowing, na.rm = T)
+  writeRaster(DMPcropmean, paste0(FeedQuantityOutdir, "/DMPcropmean_", year, ".tif"), overwrite = TRUE)
+  
+  iDMPAftermath <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="aftermath",full.names = T))
+  DMPAftermean <- mean(iDMPAftermath, na.rm = T)
+  writeRaster(DMPAftermean, paste0(FeedQuantityOutdir, "/DMPaftermean_", year, ".tif"), overwrite = TRUE)
+  gc()
+  
+})
+```
 
 
 # References
