@@ -116,11 +116,12 @@ for(year in yearList){
   MERm_list <- list() #Maintenance requirements
   MERt_list <- list() #Locomotion requirements
   MERl_list <- list() #Lactation requirements
-  MERg_list <- list() #Gestation requirements
+  MERg_list <- list() #Growth requirements
   for(i in Regions){
     for(j in Seasons){
       for(k in LivestockCategories){
         
+        #MERm <-
         if(i!="Periurban"){
           MERm_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="K" & param_ME$name == k]*
                                          param_ME$value[param_ME$Variable == "S" & param_ME$name == k]*
@@ -133,7 +134,7 @@ for(year in yearList){
         #MERt <- WD*MLW*0.0026 #[MJ/KgLW/km]
         if(i=="Periurban"){
           MERt_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="WD" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*
-                                       param_ME$value[param_ME$Variable == "MLW" & param_ME$name == k & param_ME$Season == j & param_ME$Region == "Wet Savannah"] * 0.0026)
+                                         param_ME$value[param_ME$Variable == "MLW" & param_ME$name == k & param_ME$Season == j & param_ME$Region == "Wet Savannah"] * 0.0026)
           
         }else if(i!="Periurban"){
           MERt_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="WD" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*

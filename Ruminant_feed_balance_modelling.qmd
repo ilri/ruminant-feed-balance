@@ -2,6 +2,7 @@
 title: ""
 format:
   pdf:
+    cite-method: natbib
     include-in-header:
       - text: |
           \usepackage{afterpage}
@@ -11,8 +12,10 @@ format:
           \addtocounter{page}{-1}%
           \null%
           \clearpage}
+    toc: true 
     number-sections: true
     number-depth: 3
+    number-by: equations
 crossref:
   lof-title: "List of Figures"
 bibliography: references.bib
@@ -20,12 +23,18 @@ link-citations: true
 header-includes:
   \usepackage{fancyhdr}
   \usepackage{graphicx}
-  \usepackage{pdflscape}      
-  \usepackage{hyperref}       
+  \usepackage{pdflscape}    
+  \bibliographystyle{apalike} 
+  \usepackage{hyperref}    
   \usepackage{eso-pic}
+  \usepackage{threeparttable}
   \usepackage{float}
+  \usepackage{sectsty}
+  \usepackage{amsmath}
   \usepackage{tikz}
+  \usepackage[round]{natbib}
   \usepackage{fvextra}
+  \usepackage{booktabs}
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
   \floatplacement{table}{H}
   \renewcommand{\thesection}{\arabic{section}}
@@ -43,15 +52,17 @@ header-includes:
 knitr::opts_chunk$set(tidy = TRUE, width = 90)
 ```
 
+\newpage
+
 # Introduction
 
-This course is designed to guide learners on ruminant feed balance modelling in R. The course gives an overview of the concept of feed balance modelling, and introduces the main modelling steps based by @fravalFeedBalancesRuminant2024. Learners are taught how to gather spatial and non-spatial data, pre-process it, and ultimately assess feed balances. The methodology has be implemented in Ethiopia, Burkina Faso and Nigeria. The codes and data in these course are for Nigeria. The course emphasizes practical learning, with learners working on hands-on sessions. Detailed explanations are provided, helping learners follow along with the material and providing a valuable resource for future reference.
+This course is designed to guide learners on ruminant feed balance modelling in R. The course gives an overview of the concept of feed balance modelling, and introduces the main modelling steps based by \citet{fravalFeedBalancesRuminant2024}. Learners are taught how to gather spatial and non-spatial data, pre-process it, and ultimately assess feed balances. The methodology has be implemented in Ethiopia, Burkina Faso and Nigeria. The codes and data in these course are for Nigeria. The course emphasizes practical learning, with learners working on hands-on sessions. Detailed explanations are provided, helping learners follow along with the material and providing a valuable resource for future reference.
 
 \newpage
 
 # Background
 
-Feed balances are used to evaluate the adequacy of available livestock feed resources in meeting the dietary requirements of livestock [@mottetFeedBalancesSheet2024]. Feed resources typically include natural grasses, browse, crop by-products (e.g., crop residues), and agro-industrial by-products. Feed balance assessments are conducted at specific geographical scales and over defined time periods. In this course, we focus on estimating feed (energy) balance for ruminant livestock at the national scale, while ensuring relevance at sub-national levels and across different time frames.
+Feed balances are used to evaluate the adequacy of available livestock feed resources in meeting the dietary requirements of livestock \citep{mottetFeedBalancesSheet2024}. Feed resources typically include natural grasses, browse, crop by-products (e.g., crop residues), and agro-industrial by-products. Feed balance assessments are conducted at specific geographical scales and over defined time periods. In this course, we focus on estimating feed (energy) balance for ruminant livestock at the national scale, while ensuring relevance at sub-national levels and across different time frames.
 
 ## Objectives
 
@@ -122,50 +133,39 @@ This tutorial aims to guide learners through the key spatial and non-spatial dat
 
 The tutorial leverages freely available spatial and non-spatial data to perform feed balance modeling. Recent advancements in R packages have enabled streamlined access to spatial data, including administrative boundaries, climatic variables, and environmental datasets. The required data is listed in Table \ref{tbl:model-input-data}.
 
+```{=tex}
 \begin{landscape}
-\begin{table}[ht]
-\centering
+\begin{table}[h]
 \caption{List of datasets required for feed balance modelling}
 \label{tbl:model-input-data}
-\begin{tabular}{|p{3cm}|p{6cm}|p{2cm}|p{2cm}|p{1.5cm}|p{2.8cm}|}
-\hline
+\centering
+\begin{tabular}{p{3cm}p{7cm}p{2cm}p{2cm}p{2cm}p{3cm}}
+\toprule
 \textbf{Dataset} & \textbf{Description} & \textbf{Availability} & \textbf{Spatial resolution} & \textbf{Year} & \textbf{Source} \\
-\hline
-Administrative boundaries   & Administrative boundaries for target country  & Global    & NA    & 2023 & GADM (2024) \\ 
-\hline
-Aggregation zones   & Areas with similar livestock management practices & Regional  & NA    & 2018 & FMARD (2024) \\ 
-\hline
-Land use & Fractional cover of different land uses  & Global    & 100 meter & 2019 & NA \\
-\hline
-Above ground dry matter productivity    & Vegetation's overall growth rate  & Global    & 300 meter & 2020-2023 & NA \\
-\hline
-Crop type and area  & Location, extent, and patterns of feedable crops  & Global    & 10 kilometer  & 2020 & NA \\
-\hline
-Phenolology & Seasonal pattern of variation in vegetated land surfaces observed from remote sensing & Global    & 500 meter &   2020-2023 & NA \\
-\hline
-Burned areas    & Burnt scars   & Global    & 300 meter & 2020-2023 & NA \\
-\hline
-Protected areas & Marine and terrestrial protected areas    & Global    & NA    & 2024 & NA \\
-\hline
-Tree cover  & Forest and non-forest tree cover  & Global, Regional  & 100 meter & 2019 & NA \\
-\hline
-Crop harvest index  & Ratio of harvested product dry weight to total above-ground biomass dry weight at plant maturity  & Local & NA &  2024 & NA \\
-\hline
-Feed parameters & Nutritional quality of feed items/type e.g., dry matter digestibility, crude protein  & Local & NA    & 2024 & NA \\
-\hline
-Livestock population    & Type and number of livestock  & Global & 10 kilometer & 2020 & NA \\
-\hline
-Livestock parameters    & Animal characteristics e.g.,  live weight, age    & Local & NA    & 2024 & NA \\
-\hline
+\midrule
+Administrative boundaries & Administrative boundaries for target country & Global & NA & 2023 & \citet{gadmDatabaseGlobalAdministrative2024} \\ 
+Aggregation zones & Areas with similar livestock management practices & Regional  & NA & 2018 & \citet{fmardEcologicalFeedDistribution2023} \\ 
+Land use & Fractional cover of different land uses  & Global & 100 meter & 2019 & \citet{buchhornCopernicusGlobalLand2020a} \\
+Above ground dry matter productivity & Vegetation's overall growth rate  & Global & 300 meter & 2020-2023 & \citet{copernicusDryMatterProductivity2024} \\
+Crop type and area  & Location, extent, and patterns of feedable crops & Global & 10 kilometer & 2020 & \citet{ifpriGlobalSpatiallyDisaggregatedCrop2024} \\
+Phenology & Seasonal pattern of variation in vegetated land surfaces observed from remote sensing & Global & 500 meter & 2020-2023 & \citet{grayUserGuideCollection2024} \\
+Burned areas & Burnt scars & Global & 300 meter & 2020-2023 & \citet{padillaNearrealTimeMonitoring2024} \\
+Protected areas & Marine and terrestrial protected areas & Global & NA & 2024 & \citet{unep-wcmcandiucnProtectedPlanetWorld2023} \\
+Tree cover & Forest and non-forest tree cover  & Global, Regional  & 100 meter & 2019 & \citet{reinerMoreOneQuarter2023} \\
+Crop harvest index & Ratio of harvested product dry weight to total above-ground biomass dry weight at plant maturity  & Local & NA & 2024 & \citet{ilriFeedAssessmentTool2022} \\
+Feed parameters & Nutritional quality of feed items/type e.g., dry matter digestibility, crude protein  & Local & NA & 2024 & \citet{ilriSubSaharanAfricaFeeds2020} \\
+Livestock population & Type and number of livestock  & Global & 10 kilometer & 2020 & \citet{gilbertGlobalDistributionData2018} \\
+Livestock parameters & Animal characteristics e.g., live weight, age & Local & NA & 2024 & Experts \\
+\bottomrule
 \end{tabular}
 \end{table}
 \end{landscape}
-
-We provide brief reproducible examples illustrating how to download and utilize such data for feed balance modeling.
+```
+We provide brief reproducible examples illustrating how to download and prepare such data for feed balance modeling.
 
 ## Administrative boundaries
 
-We create a new folder under `feed-balance-modelling`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` R package. Here we use `geodata` to download the administrative boundaries for levels `0`, `1` and `2` for Nigeria from `Database of Global Administrative Areas` [@gadmDatabaseGlobalAdministrative2024], and store the data in `AdminBound` folder.
+We create a new folder under `feed-balance-modelling`, and name it `AdminBound` and assign it the variable name `outdir`. We can download administrative boundaries of world countries with the `geodata` R package. Here we use `geodata` to download the administrative boundaries for levels `0`, `1` and `2` for Nigeria from `Database of Global Administrative Areas` \citep{gadmDatabaseGlobalAdministrative2024}, and store the data in `AdminBound` folder.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE}
 library(geodata)
@@ -186,7 +186,7 @@ for(admin_level in admin_levels){
 
 ## Aggregation zones
 
-We use ecological and feed distribution zones as defined by @fmardEcologialFeedDistribution2024, the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
+We use ecological and feed distribution zones as defined by \citet{fmardEcologialFeedDistribution2024}, the most recent version can be downloaded at <https://drive.google.com/file/d/10HsGspftDNgq-fjAjeUwB8QsmHZWUJyT/view?usp=sharing>.
 
 ```{r message=FALSE, warning=FALSE}
 library(googledrive)
@@ -233,7 +233,7 @@ Other useful websites for feed parameters include:
 
 ## Livestock parameters
 
-Several livestock parameters are needed for model parameterization. In this course, we utilize the Gridded Livestock of the World (GLW) database [@gilbertGlobalDistributionData2018] to spatially disaggregate herds and flocks into species and categories including sheep, goats (adult and young), cattle (bulls, steers, cows, heifers, and calves), horses, and donkeys. We compile essential livestock parameters to characterize herd dynamics and productivity. These parameters include: live weight, age, daily weight gain, fertility rate, lactation length, daily milk yield, annual milk yield, daily walking distance, and proportion of population used for work. To facilitate model parameterization, a comprehensive feed parameter file has been prepared and is available for download at: <https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd>
+Several livestock parameters are needed for model parameterization. In this course, we utilize the Gridded Livestock of the World (GLW) database to spatially disaggregate herds and flocks into species and categories including sheep, goats (adult and young), cattle (bulls, steers, cows, heifers, and calves), horses, and donkeys. We compile essential livestock parameters to characterize herd dynamics and productivity. These parameters include: live weight, age, daily weight gain, fertility rate, lactation length, daily milk yield, annual milk yield, daily walking distance, and proportion of population used for work. To facilitate model parameterization, a comprehensive feed parameter file has been prepared and is available for download at: <https://drive.google.com/drive/folders/1-3N_kmMgcHr_tayylSxlMJAr-2PBGFXd>
 
 ```{r eval=FALSE}
 outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/LivestockParams"); dir.create(outdir, F, T)
@@ -259,7 +259,7 @@ Extended workflows and detailed scripts for collating other required datasets ar
 
 # Feed geoprocessing
 
-This tutorial aims to guide learners through the geo-processiong techniques used for making the datasets we collated in the previous session ready for feed balance modelling. The workflow is comprised of R scripts that should be executed in numeric-alphabetic sequence - e.g 0a, 0b, 1, 2a, 2b etc.
+This tutorial aims to guide learners through the geo-processiong techniques used for making the datasets we collated in the previous session ready for feed balance modelling. The workflow is comprised of R scripts that should be executed in numeric-alphabetic sequence i.e., 0a, 0b, 1, 2a, 2b etc.
 
 Here we provide brief reproducible examples illustrating execute some of the R scripts.
 
@@ -658,5 +658,237 @@ lapply(yearList, function(year){
 })
 ```
 
+Finally, we copy relevant data to specific folders for use in the next section using this R script: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/2Feed-geoprocessing/8Copydata.R>
+
+# Estimating feed balances
+
+## Mapping aggregation regions and zones
+
+The ecological and feed distribution map provided by the Federal Ministry of Agriculture and Food Security (FMAFS) contain eight zones. We map them into ecological regions and zones as shown in Table \ref{tbl:ecological-zones}.
+
+```{=tex}
+\begin{table}[h]
+\caption{Ecological zones and regions}
+\label{tbl:ecological-zones}
+\centering
+\begin{tabular}{p{5cm}p{4cm}p{4cm}}
+\toprule
+\textbf{Ecological and Feed Distribution Zones} & \textbf{Ecological Regions} & \textbf{Ecological Zones} \\ 
+\midrule
+Sahel Savannah & Dry Savannah & (Agro)pastoral sahel \\ 
+Sudan Savannah & Dry Savannah & Northern mixed \\ 
+Southern Guinea Savannah & Wet Savannah & Southern mixed \\ 
+Northern Guinea Savannah & Wet Savannah & Central mixed \\ 
+Mountain Vegetations & Wet Savannah & Central mixed \\ 
+Lowland Rainfall & Forest & Forest mixed \\ 
+Fresh Water Swamp Forest & Forest & Forest mixed \\ 
+Mangrove & Forest & Forest mixed \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+```
+The R script for creating the new categories of ecological regions and zones is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/0_PrepareRegions.R>
+
+As shown in @fig-ecoregions, the ecological regions are classified into `Dry Savannah`, `Forest`, and `Wet Savannah`.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Ecological Regions of Nigeria", fig.pos="H"}
+#| label: fig-ecoregions
+library(sf)
+library(ggplot2)
+
+aoi_ECORegion <- read_sf("./src/3Balance-estimates/Nigeria/SpatialData/intermediate/regions.gpkg")
+region_colors <- c("Dry Savannah" = "yellow", "Forest" = "darkgreen", "Wet Savannah" = "lightgreen")
+ggplot() +
+  geom_sf(data = aoi_ECORegion, aes(fill = ECORegion)) +
+  scale_fill_manual(values = region_colors) +
+  coord_sf(xlim = c(2.1, 15.1), ylim = c(3.8, 14.3), expand = FALSE) +
+  labs(fill = "Ecological zones", title = "")
+```
+
+Similarly, as shown in @fig-ecozones, the ecological regions are further classified into `(Agro)pastoral sahel`, `Northern mixed`, `Central mixed`, `Southern mixed` and `Forest mixed`.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Ecological Zones of Nigeria", fig.pos="H"}
+#| label: fig-ecozones
+library(sf)
+library(ggplot2)
+
+aoi_ECOZones <- read_sf("./src/3Balance-estimates/Nigeria/SpatialData/intermediate/zones.gpkg")
+zones_colors <- c("(Agro)pastoral sahel" = "yellow", "Northern mixed" = "yellow3", "Central mixed" = "green", "Southern mixed" = "lightgreen", "Forest mixed" = "darkgreen")
+ggplot() +
+  geom_sf(data = aoi_ECOZones, aes(fill = ECOZone)) +
+  scale_fill_manual(values = zones_colors) +
+  coord_sf(xlim = c(2.1, 15.1), ylim = c(3.8, 14.3), expand = FALSE) +
+  labs(fill = "Ecological zones", title = "")
+```
+
+## Feed energy concentration
+
+We merge `feedQuality` dataset with the `crop_classification` dataset using a common id, and map some specific feed items to new codes. The resulting clean `feedQuality` dataset is saved as a CSV file. The R script is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/0_ProcessSSAfeedDB.R>
+
+We then calculate feed metabolizable energy (ME) by combining various datasets, including crop parameters, feed quality data, and spatial data related to crop type and distribution. We process feed quality data i.e., calculate dry matter intake (DMI), adjust for other variables like CP, NDF, and IVDMD. We generate summary statistics and group the data by crop type. NB: Missing or inconsistent data is addressed by imputing values or setting fixed values for certain crops (See Table \ref{tbl:feed-quality-data}).
+
+```{=tex}
+\begin{table}[H]
+\caption{Feed quality for different feed items}
+\label{tbl:feed-quality-data}
+\centering
+\begin{tabular}{p{3cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}p{1.5cm}}
+\toprule
+\textbf{Feed item} & \textbf{ME (SD)} & \textbf{ME (Min)} & \textbf{ME (Max)} & \textbf{ME (Mean)} & \textbf{CP} & \textbf{NDF} & \textbf{IVDMD} \\ 
+\midrule
+Banana* & 0.5 & 7.7 & 9.0 & 8.3 & 5.8 & 42.1 & 51.8 \\ 
+Barley* & 0.8 & 5.8 & 10.3 & 7.3 & 8.0 & 68.6 & 47.7 \\ 
+Bean* & 0.6 & 7.0 & 9.8 & 8.7 & 6.6 & 68.1 & 56.1 \\ 
+Sugarbeet* & 1.4 & 7.0 & 13.4 & 9.9 & 19.8 & 39.1 & 67.9 \\ 
+Chickpea* & 0.6 & 6.8 & 10.8 & 8.2 & 4.7 & 57.5 & 51.6 \\ 
+Lentils* & 0.5 & 7.0 & 10.3 & 8.8 & 9.2 & 51.7 & 56.2 \\ 
+Pigeon pea* & 0.4 & 7.6 & 9.1 & 8.2 & 16.2 & 53.0 & 53.5 \\ 
+Plantain* & 0.5 & 7.7 & 9.0 & 8.3 & 5.8 & 42.1 & 51.8 \\ 
+Soybean* & 0.6 & 7.0 & 10.9 & 8.6 & 7.7 & 66.6 & 57.0 \\ 
+Sugarcane* & 0.3 & 7.2 & 8.0 & 7.5 & 6.9 & 73.8 & 49.4 \\ 
+Wheat* & 1.2 & 5.7 & 11.0 & 7.3 & 4.3 & 72.1 & 48.7 \\ 
+Cowpea* & NA & 7.7 & 10.5 & 9.3 & 12.2 & 46.8 & 61.0 \\ 
+Maize* & NA & 7.9 & 7.9 & 7.9 & 5.2 & 69.1 & 51.8 \\ 
+Pearl millet* & NA & 6.7 & 8.4 & 7.6 & 5.2 & 68.6 & 50.0 \\ 
+Rice* & NA & 5.9 & 8.4 & 6.8 & 5.5 & 65.6 & 49.0 \\ 
+Sesame* & NA & 9.2 & 9.5 & 9.3 & 19.3 & 24.2 & 59.1 \\ 
+Sorghum* & NA & 6.6 & 7.9 & 7.5 & 4.5 & 71.9 & 48.5 \\ 
+Sweet potato* & NA & 8.9 & 9.6 & 9.3 & 13.3 & 48.4 & 60.6 \\ 
+Small millet & NA & 6.7 & 8.4 & 7.6 & 5.2 & 68.6 & NA \\ 
+Other cereals* & NA & 6.7 & 8.4 & 7.6 & 5.2 & 68.6 & NA \\ 
+Other legumes* & NA & 7.7 & 10.5 & 9.3 & 5.2 & 68.6 & NA \\ 
+Cassava* & NA & 4.2 & 4.2 & 4.2 & NA & NA & NA \\ 
+Yam* & NA & 4.2 & 4.2 & 4.2 & NA & NA & NA \\ 
+Other roots and tubers* & NA & 4.2 & 4.2 & 4.2 & NA & NA & NA \\ 
+Groundnut* & 1.6 & 7.2 & 9.3 & 8.5 & NA & NA & NA \\ 
+Natural pasture & NA & 6.2 & 6.8 & 6.5 & NA & NA & NA \\ 
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\item[*] \textit{* Denotes crop residue.}
+\end{tablenotes}
+\end{table}
+```
+
+We calculate crop-specific harvest index (See Table \ref{tbl:crop-harvest-index}), utilization and ME values. We then weight the values by the proportion of crop per pixel and aggregate the results to administrative level 2.
+
+```{=tex}
+\begin{table}[H]
+\caption{Harvest index for feedable crops}
+\label{tbl:crop-harvest-index}
+\centering
+\begin{tabular}{p{3cm}p{1.5cm}}
+\toprule
+\textbf{Crop name} & \textbf{Harvest index} \\ 
+\midrule
+Banana  &   0.44 \\
+Barley  &   0.534 \\
+Bean    &   0.555 \\
+Sugarbeet   &   1 \\
+Chickpea    &   0.31 \\
+Lentils &   0.246 \\
+Pigeon Pea  &   0.294 \\
+Plantain    &   0.44 \\
+Soybean &   0.422 \\
+Sugarcane   &   0.19 \\
+Wheat   &   0.36575 \\
+Cowpea  &   0.335 \\
+Maize   &   0.3785 \\
+Pearl millet    &   0.188 \\
+Rice    &   0.4613 \\
+Sesame  &   0.01 \\
+Sorghum &   0.458 \\
+Sweet potato    &   0.27 \\
+Small Millet    &   0.391 \\
+Other cereals   &   0.188 \\
+Other legumes   &   0.3 \\
+Cassava &   0.8696 \\
+Yam &   0.24102 \\
+Other roots and tubers  &   0.27 \\
+Groundnut   &   0.45 \\
+\bottomrule
+\end{tabular}
+\end{table}
+```
+The R script for completing the above steps is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/0b_Prepare_cropME.R>
+
+We analyse feed availability across multiple years (2020–2023) by integrating spatial data related to crop type and distribution, grass and browse productivity and feed utilization. Cropping days are calculated, with thresholds applied to exclude areas with insufficient cropping duration. Dry days are derived as the inverse of cropping days (365 - cropping days). Metabolizable energy (ME) is estimated for various feed sources including crop residues, grass, and browse, incorporating region-specific productivity and feed quality parameters. Feed statistics, such as mean ME values for crops, grass, and browse, are extracted and aggregated within defined regions and zones.
+
+The R script for completing the above steps is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/1_ProcessFeedMEregional.R>, and <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/1b_ProcessFeedMEregional_min_max.R>
+
+## Livestock energy requirements
+
+### Requirements for base year
+
+Using Gridded Livestock of the World (GLW) \citep{gilbertGlobalDistributionData2018}, livestock energy requirements are calculated by disaggregating herds and flocks into species and categories including `sheep`, `goats` (adult and young), `cattle` (bulls, steers, cows, heifers, and calves), `horses`, and `donkeys` and calculating seasonal metabolizable energy (ME) requirements for livestock, including energy requirements for `maintenance` , `locomotion`, `lactation` and `growth`, equations ([-@eq-maintenance]), ([-@eq-locomotion]), ([-@eq-lactation]), ([-@eq-growth-positive]) and ([-@eq-growth-negative]).
+
+$$
+\text{MERM}_{i,j,k} = K \times S \times M \times \frac{(0.26 \times \text{MLW}_k^{0.75}) \times \exp^{(-0.008 \times A_k)}}{(0.02 \times \text{ME}_{i,j}) + 0.5}
+$$ {#eq-maintenance}
+
+Where, \textit{MERM} is the maintenance energy requirement in megajoules per day (MJ/day) of animal \textit{k}, region \textit{i} and season \textit{j}, \textit{K} is a metabolic weight coefficient (1.3, an intermediate value for Bos taurus and Bos indicus cattle breeds), \textit{S} a constant for females and castrated cattle (1), \textit{M} a constant for presence or absence of milk in the diet, \textit{MLW} is the mean live weight of animal \textit{k} in region \textit{i} in season \textit{j}, and \textit{A} is the age of animal \textit{k} in region \textit{i} in season \textit{j} and \textit{ME} is metabolizable energy content of the diet in megajoules of metabolizable energy per kilogram of dry matter (MJ ME/kg DM) in region \textit{i} and season \textit{j}.
+
+$$
+\text{MERT}_{i,j,k} = \text{WD}_{i,j,k} \times \text{MLW}_{i,j,k} \times 0.0026
+$$ {#eq-locomotion}
+
+Where, \textit{MERT} is the locomotion energy requirement in megajoules per day (MJ/day) of animal \textit{k}, region \textit{i} and season \textit{j}, \textit{WD} is distance travelled by animal \textit{k} per day in kilometres in region \textit{i} and season \textit{j}, \textit{MLW} is the mean live weight of animal \textit{k} in region \textit{i} in season \textit{j}.
+
+For adult cows, goats and sheep: 
+
+$$
+\text{MERL}_{i,j,k} = \frac{\text{DMY}_{i,j,k} \times \text{ECM}_{i,j,k}}{\left(0.02 \times \text{ME}_{i,j}\right) + 0.04}
+$$ {#eq-lactation}
+
+Where, \textit{MERL} is the energy requirement for lactation for animal \textit{k}, in MJ/day in region \textit{i} and season \textit{j}, \textit{DMY} is the daily milk production for animal \textit{k} in kilogram in region \textit{i} and season \textit{j}, \textit{ECM} is the energy content of milk from animal \textit{k} in region \textit{i} and season \textit{j} and \textit{ME} is metabolizable energy content of the diet in megajoules of metabolizable energy per kilogram of dry matter (MJ ME/kg DM) in region \textit{i} and season \textit{j}.
+
+Energy expended for weight gain or loss as per equations ([-@eq-growth-positive]) and ([-@eq-growth-negative]).
+
+$$
+\text{MERG+}_{i,j,k} = \frac{\text{DWG}_{i,j,k} \times 0.92 \times \text{EC}_{i,j,k}}{0.043 \times \text{ME}_{i,j}}
+$$ {#eq-growth-positive}
+
+If energy is lost:-
+
+$$
+\text{MERG-}_{i,j,k} = \frac{\text{DWG}_{i,j,k} \times 0.92}{0.8}
+$$ {#eq-growth-negative}
+
+Where, \textit{MERG+/-} is the energy expended for live weight gain/loss for animal \textit{k}, in MJ/day in region \textit{i} and season \textit{j}, \textit{DWG} is the average daily weight gain or loss for animal \textit{k} in kilograms in region \textit{i} and season \textit{j}, EC is an assumed energy content of tissue taken of 18 MJ/kg \citep{csiroNutrientRequirementsDomesticated2007} and \textit{ME} is metabolizable energy content of the diet in megajoules of metabolizable energy per kilogram of dry matter (MJ ME/kg DM) in region \textit{i} and season \textit{j}.
+
+Finally, total energy requirements for the base year for each livestock category, season and region are calculated. The R script for completing the above steps is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/2_Lvst_requirements.R>, and <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/2b_Lvst_requirements_min_max.R>
+
+### Estimating feed balances
+
+We sum livestock energy requirements for cattle, shoats (sheep/goats), and horses/donkeys and adjust the requirements by incorporating population changes from FAOSTAT data, equation ([-@eq-energy-requirements-species]).
+
+$$
+\text{LvstME}_y = \sum \left( H_y + \left( C_y \times (1 + \Delta P_C) \right) + \left( S_y \times (1 + \Delta P_S) \right) \right)
+$$ {#eq-energy-requirements-species}
+
+Where, \textit{LvstME} is the total energy requirement for all livestock in year \textit{y}, \textit{H} is the energy requirement for horses and donkeys in MJ in year \textit{y}, \textit{C} is the energy requirement for cattle in MJ in year \textit{y}, \textit{S} is the energy requirement for shoats in MJ in year \textit{y}, \textit{\(\Delta {P}_C\)} is the annual percentage change in cattle population and \textit{\(\Delta {P}_S\)} is the annual percentage change in shoats population.
+
+We combine feed availability data into a single dataset for annual analysis, equation ([-@eq-energy-feed]).
+
+$$
+\text{FeedME}_y = \sum_{y=2020}^{2023} \text{MEF}_{y}
+$$ {#eq-energy-feed}
+
+Where, \textit{FeedME} is the total energy from feeds for year \textit{y}, \textit{MEF} is the energy from feeds for year \textit{y}.
+
+We aggregate and extract feed energy concentration and livestock energy requirements data across three spatial zones: `country`, `region`, and `state`across the time series. The zones were defined by spatial data representing Nigeria’s administrative boundaries and ecological zones. Finally we calculate feed balance for each spatial zone and year as the ratio of feed energy concentration to livestock energy requirements, equation ([-@eq-feed-balance]).
+
+$$
+\text{FeedBal}_{y,i} = \frac{\text{FeedME}_{y,i}}{\text{LvstME}_{y,i}}
+$$ {#eq-feed-balance}
+
+Where, \textit{FeedBal} is the feed balance for year \textit{y} in region \textit{i}, \textit{FeedME} is the feed energy concentration for year \textit{y} in region \textit{i} and \textit{LvstME} is the livestock energy requirement for year \textit{y} in region \textit{i}.
+
+The R script for completing the above steps is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/3_ProcessTimeseriesRegionalAdeqTotals.R>, and <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/3b_ProcessTimeseriesRegionalAdeqTotals_min_max.R>
+
+\newpage
 
 # References
+
+::: {#refs}
+:::
