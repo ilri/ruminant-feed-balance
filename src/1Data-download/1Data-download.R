@@ -241,7 +241,7 @@ for (i in dmp_manifest_list){
   }else {cat("File already exists: ", file_name, "\n")}
 }
 
-#### Phenonology----------------------------------------------------------------------------
+#### Phenology----------------------------------------------------------------------------
 # Available here https://www.earthdata.nasa.gov/
 yearList <- c("2020", "2021", "2022", "2023")
 

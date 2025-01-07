@@ -19,6 +19,7 @@ country <- "Nigeria"
 
 indir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs")
 outdirInt <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate"); dir.create(outdirInt, F, T)
+Results_dir <- paste0(root, "/src/3Balance-estimates/", country, "/Results"); dir.create(Results_dir, F, T)
 
 ECOZONE <- st_read(paste0(indir, "/Ecological_and_Feed_Distribution.shp"))
 
@@ -66,3 +67,20 @@ aoi_ECOZone <- ECOZONE %>%  group_by(ECOZone) %>% summarise()
 #   labs(fill = "Ecological zone")
 
 st_write(aoi_ECOZone, paste0(outdirInt, "/zones.gpkg"), append = F)
+
+# Add area of regions and zones
+zoneUTM <- zones %>% st_transform(., crs = 3857)
+zoneUTM <- zoneUTM %>% mutate(area_meters = as.numeric(st_area(.)),
+                              area_acres = area_meters * 0.0002471054, # 1 m2 = 0.0002471054 acres 
+                              area_hectares = area_meters * 0.0001) %>%  # 1m2 = 0.0001 hectares
+  st_drop_geometry()
+write.csv(zoneUTM, paste0(Results_dir, "/area_zones.csv"), row.names=FALSE)
+
+# Add area of regions and zones
+regionsUTM <- regions %>% st_transform(., crs = 3857)
+regionsUTM <- regionsUTM %>% mutate(area_meters = as.numeric(st_area(.)),
+                              area_acres = area_meters * 0.0002471054, # 1 m2 = 0.0002471054 acres 
+                              area_hectares = area_meters * 0.0001) %>%  # 1m2 = 0.0001 hectares
+  st_drop_geometry()
+write.csv(regionsUTM, paste0(Results_dir, "/area_regions.csv"), row.names=FALSE)
+

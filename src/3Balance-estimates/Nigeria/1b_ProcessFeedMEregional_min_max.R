@@ -381,8 +381,9 @@ for (year in yearList){
 outMEmean <- read.csv(paste0(Results_dir, "/cropME_region.csv")) %>% mutate(across(-1, as.numeric))
 tsSumRegionMin <- map_dfr(tsSumRegionMin_List, ~ .x) %>% filter(year == "2023") %>% mutate(across(-1, as.numeric))
 outMEmin <- tsSumRegionMin %>% rowwise() %>% mutate(ME_all_min = sum(cropME_min, grassME_min, browseME_min, afterME_min) / sum(cropDM, grassDM, browseDM, afterDM), ME_crop_min = cropME_min / cropDM, MEwet_all_min = sum(grassMEwet_min, browseMEwet_min) / sum(grassDMwet, browseDMwet), MEdry_all_min = sum(cropME_min, grassMEdry_min, browseMEdry_min) / sum(cropDM, grassDMdry, browseDMdry, afterDM)) 
-outMEmean <- bind_cols(outMEmean, select(outMEmin, ME_all_min, ME_crop_min, MEwet_all_min, MEdry_all_min))
+outMEmean <- bind_cols(outMEmean, dplyr::select(outMEmin, ME_all_min, ME_crop_min, MEwet_all_min, MEdry_all_min))
 tsSumRegionMax <- map_dfr(tsSumRegionMax_List, ~ .x) %>% filter(year == "2023") %>% mutate(across(-1, as.numeric))
 outMEmax <- tsSumRegionMax %>% rowwise() %>% mutate(ME_all_max = sum(cropME_max, grassME_max, browseME_max, afterME_max) / sum(cropDM, grassDM, browseDM, afterDM), ME_crop_max = cropME_max / cropDM, MEwet_all_max = sum(grassMEwet_max, browseMEwet_max) / sum(grassDMwet, browseDMwet), MEdry_all_max = sum(cropME_max, grassMEdry_max, browseMEdry_max) / sum(cropDM, grassDMdry, browseDMdry, afterDM)) 
-outMEmean <- bind_cols(outMEmean, select(outMEmax, ME_all_max, ME_crop_max, MEwet_all_max, MEdry_all_max))
+outMEmean <- bind_cols(outMEmean, dplyr::select(outMEmax, ME_all_max, ME_crop_max, MEwet_all_max, MEdry_all_max))
 write.csv(outMEmean, paste0(Results_dir, "/cropME_region.csv"), row.names=FALSE)
+

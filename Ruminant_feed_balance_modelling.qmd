@@ -886,6 +886,11 @@ Where, \textit{FeedBal} is the feed balance for year \textit{y} in region \texti
 
 The R script for completing the above steps is available at: <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/3_ProcessTimeseriesRegionalAdeqTotals.R>, and <https://github.com/ilri/ruminant-feed-balance/blob/main/src/3Balance-estimates/Nigeria/3b_ProcessTimeseriesRegionalAdeqTotals_min_max.R>
 
+### Visualising results
+
+The total biomass available as animal feed in Nigeria was 443 million tonnes (Mt) of DM, averaging 8.57 tonnes DM per hectare in the highlands and midlands and 3.18 tonnes DM per hectare in the (agro)pastoral/lowland zones (Table 2 and Fig. 2).
+
+
 \newpage
 
 # References

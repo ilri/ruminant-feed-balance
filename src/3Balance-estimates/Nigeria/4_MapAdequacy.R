@@ -19,7 +19,6 @@ options(scipen = 999)
 # install.packages("ggsci")
 # install.packages("extrafont")
 
-
 # Load libraries
 library(raster)
 #library(stars)
@@ -126,12 +125,30 @@ SI1 <- ggplot(tsSum_plot2, aes(year, value, colour = name, fill = name)) + geom_
 ggsave(paste0(plotsDir, "/NGASI1.tiff"), SI1, device = "tiff", dpi = 300, width=90 * (14/5), height=20 * (14/5), units = "mm")
 
 #Table 2
+zone_area <- readr::read_csv(paste0(Results_dir, "/area_zones.csv")) %>% rename(zone=ECOZone) %>% select(zone, area_hectares) %>% 
+  mutate(zone = case_when(zone %in% c("(Agro)pastoral sahel", "Northern mixed") ~ "dry_sav", 
+                          zone == "Forest mixed" ~ "for", 
+                          zone %in% c("Central mixed", "Southern mixed") ~ "wet_sav", TRUE ~ zone)) %>% 
+  group_by(zone) %>% summarise(area_hectares=sum(area_hectares, na.rm=TRUE))
+
+
+feedDM <- read.csv(paste0(Results_dir, "/cropME_region.csv"), stringsAsFactors = F) %>% select(region, cropDM, grassDM, browseDM, afterDM) %>% 
+  rowwise() %>% mutate(FeedDM = sum(cropDM, grassDM, browseDM, afterDM)/1000000000) %>% #convert to metric tonnes
+  mutate(zone = case_when(region == "Dry Savannah" ~ "dry_sav", 
+                          region == "Forest" ~ "for", 
+                          region == "Wet Savannah" ~ "wet_sav", TRUE ~ region)) %>% select(zone, FeedDM) %>% 
+  left_join(zone_area, by="zone") %>% 
+  mutate(yieldHa = (FeedDM/area_hectares)*1000000) %>% #convert t/ha
+  select(-area_hectares)
+  
 x <- select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
-x$eco <- c("sav", "for", "sav", "sav", "sah")
+x$eco <- c("wet_sav", "for", "dry_sav", "wet_sav", "dry_sav")
 x <- group_by(x, eco)
 x <- summarise_all(select(x, -zone), sum)
+x<-rename(x, zone=eco)
+x <- x %>% left_join(feedDM, by="zone")
 x <- x %>% rowwise() %>% mutate(cropMEprop_mean = cropME_mean/ totalME_mean, grassMEprop_mean = grassME_mean / totalME_mean, browseMEprop_mean = browseME_mean / totalME_mean, afterMEprop_mean = afterME_mean / totalME_mean)
-x <- select(x, c(eco, totalME_mean, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean))
+x <- select(x, c(zone, FeedDM, yieldHa, totalME_mean, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean))
 
 ######
 ##Livestock feed adequacy timeseries breakdown
