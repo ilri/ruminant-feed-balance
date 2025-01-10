@@ -888,7 +888,7 @@ The R script for completing the above steps is available at: <https://github.com
 
 ### Visualising results
 
-The total biomass available as animal feed in Nigeria was 443 million tonnes (Mt) of DM, averaging 8.57 tonnes DM per hectare in the highlands and midlands and 3.18 tonnes DM per hectare in the (agro)pastoral/lowland zones (Table 2 and Fig. 2).
+The total biomass available as animal feed in Nigeria was XX million tonnes (Mt) of DM, averaging XX tonnes DM per hectare in the dry savannah and midlands and XX tonnes DM per hectare in the wet savannah.
 
 
 \newpage

@@ -184,3 +184,4 @@ for(year in yearList){
   st_rasterize(sf = aoi2[, "cropME_HI_utilmin"], template = feedCropBurn, file = paste0(cropMEdir, "/cropME_HI_utilmin.tif"))
   st_rasterize(sf = aoi2[, "cropME_HI_utilmax"], template = feedCropBurn, file = paste0(cropMEdir, "/cropME_HI_utilmax.tif"))
 }
+

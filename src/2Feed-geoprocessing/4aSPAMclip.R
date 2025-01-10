@@ -33,7 +33,7 @@ lapply(sPamfiles, function(sPamfile){
   
   isPamFile <- rast(sPamfile)
   isPamFile <- crop(isPamFile, ext(dmpTemp))
-  isPamFile <- resample(isPamFile, dmpTemp, method="bilinear")
+  isPamFile <- resample(isPamFile, dmpTemp, method="bilinear", threads = TRUE)
   isPamFile <- mask(isPamFile, mask = dmpTemp)
   
   isPamFile[is.nan(values(isPamFile))] <- NA

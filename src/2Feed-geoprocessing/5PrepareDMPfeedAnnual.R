@@ -117,9 +117,9 @@ lapply(yearList, function(year){
   writeRaster(growingDays, paste0(cropOutdir, "/croppingDays_", year, ".tif"), overwrite = T)
   
   #stPhen <- mask(stPhen, aoi)
-  #rNonProtectedAreas <- resample(rNonProtectedAreas, stDMP[[1]], method = "ngb")
-  #rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stDMP[[1]]))
-  #rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stDMP[[1]]))
+  rNonProtectedAreas <- resample(rNonProtectedAreas, stDMP[[1]], method = "ngb")
+  rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stDMP[[1]]))
+  rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stDMP[[1]]))
   #rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
   print("past 0")
   
@@ -147,11 +147,11 @@ lapply(yearList, function(year){
   
   #res1 <- res(residueFrac)[1]
   #res2 <- res(stDMP[[1]])[1]
-  #residueFrac <- resample(iSPAMHarvestResidueFrac, stDMP[[1]], method = "near") 
-  residueFrac <- iSPAMHarvestResidueFrac
+  residueFrac <- resample(iSPAMHarvestResidueFrac, stDMP[[1]], method = "ngb") 
+  #residueFrac <- iSPAMHarvestResidueFrac
   
-  # residueFrac <- extend(residueFrac, extent(stDMP[[1]]))
-  # residueFrac <- crop(residueFrac, extent(stDMP[[1]]))
+  residueFrac <- extend(residueFrac, extent(stDMP[[1]]))
+  residueFrac <- crop(residueFrac, extent(stDMP[[1]]))
   #residueFrac <- mask(residueFrac, aoi)
   
   #stLU$LUgrass300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
@@ -161,16 +161,16 @@ lapply(yearList, function(year){
   
   #shrubFrac[is.na(shrubFrac)] <- 0.13
   #shrubFrac <- reclassify(shrubFrac, c(NA, NA, 0.13), right = FALSE) 
-  # shrubFrac <- resample(shrubFrac, stDMP[[1]], method = "ngb")
-  # shrubFrac <- extend(shrubFrac, extent(stDMP[[1]]))
-  # shrubFrac <- crop(shrubFrac, extent(stDMP[[1]]))
+  shrubFrac <- resample(shrubFrac, stDMP[[1]], method = "ngb")
+  shrubFrac <- extend(shrubFrac, extent(stDMP[[1]]))
+  shrubFrac <- crop(shrubFrac, extent(stDMP[[1]]))
   gc()
   
-  funGrowingGrassWet <- function(dmp, crops, grassShrub, forest, shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp/10*9*grassShrub*grassFracWet*(1-shrubFrac))+(dmp*9*forest*grassFracWet*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
-  funGrowingGrassDry <- function(dmp, crops, grassShrub, forest,  shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp/10*9*grassShrub*grassFracDry*(1-shrubFrac))+(dmp*9*forest*grassFracDry*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingGrassWet <- function(dmp, crops, grassShrub, forest, shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*grassShrub*grassFracWet*(1-shrubFrac))+(dmp*9*forest*grassFracWet*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingGrassDry <- function(dmp, crops, grassShrub, forest,  shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*grassShrub*grassFracDry*(1-shrubFrac))+(dmp*9*forest*grassFracDry*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
   funGrowingBrowse <- function(dmp, crops, grassShrub, forest,  shrubFrac, nonprotected) {(dmp*9*grassShrub*shrubFrac*browseShrubFrac)+(dmp*9*forest*nonprotected*shrubFrac*browseForestFrac)} 
-  funGrowingCrops <- function(dmp, crops, greenup, senesence, feedFrac, resFrac, greenup2, senesence2) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp/10*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
-  funGrowingAftermath <- function(dmp, crops, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp/10*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingCrops <- function(dmp, crops, greenup, senesence, feedFrac, resFrac, greenup2, senesence2) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingAfter <- function(dmp, crops, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
   
   for(i in 1:length(names(stDMP))){
     
@@ -194,8 +194,8 @@ lapply(yearList, function(year){
     rm(iDMPCropGrowing)
     gc()
     
-    iDMPAftermath <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAftermath)
-    writeRaster(iDMPAftermath, paste0(FeedQuantityOutdir, "/aftermathDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
+    iDMPAfter <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAfter)
+    writeRaster(iDMPAfter, paste0(FeedQuantityOutdir, "/afterDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
     rm(iDMPAftermath)
     gc()
     print(paste("cycle", i))
@@ -205,23 +205,23 @@ lapply(yearList, function(year){
   #rm(list = ls())
   gc()
   
-  iDMPgrassWet <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassWet",full.names = T))
+  iDMPgrassWet <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassWetDMP",full.names = T))
   DMPgrassmeanWet <- mean(iDMPgrassWet, na.rm = T)
   writeRaster(DMPgrassmeanWet, paste0(FeedQuantityOutdir, "/DMPgrassWetmean_", year, ".tif"), overwrite = TRUE)
   
-  iDMPgrassDry <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassDry",full.names = T))
+  iDMPgrassDry <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="grassDryDMP",full.names = T))
   DMPgrassmeanDry <- mean(iDMPgrassDry, na.rm = T)
   writeRaster(DMPgrassmeanDry, paste0(FeedQuantityOutdir, "/DMPgrassDrymean_", year, ".tif"), overwrite = TRUE)
   
-  iDMPbrowse <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="browse",full.names = T))
+  iDMPbrowse <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="browseDMP",full.names = T))
   DMPbrowsemean <- mean(iDMPbrowse, na.rm = T)
   writeRaster(DMPbrowsemean, paste0(FeedQuantityOutdir, "/DMPbrowsemean_", year, ".tif"), overwrite = TRUE)
   
-  iDMPCropGrowing <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="crop",full.names = T))
+  iDMPCropGrowing <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="cropDMP",full.names = T))
   DMPcropmean <- mean(iDMPCropGrowing, na.rm = T)
   writeRaster(DMPcropmean, paste0(FeedQuantityOutdir, "/DMPcropmean_", year, ".tif"), overwrite = TRUE)
   
-  iDMPAftermath <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="aftermath",full.names = T))
+  iDMPAftermath <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="afterDMP",full.names = T))
   DMPAftermean <- mean(iDMPAftermath, na.rm = T)
   writeRaster(DMPAftermean, paste0(FeedQuantityOutdir, "/DMPaftermean_", year, ".tif"), overwrite = TRUE)
   gc()

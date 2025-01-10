@@ -69,7 +69,7 @@ aoi_ECOZone <- ECOZONE %>%  group_by(ECOZone) %>% summarise()
 st_write(aoi_ECOZone, paste0(outdirInt, "/zones.gpkg"), append = F)
 
 # Add area of regions and zones
-zoneUTM <- zones %>% st_transform(., crs = 3857)
+zoneUTM <- aoi_ECOZone %>% st_transform(., crs = 3857)
 zoneUTM <- zoneUTM %>% mutate(area_meters = as.numeric(st_area(.)),
                               area_acres = area_meters * 0.0002471054, # 1 m2 = 0.0002471054 acres 
                               area_hectares = area_meters * 0.0001) %>%  # 1m2 = 0.0001 hectares
@@ -77,7 +77,7 @@ zoneUTM <- zoneUTM %>% mutate(area_meters = as.numeric(st_area(.)),
 write.csv(zoneUTM, paste0(Results_dir, "/area_zones.csv"), row.names=FALSE)
 
 # Add area of regions and zones
-regionsUTM <- regions %>% st_transform(., crs = 3857)
+regionsUTM <- aoi_ECORegion %>% st_transform(., crs = 3857)
 regionsUTM <- regionsUTM %>% mutate(area_meters = as.numeric(st_area(.)),
                               area_acres = area_meters * 0.0002471054, # 1 m2 = 0.0002471054 acres 
                               area_hectares = area_meters * 0.0001) %>%  # 1m2 = 0.0001 hectares
