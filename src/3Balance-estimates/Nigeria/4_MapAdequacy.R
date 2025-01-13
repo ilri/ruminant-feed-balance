@@ -185,7 +185,10 @@ for(aggregation_zone in aggregation_zones){
     }
 
   tsSumReg_mean <- separate(tsSumReg_mean, name, c("name", "year"), "_")
-  tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Northern mixed", "Southern mixed", "Central mixed", "Forest mixed")))
+  if(aggregation_zone=="region"){
+    tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Northern mixed", "Southern mixed", "Central mixed", "Forest mixed")))
+  }else{tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=unique(tsSumReg_mean$NAME_1)))}
+  
   
   Fig3 <- ggplot(data = tsSumReg_plot) +
     geom_sf(aes(fill = value)) +

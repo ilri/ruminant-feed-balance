@@ -15,7 +15,7 @@ library(rgdal)
 library(readr)
 
 #Runs with 16gb ram and 40+gb hdd space
-rasterOptions(tmpdir="/home/s2255815/scratch/AUTemp")
+rasterOptions(tmpdir="/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
 rasterOptions(maxmemory = 1e+60)
 rasterOptions(todisk = TRUE)
 #memory.limit(size = 56000) #Windows specific
@@ -27,7 +27,7 @@ root <- "."
 country <- "Nigeria"
 
 #setwd("/exports/eddie/scratch/sfraval/feed-surfaces/")
-cropHI <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv"))
+cropHI <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/", country, "/CropParams/crop_harvest index.csv"))
 
 pathSPAM <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020")
 pathSPAMInter <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/intermediate")

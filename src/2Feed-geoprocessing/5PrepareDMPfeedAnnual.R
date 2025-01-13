@@ -29,7 +29,8 @@ root <- "."
 country <- "Nigeria"
 
 # read AOI
-aoi <- readOGR(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
+#aoi <- readOGR(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
+aoi <- read_sf(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
 
 yearList <- c("2020", "2021", "2022", "2023")
 
@@ -78,7 +79,7 @@ lapply(yearList, function(year){
                   raster(grep("phenoSenescence2.tif", filesPhenology, value=TRUE)))
   gc()
   
-  ##Crop land use to test area
+  #Crop land use to test area
   LUcrops300DEA <- extend(LUcrops300DEA, extent(stDMP[[1]]))
   LUcrops300DEA <- crop(LUcrops300DEA, extent(stDMP[[1]]))
   LUcrops300DEA <- mask(LUcrops300DEA, aoi)
@@ -86,21 +87,23 @@ lapply(yearList, function(year){
   stLU <- crop(stLU, extent(stDMP[[1]]))
   stLU <- mask(stLU, aoi)
   #stLU <- stack(stLU, LUcrops300DEA)
+  stLU <- stack(stLU)
   
-  ##Revise grass and shrub area
+  #Revise grass and shrub area
   diffCrop <- LUcrops300DEA - stLU$LUcrops300
   stLU$LUgrassShrub300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
   stLU$LUgrassShrub300 <- stLU$LUgrassShrub300 - LUcrops300DEA
   
   stLU$LUcrops300 <- LUcrops300DEA
   
-  # ##Crop phenology to test area
-  # stPhen <- extend(stPhen, extent(stDMP[[1]]))
-  # stPhen <- crop(stPhen, extent(stDMP[[1]]))
-  # stPhen <- resample(stPhen, stDMP[[1]], method = "ngb")
-  # stPhen <- stPhen + yearOffset #!Change to + or - as needed
+  #Crop phenology to test area
+  stPhen <- extend(stPhen, extent(stDMP[[1]]))
+  stPhen <- crop(stPhen, extent(stDMP[[1]]))
+  stPhen <- resample(stPhen, stDMP[[1]], method = "ngb")
+  stPhen <- stPhen + yearOffset #!Change to + or - as needed
   #stPhen$phenoGreenup2 <- overlay(stPhen$phenoGreenup2, stPhen$phenoGreenup1, stPhen$phenoSenescence2, fun = function(x, g1, s2){ifelse(x > max(datesDMPdiff)+30 & x-365 < g1 & s2-365 < g1, x-365, x)})
   #stPhen$phenoSenescence2 <- overlay(stPhen$phenoSenescence2, stPhen$phenoGreenup1, fun = function(x, g1){ifelse(x > max(datesDMPdiff)+30 & x-365 < g1, x-365, x)})
+  stPhen <- stack(stPhen)
   
   stPhen$phenoGreenup2 <- calc(stPhen$phenoGreenup2, fun = function(x){ifelse(x > max(datesDMPdiff)+30, NA, x)})
   stPhen$phenoSenescence2 <- calc(stPhen$phenoSenescence2, fun = function(x){ifelse(x > max(datesDMPdiff)+30, NA, x)})
@@ -148,7 +151,6 @@ lapply(yearList, function(year){
   #res1 <- res(residueFrac)[1]
   #res2 <- res(stDMP[[1]])[1]
   residueFrac <- resample(iSPAMHarvestResidueFrac, stDMP[[1]], method = "ngb") 
-  #residueFrac <- iSPAMHarvestResidueFrac
   
   residueFrac <- extend(residueFrac, extent(stDMP[[1]]))
   residueFrac <- crop(residueFrac, extent(stDMP[[1]]))

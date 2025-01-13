@@ -17,7 +17,7 @@ library(readr)
 #EDDIE_TMP <- as.character(args[1])
 
 #Runs with 16gb ram and 40+gb hdd space
-terraOptions(tempdir = "/home/s2255815/scratch/AUTemp")
+terraOptions(tempdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
 terraOptions(memfrac=0.5)
 terraOptions(todisk=TRUE)
 
@@ -42,9 +42,10 @@ stSPAM <- rast(filesSPAM)
 ###Calculate non-feed crops proportion from SPAM model.
 #@Fill NAs of SPAM layers? At the moment all crops are assumed to be animal digestable if NA
 #tmpNonFeed <- c("acof", "rcof", "coco", "teas", "toba", "oilp", "cnut", "ooil", "sugc", "trof", "temf", "rest", "ofib", "cott", "pota" )
-tmpNonFeed <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/CropParams/crop_harvest index.csv")) %>% filter(Excluded != "0") %>%
+tmpNonFeed <- read_csv(paste0(root, "/src/1Data-download/Tables/inputs/", country, "/CropParams/crop_harvest index.csv")) %>% filter(Excluded != "0") %>%
   pull(codeSPAM) %>%
   unique()
+
 tmpNonFeedIndex <- grep(pattern = paste(tmpNonFeed, collapse = "|"), names(stSPAM))
 ##iSPAMtotalArea <- sum(stSPAM, na.rm=T)
 ##iSPAMnonFeedArea <- sum(stSPAM[[tmpNonFeedIndex]], na.rm=T)

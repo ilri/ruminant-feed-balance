@@ -8,7 +8,7 @@
 # Load libraries
 library(terra)
 
-terraOptions(tempdir = "/home/s2255815/scratch/AUTemp")
+terraOptions(tempdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
 terraOptions(memfrac=0.5)
 terraOptions(todisk=TRUE)
 
