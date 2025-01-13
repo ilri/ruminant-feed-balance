@@ -10,7 +10,7 @@ rm(list=ls())
 # install.packages("rgdal")
 
 # Load libraries
-yearOffset <- (0*365) # Base year = 2019
+yearOffset <- (0*365) # Base year = 2020
 
 library(dplyr)
 library(raster)
