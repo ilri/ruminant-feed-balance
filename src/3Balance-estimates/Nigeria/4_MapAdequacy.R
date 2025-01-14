@@ -103,8 +103,8 @@ tsSum <- rbind(tsSum[!tsSum$zone == "(Agro)pastoral sahel",], tmp)
 tsSum_plot <- pivot_longer(dplyr::select(tsSum, zone, year, cropME_mean, grassME_mean, browseME_mean, afterME_mean), cols = -c(zone, year))
 lower <- pivot_longer(dplyr::select(tsSum, zone, year, cropME_min, grassME_min, browseME_min, afterME_min), cols = -c(zone, year), values_to = "lower")
 upper <- pivot_longer(dplyr::select(tsSum, zone, year, cropME_max, grassME_max, browseME_max, afterME_max), cols = -c(zone, year), values_to = "upper")
-tsSum_plot <- cbind(tsSum_plot, select(lower, lower))
-tsSum_plot <- cbind(tsSum_plot, select(upper, upper))
+tsSum_plot <- cbind(tsSum_plot, dplyr::select(lower, lower))
+tsSum_plot <- cbind(tsSum_plot, dplyr::select(upper, upper))
 
 tsSum_plot$value <- tsSum_plot$value/1000000
 tsSum_plot$lower <- tsSum_plot$lower/1000000
@@ -125,21 +125,21 @@ SI1 <- ggplot(tsSum_plot2, aes(year, value, colour = name, fill = name)) + geom_
 ggsave(paste0(plotsDir, "/NGASI1.tiff"), SI1, device = "tiff", dpi = 300, width=90 * (14/5), height=20 * (14/5), units = "mm")
 
 #Table 2
-zone_area <- readr::read_csv(paste0(Results_dir, "/area_zones.csv")) %>% rename(zone=ECOZone) %>% select(zone, area_hectares) %>% 
+zone_area <- readr::read_csv(paste0(Results_dir, "/area_zones.csv")) %>% rename(zone=ECOZone) %>% dplyr::select(zone, area_hectares) %>% 
   mutate(zone = case_when(zone %in% c("(Agro)pastoral sahel", "Northern mixed") ~ "dry_sav", 
                           zone == "Forest mixed" ~ "for", 
                           zone %in% c("Central mixed", "Southern mixed") ~ "wet_sav", TRUE ~ zone)) %>% 
   group_by(zone) %>% summarise(area_hectares=sum(area_hectares, na.rm=TRUE))
 
 
-feedDM <- read.csv(paste0(Results_dir, "/cropME_region.csv"), stringsAsFactors = F) %>% select(region, cropDM, grassDM, browseDM, afterDM) %>% 
-  rowwise() %>% mutate(FeedDM = sum(cropDM, grassDM, browseDM, afterDM)/1000000000) %>% #convert to metric tonnes
+feedDM <- read.csv(paste0(Results_dir, "/cropME_region.csv"), stringsAsFactors = F) %>% dplyr::select(region, cropDM, grassDM, browseDM, afterDM) %>% 
+  rowwise() %>% mutate(FeedDM = sum(cropDM, grassDM, browseDM, afterDM)) %>% #convert to metric tonnes /1000000000
   mutate(zone = case_when(region == "Dry Savannah" ~ "dry_sav", 
                           region == "Forest" ~ "for", 
-                          region == "Wet Savannah" ~ "wet_sav", TRUE ~ region)) %>% select(zone, FeedDM) %>% 
+                          region == "Wet Savannah" ~ "wet_sav", TRUE ~ region)) %>% dplyr::select(zone, FeedDM) %>% 
   left_join(zone_area, by="zone") %>% 
-  mutate(yieldHa = (FeedDM/area_hectares)*1000000) %>% #convert t/ha
-  select(-area_hectares)
+  mutate(yieldHa = FeedDM/area_hectares/1000) %>% #convert t/ha 1000000
+  dplyr::select(-area_hectares)
   
 x <- select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
 x$eco <- c("wet_sav", "for", "dry_sav", "wet_sav", "dry_sav")
