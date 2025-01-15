@@ -76,3 +76,4 @@ iSPAMcropResFrac <- reclassify(iSPAMcropResFrac, cbind(NA, NA, 0.8), right=FALSE
 print("past mean")
 
 writeRaster(iSPAMcropResFrac, paste0(pathSPAMInter, "/crop_res_frac.tif"), overwrite = T)
+

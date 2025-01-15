@@ -31,7 +31,7 @@ aoi_path <- paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", c
 
 yearList <- c("2020", "2021", "2022", "2023")
 
-for(year in yearList[2:4]){
+for(year in yearList){
   
   phenPath <- paste0(root, "/src/1Data-download/SpatialData/inputs/PhenologyModis/", year)
   

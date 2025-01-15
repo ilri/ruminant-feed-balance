@@ -45,6 +45,7 @@ itreeCover <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", 
 itreeCover <- crop(itreeCover, ext(dmpTemp))
 itreeCover <- resample(itreeCover, dmpTemp, method="bilinear")
 itreeCover <- mask(itreeCover, mask = dmpTemp)
+itreeCover <- itreeCover/100
 
 writeRaster(itreeCover, paste0(outdir, "/treecover300m.tif"), overwrite=TRUE)
 

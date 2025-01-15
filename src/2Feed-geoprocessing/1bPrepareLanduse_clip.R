@@ -22,21 +22,18 @@ luClasses <- c("Crops", "Grass", "Shrub", "Tree")
 
 for(luClass in luClasses){
   
-  if (!file.exists(paste0(outdir, "/LU", tolower(luClass), "300.tif"))){
+  iluFile <- rast(paste0(indir, "/PROBAV_LC100_global_v3.0.1_2019-nrt_", luClass,"-CoverFraction-layer_EPSG-4326.tif"))
+  iluFile <- crop(iluFile, ext(iluFile))
+  iluFile <- resample(iluFile, dmpTemp, method="near")
+  iluFile <- mask(iluFile, mask = dmpTemp)
+  iluFile <- iluFile/100 # make it 0-1
     
-    iluFile <- rast(paste0(indir, "/PROBAV_LC100_global_v3.0.1_2019-nrt_", luClass,"-CoverFraction-layer_EPSG-4326.tif"))
-    iluFile <- crop(iluFile, ext(iluFile))
-    iluFile <- resample(iluFile, dmpTemp, method="near")
-    iluFile <- mask(iluFile, mask = dmpTemp)
+  names(iluFile) <- paste0("LU", tolower(luClass), "300")
     
-    names(iluFile) <- paste0("LU", tolower(luClass), "300")
+  writeRaster(iluFile, paste0(outdir, "/LU", tolower(luClass), "300.tif"), overwrite=TRUE)
     
-    writeRaster(iluFile, paste0(outdir, "/LU", tolower(luClass), "300.tif"), overwrite=TRUE)
-    
-    rm(iluFile)
-    gc()
-    
-  }else{cat("Already cropped: ", tolower(luClass), "\n")}
+  rm(iluFile)
+  gc()
 }
 
 # # plotting

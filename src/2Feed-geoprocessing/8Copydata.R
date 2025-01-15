@@ -87,3 +87,4 @@ spam_src <- paste0(indir, "/2Feed-geoprocessing/SpatialData/inputs/", country, "
 spam_dest <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/SPAM2020"); dir.create(spam_dest, F, T)
 spam_files <- list.files(spam_src, pattern = "_(a|frac)\\.tif$", full.names = TRUE, ignore.case = TRUE)
 file.copy(spam_files, spam_dest, recursive = TRUE)
+

@@ -54,10 +54,10 @@ for(year in yearList){
 
 DMPSum_all <- reduce(DMPSumList, full_join, by = "ECORegion") %>% 
   left_join(regionsArea, by = "ECORegion") %>% 
-  mutate(tonHa_2020 = DM_2020 / area_hectares/1000,
-         tonHa_2021 = DM_2021 / area_hectares/1000,
-         tonHa_2022 = DM_2022 / area_hectares/1000,
-         tonHa_2023 = DM_2023 / area_hectares/1000)
+  mutate(tonHa_2020 = (DM_2020 / area_hectares)/1000,
+         tonHa_2021 = (DM_2021 / area_hectares)/1000,
+         tonHa_2022 = (DM_2022 / area_hectares)/1000,
+         tonHa_2023 = (DM_2023 / area_hectares)/1000)
 
 write.csv(DMPSum_all, paste0(root, "/src/3Balance-estimates/Nigeria/Accuracy_Checks/DMPSum_ECOZone.csv"), row.names=FALSE)
 
@@ -87,9 +87,9 @@ for(year in yearList){
 
 DMPPotentialSum_all <- reduce(DMPPotentialSumList, full_join, by = "ECORegion") %>% 
   left_join(regionsArea, by = "ECORegion") %>% 
-  mutate(tonHa_2020 = DM_2020 / area_hectares/1000,
-         tonHa_2021 = DM_2021 / area_hectares/1000,
-         tonHa_2022 = DM_2022 / area_hectares/1000,
-         tonHa_2023 = DM_2023 / area_hectares/1000)
+  mutate(tonHa_2020 = (DM_2020 / area_hectares)/1000,
+         tonHa_2021 = (DM_2021 / area_hectares)/1000,
+         tonHa_2022 = (DM_2022 / area_hectares)/1000,
+         tonHa_2023 = (DM_2023 / area_hectares)/1000)
 
 write.csv(DMPPotentialSum_all, paste0(root, "/src/3Balance-estimates/Nigeria/Accuracy_Checks/DMPPotentialSum_ECOZone.csv"), row.names=FALSE)

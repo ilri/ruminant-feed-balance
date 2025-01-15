@@ -10,8 +10,6 @@ rm(list=ls())
 # install.packages("rgdal")
 
 # Load libraries
-yearOffset <- (0*365) # Base year = 2020
-
 library(dplyr)
 library(raster)
 library(rgdal)
@@ -35,6 +33,8 @@ aoi <- read_sf(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/"
 yearList <- c("2020", "2021", "2022", "2023")
 
 lapply(yearList, function(year){
+  
+  yearOffset <- if_else(year %in% c("2021", "2022", "2023"), 0*365, 1)
   
   cropOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Cropping_days"); dir.create(cropOutdir, F, T)
   FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/Feed_quantity/", year); dir.create(FeedQuantityOutdir, F, T)
@@ -93,6 +93,9 @@ lapply(yearList, function(year){
   diffCrop <- LUcrops300DEA - stLU$LUcrops300
   stLU$LUgrassShrub300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
   stLU$LUgrassShrub300 <- stLU$LUgrassShrub300 - LUcrops300DEA
+  
+  stLU$LUgrassShrub300 <- reclassify(stLU$LUgrassShrub300, c(-Inf, 0, 0)) 
+  stLU$LUgrassShrub300[is.na(stLU$LUgrassShrub300)] <- 0
   
   stLU$LUcrops300 <- LUcrops300DEA
   
@@ -159,7 +162,7 @@ lapply(yearList, function(year){
   #stLU$LUgrass300 <- sum(stLU$LUgrass300, stLU$LUshrub300, na.rm = T)
   
   #shrubFrac <- raster('SpatialData/inputs/TreeCover/treecover_imp.tif')/100
-  shrubFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/TreeCover/treecover300m.tif"))/100
+  shrubFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/TreeCover/treecover300m.tif"))
   
   #shrubFrac[is.na(shrubFrac)] <- 0.13
   #shrubFrac <- reclassify(shrubFrac, c(NA, NA, 0.13), right = FALSE) 

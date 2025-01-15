@@ -35,11 +35,11 @@ indexLeg <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_group
 indexOilc <- grep(pattern = paste(cropLookup$codeSPAM[cropLookup$codeBasket_grouped_NGA == "oilc"], collapse = "|"), sub(".*_a_(.*?)_a\\.tif$", "\\1", filesSPAM))
 
 # Extraction area for major feed categories
-areaTotal <- app(stCrops, fun = sum, na.rm = T)
-areaCere <- app(stCrops[[indexCere]], fun = sum, na.rm = T)
-areaRoots <- app(stCrops[[indexRoots]], fun = sum, na.rm = T)
-areaLeg <- app(stCrops[[indexLeg]], fun = sum, na.rm = T)
-areaOilc <- app(stCrops[[indexOilc]], fun = sum, na.rm = T)
+areaTotal <- app(stCrops, fun = "sum", na.rm = T)
+areaCere <- app(stCrops[[indexCere]], fun = "sum", na.rm = T)
+areaRoots <- app(stCrops[[indexRoots]], fun = "sum", na.rm = T)
+areaLeg <- app(stCrops[[indexLeg]], fun = "sum", na.rm = T)
+areaOilc <- app(stCrops[[indexOilc]], fun = "sum", na.rm = T)
 
 # Calculate proportions
 propCere <- areaCere / areaTotal
@@ -52,3 +52,4 @@ writeRaster(propCere, paste0(spamPath, "/propCereSPAM.tif"), overwrite=TRUE)
 writeRaster(propRoots, paste0(spamPath, "/propRootsSPAM.tif"), overwrite=TRUE)
 writeRaster(propLeg, paste0(spamPath, "/propLegSPAM.tif"), overwrite=TRUE)
 writeRaster(propOilc, paste0(spamPath, "/propOilcSPAM.tif"), overwrite=TRUE)
+gc()
