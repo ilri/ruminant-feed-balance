@@ -26,18 +26,7 @@ ECOZONE <- st_read(paste0(indir, "/Ecological_and_Feed_Distribution.shp"))
 sf_use_s2(FALSE)
 
 ECOZONE <- ECOZONE %>%
-  mutate(Ecological = case_when(Ecological == "Fresh Water Swanmp Forest" ~ "Fresh Water Swamp Forest",
-                                TRUE ~ Ecological),
-         ECOZONECode = case_when(Ecological == "Sudan Savannah" ~ "SUSSAV",
-                                 Ecological == "Sahel Savannah" ~ "SASSAV",
-                                 Ecological == "Southern Guinea Savannah" ~ "SOGSAV",
-                                 Ecological == "Lowland Rainfall" ~ "LORAIN",
-                                 Ecological == "Fresh Water Swamp Forest" ~ "FRWASF",
-                                 Ecological == "Northern Guinea Savannah" ~ "NOGSAV",
-                                 Ecological == "Mountain Vegetations" ~ "MOUVEG",
-                                 Ecological == "Mangrove" ~ "MANGGR",
-                                 TRUE ~ Ecological),
-         ECORegion = case_when(Ecological %in% c("Sahel Savannah", "Sudan Savannah") ~ "Dry Savannah",
+  mutate(ECORegion = case_when(Ecological %in% c("Sahel Savannah", "Sudan Savannah") ~ "Dry Savannah",
                                Ecological %in% c("Southern Guinea Savannah", "Northern Guinea Savannah", "Mountain Vegetations")  ~ "Wet Savannah",
                                Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove") ~ "Forest",
                                TRUE ~ Ecological),

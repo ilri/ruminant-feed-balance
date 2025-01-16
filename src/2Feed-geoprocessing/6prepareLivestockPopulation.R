@@ -1,4 +1,5 @@
 # Prepare livestock population layers
+# Layer provided at 10km spatial resolution, units: animals per km2
 # Author: John Mutua
 # Last modified on 11/11/2024
 
@@ -14,17 +15,15 @@ root <- "."
 indir <- paste0(root, "/src/1Data-download/SpatialData/inputs/GLW4")
 outdir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/GLW4"); dir.create(outdir, F, T)
 
-# Fix extent
-dmpTemp <- terra::rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+aoi2 <- st_read(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
 
 animalCategories <- c("CTL", "GTS", "PGS", "SHP", "HRS")
 
 for(animalCategory in animalCategories){
   
-  animalFile <- rast(paste0(indir, "/GLW4-2020.D-DA.", animalCategory, ".tif"))
-  animalFile <- crop(animalFile, ext(dmpTemp))
-  animalFile <- resample(animalFile, dmpTemp, method="near")
-  animalFile <- mask(animalFile, mask = dmpTemp)
+  animalFile <- terra::rast(paste0(indir, "/GLW4-2020.D-DA.", animalCategories[1], ".tif"))
+  animalFile <- terra::crop(animalFile, aoi2)
+  animalFile <- animalFile*100 #total number of cattle per pixel
   writeRaster(animalFile, paste0(outdir, "/", names(animalFile), ".tif"), overwrite=TRUE)
 
 }

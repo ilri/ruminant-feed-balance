@@ -16,7 +16,7 @@ root <- "."
 country <- "Nigeria"
 
 # paths
-feedParOut <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams"); dir.create(feedParOut, F, T)
+feedParOut <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams")
 
 feedQuality <- read_csv(paste0(feedParOut, "/feedQuality_SSAdb.csv"))
 crop_classification <- read_csv(paste0(feedParOut, "/Crop classification_feed basket.csv"))

@@ -4,6 +4,8 @@ rm(list=ls())
 # Author: Simon Fraval
 # Last modified by John Mutua on 12/11/2024
 
+yearOffset <- (0*365) # Base year = 2020
+
 # # Install required packages
 # install.packages("dplyr")
 # install.packages("raster")
@@ -33,8 +35,6 @@ aoi <- read_sf(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/"
 yearList <- c("2020", "2021", "2022", "2023")
 
 lapply(yearList, function(year){
-  
-  yearOffset <- if_else(year %in% c("2021", "2022", "2023"), 0*365, 1)
   
   cropOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Cropping_days"); dir.create(cropOutdir, F, T)
   FeedQuantityOutdir <- paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/Feed_quantity/", year); dir.create(FeedQuantityOutdir, F, T)
@@ -201,9 +201,9 @@ lapply(yearList, function(year){
     
     iDMPAfter <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAfter)
     writeRaster(iDMPAfter, paste0(FeedQuantityOutdir, "/afterDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
-    rm(iDMPAftermath)
+    rm(iDMPAfter)
     gc()
-    print(paste("cycle", i))
+    print(paste("Cycle", i, ": ", year))
     
   }
   
@@ -226,11 +226,12 @@ lapply(yearList, function(year){
   DMPcropmean <- mean(iDMPCropGrowing, na.rm = T)
   writeRaster(DMPcropmean, paste0(FeedQuantityOutdir, "/DMPcropmean_", year, ".tif"), overwrite = TRUE)
   
-  iDMPAftermath <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="afterDMP",full.names = T))
-  DMPAftermean <- mean(iDMPAftermath, na.rm = T)
+  iDMPAfter <- stack(list.files(path = paste0(FeedQuantityOutdir), pattern="afterDMP",full.names = T))
+  DMPAftermean <- mean(iDMPAfter, na.rm = T)
   writeRaster(DMPAftermean, paste0(FeedQuantityOutdir, "/DMPaftermean_", year, ".tif"), overwrite = TRUE)
   gc()
   
   print(paste("Completed processing year: ", year))
   
 })
+

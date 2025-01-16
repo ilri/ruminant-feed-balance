@@ -14,13 +14,11 @@ root <- "."
 indir <- paste0(root, "/src/1Data-download/SpatialData/inputs/GLPS")
 outdir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/inputs/GLPS"); dir.create(outdir, F, T)
 
-# Fix extent
-dmpTemp <- terra::rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/Feed_DrySeason/DMP/c_gls_DMP300-RT6_202301100000_GLOBE_OLCI_V1.1.2.tif"))
+aoi2 <- st_read(paste0(root, "/src/1Data-download/SpatialData/inputs/AdminBound/", country, "/aoi0.shp"))
 
 glps <- rast(paste0(indir, "/glps_gleam_61113_10km/glps_gleam_61113_10km.tif"))
-glps <- crop(glps, ext(dmpTemp))
-glps <- resample(glps, dmpTemp, method="near")
-glps <- mask(glps, mask = dmpTemp)
+glps <- terra::crop(glps, aoi2)
+
 writeRaster(glps, paste0(outdir, "/glps.tif"), overwrite=TRUE)
 
 # # plotting

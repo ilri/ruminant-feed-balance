@@ -44,6 +44,7 @@ country <- "Nigeria"
 spatialDir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData")
 CropParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/CropParams")
 LivestockParams_dir <- paste0(root, "/src/3Balance-estimates/", country, "/LivestockParams")
+Results_dir <- paste0(root, "/src/3Balance-estimates/", country, "/Results")
 
 param_ME <- read.csv(paste0(LivestockParams_dir, "/Livestock_energy_requirement.csv"), stringsAsFactors = F)
 #param_ME <- pivot_longer(select(param_ME, -X), cols = c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat"))
@@ -79,7 +80,6 @@ glps <- rast(paste0(spatialDir, "/inputs/GLPS/glps.tif"))
 glps <- terra::resample(glps, lv, method = 'near')
 glps <- terra::crop(glps, ECORegions, mask = T)
 periurban <- glps %>% tidyterra::mutate(CLASSNAME = ifelse(as.character(CLASSNAME) == "Urban", 1, 0)) # Convert urban areas to 1, other areas to 0
-
 #periurban <- periurban == 13
 lv <- c(lv, periurban)
 
@@ -110,9 +110,9 @@ for(year in yearList){
   ##Intermediate MER calculations
   #################
   # Loop through regions, seasons and livestock species
-  Regions <- c("Dry Savannah", "Wet Savannah", "Forest", "Periurban")
-  Seasons <- c("WS", "DS")
-  LivestockCategories <- c("Bull", "Steer", "Calf", "Heifer", "Cow", "Lamb", "Sheep", "Kid", "Goat")
+  Regions <- c("Dry Savannah", "Forest", "Wet Savannah", "Periurban")
+  Seasons <- c("DS","WS")
+  LivestockCategories <- c("Bull", "Cow", "Steer", "Heifer", "Calf", "Sheep", "Goat", "Lamb", "Kid")
   MERm_list <- list() #Maintenance requirements
   MERt_list <- list() #Locomotion requirements
   MERl_list <- list() #Lactation requirements
@@ -142,13 +142,14 @@ for(year in yearList){
         }
         
         #MERl <- (DMY*ECM)/((0.02*M.D)+0.04) #! These are a factor of 10 too high.
-        if(i=="Periurban"&k %in% c("Cow","Sheep", "Goat")){
-          MERl_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="DMY" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*
+        if(i=="Periurban"&k %in% c("Cow","Sheep","Goat")){
+          MERl_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="DMY" & param_ME$name == k & param_ME$Season == j & param_ME$Region == "Wet Savannah"]*
                                          ECM)/((0.02*param_ME$value[param_ME$Variable == "M.D" & param_ME$name == k & param_ME$Season == j & param_ME$Region == "Wet Savannah"])+0.04)
           
-        }else if(i!="Periurban"&k %in% c("Cow","Sheep", "Goat")){
+        }else if(i!="Periurban"&k %in% c("Cow","Sheep","Goat")){
           MERl_list[[i]][[j]][[k]] <- (param_ME$value[param_ME$Variable=="DMY" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*
                                          ECM)/((0.02*param_ME$value[param_ME$Variable == "M.D" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i])+0.04)
+          
         }
 
         #Pregnancy
@@ -166,7 +167,7 @@ for(year in yearList){
         MEcow <- function(x){B * C * exp(-C*t) * (SBW*exp(A - B*exp(-C*t))) / 0.133}
         y <- MEcow(t)
         MERp_cow_fullPreg <- sum(y)
-        MERp_cow_fullPreg <- 0 #!Pregnancy is included in maintenance for Burkina faso
+        MERp_cow_fullPreg <- 0 #!Pregnancy is included in maintenance for Nigeria
         #f <- function(t,y) approxfun(y)(t)
         #MERp_cow_fullPreg <- integrate(f,min(t),max(t),y)
         
@@ -183,7 +184,7 @@ for(year in yearList){
         MEshoat <- function(x){B * C * exp(-C*t) * (SBW*exp(A - B*exp(-C*t))) / 0.133}
         y <- MEshoat(t)
         MERp_shoat_fullPreg  <- sum(y)
-        MERp_shoat_fullPreg <- 0 #!Pregnancy is included in maintenance for Burkina faso
+        MERp_shoat_fullPreg <- 0 #!Pregnancy is included in maintenance for Nigeria
         #MERp_shoat_fullPreg <- integrate(f,min(t),max(t),y)
         
         #MERg 
@@ -196,7 +197,7 @@ for(year in yearList){
           MERg_list[[i]][[j]][[k]] <- ifelse(param_ME$value[param_ME$Variable=="DWG" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i] >= 0,
                                              (param_ME$value[param_ME$Variable=="DWG" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*0.92*EC) / 
                                                (0.043*param_ME$value[param_ME$Variable == "M.D" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]),
-                                             (param_ME$value[param_ME$Variable=="DWG" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*0.92*EC) / (0.8))
+                                             (param_ME$value[param_ME$Variable=="DWG" & param_ME$name == k & param_ME$Season == j & param_ME$Region == i]*0.92*EC) / 0.8)
         }
       }
     }
@@ -232,16 +233,23 @@ for(year in yearList){
   MERgPeriurbanNonAdultFemale <- MERsYr %>% 
     filter(Region == "Wet Savannah", Livestock %in% c("Bull", "Steer", "Calf", "Heifer", "Lamb", "Kid"),MERx == "MERg") %>% mutate(Region = ifelse(Region == "Wet Savannah", "Periurban", Region))
   
-  # Lift MERm for adult females from Wet Savannah
+  # Lift MERg for adult females from Wet Savannah
   MERgPeriurbanAdultFemale <- MERsYr %>% 
     filter(Region == "Wet Savannah", Livestock %in% c("Cow", "Sheep", "Goat"),MERx == "MERg") %>% mutate(Region = ifelse(Region == "Wet Savannah", "Periurban", Region))
   
-
   # Add Periurban MERs
   MERsYr <- rbind(MERsYr, MERmPeriurbanNonAdultFemale, MERmPeriurbanAdultFemale, MERgPeriurbanNonAdultFemale, MERgPeriurbanAdultFemale)
   
+  # explore energy requirements
+  MERsYr_wide <- MERsYr %>% pivot_wider(names_from = Livestock, values_from = Value) %>% select(Region, Season, MERx, Bull, Cow, Steer, Heifer, Calf, Sheep, Goat, Lamb, Kid)
+  write_csv(MERsYr_wide, paste0(Results_dir, "/MERs_MJday.csv"), append = FALSE)
+  
   # Summarize MERs
   MERtotalYr <- MERsYr %>% group_by(Region, Season, Livestock) %>% summarise(MERtotal = sum(Value, na.rm = TRUE))
+  
+  # explore energy requirements
+  MERtotalYr_wide <- MERtotalYr %>% pivot_wider(names_from = Livestock, values_from = MERtotal) %>% select(Region, Season, Bull, Cow, Steer, Heifer, Calf, Sheep, Goat, Lamb, Kid)
+  write_csv(MERtotalYr_wide, paste0(Results_dir, "/MERtotal_MJday.csv"), append = FALSE)
   
   #MER totals
   for(i in Regions){
@@ -289,7 +297,8 @@ for(year in yearList){
                    (MERsSelected$Value[MERsSelected$MERx=="MERl"&MERsSelected$Livestock=="Goat"] * goats * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Goat" & param_ME$Region == i]*
                       param_ME$value[param_ME$Variable=="LL" & param_ME$name == "Goat"] *
                       param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"]/2) + # Weighted by fertility rate and assumed to be half in DS and half in WS
-                   (MERp_cow_fullPreg * sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Sheep" & param_ME$Region == i]*param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Sheep"]) +
+                   (MERp_cow_fullPreg * sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Sheep" & param_ME$Region == i]*
+                      param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Sheep"]) +
                    (MERp_cow_fullPreg * goats * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Goat" & param_ME$Region == i]*
                       param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"])
                  ,NA)#Close if
@@ -329,11 +338,9 @@ for(year in yearList){
                       drySSN) +
                    (MERsSelected$Value[MERsSelected$MERx=="MERl"&MERsSelected$Livestock=="Goat"] * goats * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Goat" & param_ME$Region == i]*
                       param_ME$value[param_ME$Variable=="LL" & param_ME$name == "Goat"] *
-                      param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"]/2) + # Weighted by fertility rate and assumed to be half in DS and half in WS
-                   (MERp_cow_fullPreg * sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Sheep" & param_ME$Region == i]*param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Sheep"]) +
-                   (MERp_cow_fullPreg * goats * param_ME$value[param_ME$Variable=="HS" & param_ME$name == "Goat" & param_ME$Region == i]*
-                      param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"])
-                 ,NA)#Close if
+                      param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"]/2) # Weighted by fertility rate and assumed to be half in DS and half in WS
+                   ,NA)#Close if
+          
         })
       }else if(j == "WS" & i == "Wet Savannah"){
         MERtotalYr_WS_Wet_Savannah_cattle <- lapp(lv[[c(1,4,5,6)]], fun = function(cattle, ECORegions, periurban, wetSSN) { #!Including pregnancy
@@ -497,8 +504,6 @@ for(year in yearList){
                       param_ME$value[param_ME$Variable=="Fertility" & param_ME$name == "Goat"]/2) # Weighted by fertility rate and assumed to be half in DS and half in WS
                  ,NA)#Close if
         })
-        
-        cattle <- lv[[c(1)]]
  
       }else if(j=="WS"&i=="Periurban"){
         MERtotalYr_WS_Periurban_cattle <- lapp(lv[[c(1,4,5,6)]], fun = function(cattle, ECORegions, periurban, wetSSN) { #!Including pregnancy
@@ -595,7 +600,6 @@ for(year in yearList){
   #Intake calculation from https://books.google.co.uk/books?hl=en&lr=&id=rlBfYgLiqtwC&oi=fnd&pg=PA64&dq=horse+feed+requirements+ME+DM&ots=SjcNMBUJ_o&sig=MABvL3RGWr6J-TZMw8MpCwmwLwU&redir_esc=y#v=onepage&q=horse%20feed%20requirements%20ME%20DM&f=false
   #liveweight of African Donkeys from Nininahazwe et al., 2017 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5682267/
   MERdonkey <- (((87/1000) * (126^0.75)) * 8.3 * lvDonkey * 365) +  (0.9*(((87/1000) * (126^0.75)) * 8.3 * lvDonkey * 180))
-  
   terra::writeRaster(sum(MERhorse, MERdonkey, na.rm = T), paste0(spatialDir, "/outputs/horseDonkeyMER_MJ_", year, ".tif"), overwrite = T)
   
   MERcattle <- sum(MERtotalYr_DS_Dry_Savannah_cattle, MERtotalYr_DS_Wet_Savannah_cattle, MERtotalYr_DS_Forest_cattle, MERtotalYr_DS_Periurban_cattle, MERtotalYr_WS_Dry_Savannah_cattle, MERtotalYr_WS_Wet_Savannah_cattle, MERtotalYr_WS_Forest_cattle, MERtotalYr_WS_Periurban_cattle, na.rm = T)
