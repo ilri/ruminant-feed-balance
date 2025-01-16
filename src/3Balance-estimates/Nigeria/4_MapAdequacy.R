@@ -131,14 +131,14 @@ zone_area <- readr::read_csv(paste0(Results_dir, "/area_zones.csv")) %>% rename(
                           zone %in% c("Central mixed", "Southern mixed") ~ "wet_sav", TRUE ~ zone)) %>% 
   group_by(zone) %>% summarise(area_hectares=sum(area_hectares, na.rm=TRUE))
 
-
 feedDM <- read.csv(paste0(Results_dir, "/cropME_region.csv"), stringsAsFactors = F) %>% dplyr::select(region, cropDM, grassDM, browseDM, afterDM) %>% 
-  rowwise() %>% mutate(FeedDM = sum(cropDM, grassDM, browseDM, afterDM)) %>% #convert to metric tonnes /1000000000
+  rowwise() %>% mutate(FeedDM = sum(cropDM, grassDM, browseDM, afterDM)) %>% 
   mutate(zone = case_when(region == "Dry Savannah" ~ "dry_sav", 
                           region == "Forest" ~ "for", 
                           region == "Wet Savannah" ~ "wet_sav", TRUE ~ region)) %>% dplyr::select(zone, FeedDM) %>% 
   left_join(zone_area, by="zone") %>% 
-  mutate(yieldHa = FeedDM/area_hectares/1000) %>% #convert t/ha 1000000
+  mutate(yieldHa = (FeedDM/area_hectares)/1000, #convert t/ha 1000
+         FeedDM = FeedDM/1000000000) %>% #convert to million tonnes /1000000000
   dplyr::select(-area_hectares)
   
 x <- select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
@@ -148,7 +148,12 @@ x <- summarise_all(select(x, -zone), sum)
 x<-rename(x, zone=eco)
 x <- x %>% left_join(feedDM, by="zone")
 x <- x %>% rowwise() %>% mutate(cropMEprop_mean = cropME_mean/ totalME_mean, grassMEprop_mean = grassME_mean / totalME_mean, browseMEprop_mean = browseME_mean / totalME_mean, afterMEprop_mean = afterME_mean / totalME_mean)
-x <- select(x, c(zone, FeedDM, yieldHa, totalME_mean, cropMEprop_mean, grassMEprop_mean, browseMEprop_mean, afterMEprop_mean))
+x <- select(x, c(zone, FeedDM, yieldHa, totalME_mean, grassMEprop_mean, cropMEprop_mean, browseMEprop_mean, afterMEprop_mean)) %>% 
+  mutate(totalME_mean=totalME_mean/1000000000000, across(5:ncol(.), ~ . * 100),
+         zone=case_when(zone=="wet_sav"~"Wet Savannah", zone == "for" ~ "Forest", zone == "dry_sav" ~ "Dry Savannah", TRUE ~ zone),
+         across(where(is.numeric), ~ round(., 2))) %>% 
+  rename(Region=zone,`DM (Mt)`=FeedDM, `Yield (t/ha)`=yieldHa, `Energy supply (ME EJ*)`=totalME_mean, `Grass (%ME)`=grassMEprop_mean, `Crop residue (%ME)`=cropMEprop_mean,`Postharvest growth (%ME)`=afterMEprop_mean,`Browse (%ME)`=browseMEprop_mean)
+write.csv(x, paste0(Results_dir, "/Annual_feedAvailability.csv"), row.names = FALSE)
 
 ######
 ##Livestock feed adequacy timeseries breakdown
@@ -165,7 +170,7 @@ tsSumReg_plot <- cbind(tsSumReg_plot, select(tsSumRegMax, upper = value))
 
 tsSumReg_plot <- transform(tsSumReg_plot, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 
-Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,10), breaks = c(0,5,10)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 5)
+Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,2), breaks = c(0,1,2)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 5)
 ggsave(paste0(plotsDir, "/NGAFig2_1000.tiff"), Fig2, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
 
 #plot by aggregation zones
@@ -220,6 +225,7 @@ feed_total_MJ <- mask(feed_total_MJ, aoi1)
 lvstIntake_MJ <- mask(lvstIntake_MJ, aoi1)
 resLvst <- res(lvstIntake_MJ)[1]
 lvstIntake_MJ <- resample(lvstIntake_MJ, feed_total_MJ)/(resLvst/res(feed_total_MJ)[1])^2
+lvstIntake_MJ <- reclassify(lvstIntake_MJ, c(-Inf, 0, 0))
 
 countries <- ne_countries(scale = 50, type = "countries", returnclass = "sf")
 
@@ -227,7 +233,7 @@ ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) +
   geom_sf(data = sfZones, aes(fill = ECOZone)) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + labs(fill = "Region") #+ themeLabs + theme(legend.position="bottom")   
 
 ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) + 
-  geom_stars(data = st_as_stars(feed_total_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 11), breaks = c(0, 3, 6, 9, 11), low = "#CDDF4A", high = "#0BAE1C", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
+  geom_stars(data = st_as_stars(feed_total_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 1), breaks = c(0, 0.25, 0.5, 1), low = "#CDDF4A", high = "#0BAE1C", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
 
 ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) + 
-  geom_stars(data = st_as_stars(lvstIntake_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 6), breaks = c(0, 2, 4, 6), low = "#FFFFFF", high = "#F9A908", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
+  geom_stars(data = st_as_stars(lvstIntake_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 0.5), breaks = c(0, 0.25, 0.5), low = "#FFFFFF", high = "#F9A908", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
