@@ -425,11 +425,11 @@ for (speciesCategory in speciesCategories){
     
     file_name <- basename(producLink)
     
-    if (!file.exists(paste0(outdir, "/", file_name))){
+    #if (!file.exists(paste0(outdir, "/", file_name))){
       download.file(
         url = paste0("https://storage.googleapis.com/fao-gismgr-glw4-2020-data/DATA/GLW4-2020/MAPSET/D-DA/GLW4-2020.D-DA.",speciesCategory,".tif"),
         destfile = paste0(outdir, "/", file_name), quiet = TRUE)
-    }else {cat("File already exists:", file_name, "\n")}
+    #}else {cat("File already exists:", file_name, "\n")}
   }
 }
 

@@ -7,6 +7,7 @@
 # install.packages("terra")
 
 library(terra)
+library(sf)
 
 country <- "Nigeria"
 
@@ -21,9 +22,18 @@ animalCategories <- c("CTL", "GTS", "PGS", "SHP", "HRS")
 
 for(animalCategory in animalCategories){
   
-  animalFile <- terra::rast(paste0(indir, "/GLW4-2020.D-DA.", animalCategories[1], ".tif"))
+  animalFile <- terra::rast(paste0(indir, "/GLW4-2020.D-DA.", animalCategory, ".tif"))
   animalFile <- terra::crop(animalFile, aoi2)
-  animalFile <- animalFile*100 #total number of cattle per pixel
+  
+  if(animalCategory != "HRS"){ # Horse numbers are from 2025, already in animal per pixel
+    animalFile_area <- terra::cellSize(animalFile, unit = "km") #calculate area per pixel
+    animalFile <- animalFile*animalFile_area #total number of cattle per pixel taking into account the area per pixel
+  }
+
+  # masked_animalFile <- mask(animalFile, aoi2)
+  # sum_values <- global(masked_animalFile, fun = "sum", na.rm = TRUE)
+  # sum_values
+  
   writeRaster(animalFile, paste0(outdir, "/", names(animalFile), ".tif"), overwrite=TRUE)
 
 }

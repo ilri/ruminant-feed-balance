@@ -141,14 +141,14 @@ feedDM <- read.csv(paste0(Results_dir, "/cropME_region.csv"), stringsAsFactors =
          FeedDM = FeedDM/1000000000) %>% #convert to million tonnes /1000000000
   dplyr::select(-area_hectares)
   
-x <- select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
+x <- dplyr::select(tsSum[tsSum$year == 2023,], c(zone, totalME_mean, cropME_mean, grassME_mean, browseME_mean, afterME_mean))
 x$eco <- c("wet_sav", "for", "dry_sav", "wet_sav", "dry_sav")
 x <- group_by(x, eco)
-x <- summarise_all(select(x, -zone), sum)
+x <- summarise_all(dplyr::select(x, -zone), sum)
 x<-rename(x, zone=eco)
 x <- x %>% left_join(feedDM, by="zone")
 x <- x %>% rowwise() %>% mutate(cropMEprop_mean = cropME_mean/ totalME_mean, grassMEprop_mean = grassME_mean / totalME_mean, browseMEprop_mean = browseME_mean / totalME_mean, afterMEprop_mean = afterME_mean / totalME_mean)
-x <- select(x, c(zone, FeedDM, yieldHa, totalME_mean, grassMEprop_mean, cropMEprop_mean, browseMEprop_mean, afterMEprop_mean)) %>% 
+x <- dplyr::select(x, c(zone, FeedDM, yieldHa, totalME_mean, grassMEprop_mean, cropMEprop_mean, browseMEprop_mean, afterMEprop_mean)) %>% 
   mutate(totalME_mean=totalME_mean/1000000000000, across(5:ncol(.), ~ . * 100),
          zone=case_when(zone=="wet_sav"~"Wet Savannah", zone == "for" ~ "Forest", zone == "dry_sav" ~ "Dry Savannah", TRUE ~ zone),
          across(where(is.numeric), ~ round(., 2))) %>% 
@@ -170,7 +170,7 @@ tsSumReg_plot <- cbind(tsSumReg_plot, select(tsSumRegMax, upper = value))
 
 tsSumReg_plot <- transform(tsSumReg_plot, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 
-Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,2), breaks = c(0,1,2)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 5)
+Fig2 <- ggplot(tsSumReg_plot, aes(year, value, group = NAME_1)) + geom_hline(yintercept = 1, linetype = 2, colour = "grey") + geom_ribbon(aes(ymin = lower, ymax = upper), fill = "grey70", linetype = 0, alpha = 0.3) + geom_line() + ylab("Energy available / required") + xlab("Year") + labs(colour = "") + scale_x_discrete(breaks=c("2020", "2021", "2022", "2023")) + scale_y_continuous(limits = c(0,10), breaks = c(0,2,4,6,8,10)) + scale_colour_lancet() + theme_classic() +  theme(text=element_text(family="serif", size = 12), strip.background = element_blank()) + facet_wrap(~NAME_1, ncol = 5)
 ggsave(paste0(plotsDir, "/NGAFig2_1000.tiff"), Fig2, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
 
 #plot by aggregation zones
@@ -189,7 +189,7 @@ for(aggregation_zone in aggregation_zones){
     tsSumReg_mean <- pivot_longer(dplyr::select(zones, NAME_1, adeq_2020, adeq_2021, adeq_2022, adeq_2023), cols = -c(NAME_1, geometry))
     }
 
-  tsSumReg_mean <- separate(tsSumReg_mean, name, c("name", "year"), "_")
+  tsSumReg_mean <- separate(tsSumReg_mean, name, c("name", "year"), "_") %>% tidyterra::filter(year == 2023)
   if(aggregation_zone=="region"){
     tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Northern mixed", "Southern mixed", "Central mixed", "Forest mixed")))
   }else{tsSumReg_plot <- transform(tsSumReg_mean, NAME_1=factor(NAME_1,levels=unique(tsSumReg_mean$NAME_1)))}
@@ -197,7 +197,7 @@ for(aggregation_zone in aggregation_zones){
   
   Fig3 <- ggplot(data = tsSumReg_plot) +
     geom_sf(aes(fill = value)) +
-    facet_wrap(~ year, ncol = 4) +
+    #facet_wrap(~ year, ncol = 4) +
     scale_fill_gradient2(low = "darkred", mid = "white", high = "darkgreen", midpoint = 1, limits = c(floor(min(tsSumReg_plot$value, na.rm = TRUE)), ceiling(max(tsSumReg_plot$value, na.rm = TRUE))), space = "Lab", name = "", breaks = c(floor(min(tsSumReg_plot$value, na.rm = TRUE)), 1, ceiling(max(tsSumReg_plot$value, na.rm = TRUE))), labels = c("Negative balance", "0", "Positive balance")) +
     labs(fill = "") + 
     coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + 
@@ -236,4 +236,5 @@ ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) +
   geom_stars(data = st_as_stars(feed_total_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 1), breaks = c(0, 0.25, 0.5, 1), low = "#CDDF4A", high = "#0BAE1C", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
 
 ggplot() + geom_sf(data = countries, colour = "black", show.legend = F) + 
-  geom_stars(data = st_as_stars(lvstIntake_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 0.5), breaks = c(0, 0.25, 0.5), low = "#FFFFFF", high = "#F9A908", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")    
+  geom_stars(data = st_as_stars(lvstIntake_MJ)/1000000) + geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + ggtitle("") + labs(fill = expression("Tj"~year^-1)) + xlab("") + ylab("") + scale_fill_gradient(limits = c(0, 0.5), breaks = c(0, 0.25, 0.5), low = "#FFFFFF", high = "#F9A908", na.value = NA) + coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + theme(axis.text.x = element_blank(), axis.text.y = element_blank(), rect = element_blank(), panel.background = element_rect(fill = "blue3"), panel.grid.major = element_line(color = "blue3")) #+ themeLabs + theme(legend.position="bottom")
+

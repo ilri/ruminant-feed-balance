@@ -25,6 +25,7 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(tidyterra)
+library(readr)
 #library(exactextractr) #For zonal statistics
 
 rasterOptions(tmpdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp") # Process needs > 40GB of temporary disk space
@@ -614,3 +615,4 @@ for(year in yearList){
   cat("Completed: ",  "Mean Energy Requirements --", year, "\n")
   
 }
+

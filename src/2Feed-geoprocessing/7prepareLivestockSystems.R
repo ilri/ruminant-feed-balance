@@ -29,3 +29,4 @@ writeRaster(glps, paste0(outdir, "/glps.tif"), overwrite=TRUE)
 #   geom_spatraster(data = cattlePop) + 
 #   geom_sf(data = aoi1, colour = "black", fill = NA, show.legend = F) + 
 #   scale_fill_gradient(limits = c(0, 250), breaks = c(0, 50, 100, 250), low = "#FFFFFF", high = "brown", na.value = NA, name="Cattle (Head/sq km)")
+

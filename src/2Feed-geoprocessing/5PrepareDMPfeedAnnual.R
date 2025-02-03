@@ -23,6 +23,10 @@ rasterOptions(tmpdir="/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp
 rasterOptions(maxmemory = 5e+20) # 6e+10 ~51GB allowed
 rasterOptions(todisk = TRUE)
 
+terraOptions(tempdir = "/home/s2255815/rspovertygroup/JameelObs/FeedBaskets/AUTemp")
+terraOptions(memfrac=0.5)
+terraOptions(todisk=TRUE)
+
 # root folder
 root <- "."
 
@@ -58,15 +62,14 @@ lapply(yearList, function(year){
   filesSPAM <- list.files(path = pathSPAM, pattern = "_a.tif$", full.names = T)
   iSPAMAnimalDigestCropFrac <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/SPAM2020/animal_digest_frac.tif"))
   
-  rProtectedAreas <- stack(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
-  rNonProtectedAreas <- calc(rProtectedAreas, fun = function(x){ifelse(x == 0, 1, 0)})
+  rProtectedAreas <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/", country, "/ProtectedAreas/WDPAGlobal.tif")) #Original shp is 4gb+ 
+  rNonProtectedAreas <- calc(rProtectedAreas, fun = function(x){ifelse(is.na(x), 1, 0)})
   rm(rProtectedAreas)
   
   print("past protected")
   
   stLU <- stack(filesLU)
   LUcrops300DEA <- raster(paste0(pathLU, "/LUcrops300DEA.tif"))
-  
   
   # stPhen <- stack(raster('SpatialData/inputs/Feed_DrySeason/PhenologyModis/outputTif/phenoGreenup1.tif'), 
   #                 raster('SpatialData/inputs/Feed_DrySeason/PhenologyModis/outputTif/phenoSenescence1.tif'), 
@@ -99,6 +102,9 @@ lapply(yearList, function(year){
   
   stLU$LUcrops300 <- LUcrops300DEA
   
+  stLU$LUtree300 <- reclassify(stLU$LUtree300, c(-Inf, 0, 0, 200, Inf, 0)) 
+  stLU$LUtree300[is.na(stLU$LUtree300)] <- 0
+  
   #Crop phenology to test area
   stPhen <- extend(stPhen, extent(stDMP[[1]]))
   stPhen <- crop(stPhen, extent(stDMP[[1]]))
@@ -126,13 +132,10 @@ lapply(yearList, function(year){
   rNonProtectedAreas <- resample(rNonProtectedAreas, stDMP[[1]], method = "ngb")
   rNonProtectedAreas <- extend(rNonProtectedAreas, extent(stDMP[[1]]))
   rNonProtectedAreas <- crop(rNonProtectedAreas, extent(stDMP[[1]]))
-  #rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
+  rNonProtectedAreas <- mask(rNonProtectedAreas, aoi)
   print("past 0")
   
   names(stDMP) <- paste0("d", datesDMPdiff)
-  
-  stLU$LUtree300 <- reclassify(stLU$LUtree300, c(-Inf, 0, 0, 200, Inf, 0)) 
-  stLU$LUtree300[is.na(stLU$LUtree300)] <- 0
   
   print("past 1")
   
@@ -171,35 +174,38 @@ lapply(yearList, function(year){
   shrubFrac <- crop(shrubFrac, extent(stDMP[[1]]))
   gc()
   
-  funGrowingGrassWet <- function(dmp, crops, grassShrub, forest, shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*grassShrub*grassFracWet*(1-shrubFrac))+(dmp*9*forest*grassFracWet*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
-  funGrowingGrassDry <- function(dmp, crops, grassShrub, forest,  shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*grassShrub*grassFracDry*(1-shrubFrac))+(dmp*9*forest*grassFracDry*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
-  funGrowingBrowse <- function(dmp, crops, grassShrub, forest,  shrubFrac, nonprotected) {(dmp*9*grassShrub*shrubFrac*browseShrubFrac)+(dmp*9*forest*nonprotected*shrubFrac*browseForestFrac)} 
-  funGrowingCrops <- function(dmp, crops, greenup, senesence, feedFrac, resFrac, greenup2, senesence2) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
-  funGrowingAfter <- function(dmp, crops, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*9*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  stDMParea <- terra::cellSize(stDMP[[1]] %>% terra::rast(), unit = "ha") #calculate area per pixel
+  stDMParea <- raster(stDMParea)
+  
+  funGrowingGrassWet <- function(dmp, dmparea, crops, grassShrub, forest, shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*dmparea*grassShrub*grassFracWet*(1-shrubFrac))+(dmp*dmparea*forest*grassFracWet*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingGrassDry <- function(dmp, dmparea, crops, grassShrub, forest,  shrubFrac, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*dmparea*grassShrub*grassFracDry*(1-shrubFrac))+(dmp*dmparea*forest*grassFracDry*(1-shrubFrac)*nonprotected), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingBrowse <- function(dmp, dmparea, crops, grassShrub, forest,  shrubFrac, nonprotected) {(dmp*dmparea*grassShrub*shrubFrac*browseShrubFrac)+(dmp*dmparea*forest*nonprotected*shrubFrac*browseForestFrac)} 
+  funGrowingCrops <- function(dmp, dmparea, crops, greenup, senesence, feedFrac, resFrac, greenup2, senesence2) {ifelse((greenup <= datesDMPdiff[i] & senesence >= datesDMPdiff[i]) | (greenup2 <= datesDMPdiff[i] & senesence2 >= datesDMPdiff[i]), (dmp*dmparea*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
+  funGrowingAfter <- function(dmp, dmparea, crops, greenup, senesence, greenup2, senesence2, nonprotected) {ifelse((greenup > datesDMPdiff[i]) | (senesence < datesDMPdiff[i] & senesence + 60 > datesDMPdiff[i]) | (senesence2 < datesDMPdiff[i]), (dmp*dmparea*crops), NA) } #@feedFrac is the proportion of crops grown that have feedable residues - i.e. excluding coffee, tea, ect.
   
   for(i in 1:length(names(stDMP))){
     
-    iDMPGrassGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassWet)
+    iDMPGrassGrowing <- overlay(stDMP[[i]], stDMParea, stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassWet)
     writeRaster(iDMPGrassGrowing, paste0(FeedQuantityOutdir, "/grassWetDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
     rm(iDMPGrassGrowing)
     gc()
     
-    iDMPGrassDry <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassDry)
+    iDMPGrassDry <- overlay(stDMP[[i]], stDMParea, stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, rNonProtectedAreas, fun = funGrowingGrassDry)
     writeRaster(iDMPGrassDry, paste0(FeedQuantityOutdir, "/grassDryDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
     rm(iDMPGrassDry)
     gc()
     
-    iDMPBrowse <- overlay(stDMP[[i]], stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, rNonProtectedAreas, fun = funGrowingBrowse)
+    iDMPBrowse <- overlay(stDMP[[i]], stDMParea, stLU$LUcrops300, stLU$LUgrassShrub300, stLU$LUtree300, shrubFrac, rNonProtectedAreas, fun = funGrowingBrowse)
     writeRaster(iDMPBrowse, paste0(FeedQuantityOutdir, "/browseDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
     rm(iDMPBrowse)
     gc()
     
-    iDMPCropGrowing <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, iSPAMAnimalDigestCropFrac, residueFrac, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingCrops) 
+    iDMPCropGrowing <- overlay(stDMP[[i]], stDMParea, stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, iSPAMAnimalDigestCropFrac, residueFrac, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingCrops) 
     writeRaster(iDMPCropGrowing, paste0(FeedQuantityOutdir, "/cropDMP", datesDMP[i], ".tif"), overwrite = TRUE)
     rm(iDMPCropGrowing)
     gc()
     
-    iDMPAfter <- overlay(stDMP[[i]], stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAfter)
+    iDMPAfter <- overlay(stDMP[[i]], stDMParea, stLU$LUcrops300, stPhen$phenoGreenup1, stPhen$phenoSenescence1, stPhen$phenoGreenup2, stPhen$phenoSenescence2, fun = funGrowingAfter)
     writeRaster(iDMPAfter, paste0(FeedQuantityOutdir, "/afterDMP", datesDMP[i], ".tif"), overwrite = TRUE)  
     rm(iDMPAfter)
     gc()

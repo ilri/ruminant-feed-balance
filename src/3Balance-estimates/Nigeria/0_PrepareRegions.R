@@ -28,13 +28,13 @@ sf_use_s2(FALSE)
 ECOZONE <- ECOZONE %>%
   mutate(ECORegion = case_when(Ecological %in% c("Sahel Savannah", "Sudan Savannah") ~ "Dry Savannah",
                                Ecological %in% c("Southern Guinea Savannah", "Northern Guinea Savannah", "Mountain Vegetations")  ~ "Wet Savannah",
-                               Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove") ~ "Forest",
+                               Ecological %in% c("Lowland Rainfall", "Fresh Water Swanmp Forest", "Mangrove") ~ "Forest",
                                TRUE ~ Ecological),
          ECOZone = case_when(Ecological =="Sahel Savannah" ~ "(Agro)pastoral sahel",
                              Ecological == "Sudan Savannah" ~ "Northern mixed",
                              Ecological %in% c("Northern Guinea Savannah", "Mountain Vegetations")  ~ "Central mixed",
                              Ecological == "Southern Guinea Savannah" ~ "Southern mixed",
-                             Ecological %in% c("Lowland Rainfall", "Fresh Water Swamp Forest", "Mangrove")  ~ "Forest mixed",
+                             Ecological %in% c("Lowland Rainfall", "Fresh Water Swanmp Forest", "Mangrove")  ~ "Forest mixed",
                              TRUE ~ Ecological)
   )
 

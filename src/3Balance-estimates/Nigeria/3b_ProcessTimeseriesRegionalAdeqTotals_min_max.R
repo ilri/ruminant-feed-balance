@@ -71,15 +71,15 @@ for(aggregation_zone in aggregation_zones){
   
   if(aggregation_zone == "country"){
     zones <- st_read(paste0(spatialDir, "/inputs/aoi0.shp"))
-    zones <- bind_cols(select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }else if(aggregation_zone == "region"){
     zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
-    zones <- bind_cols(select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }else if(aggregation_zone == "state"){
     zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
-    zones <- bind_cols(select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }
   
@@ -132,15 +132,15 @@ for(aggregation_zone in aggregation_zones){
   
   if(aggregation_zone == "country"){
     zones <- st_read(paste0(spatialDir, "/inputs/aoi0.shp"))
-    zones <- bind_cols(select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, COUNTRY), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }else if(aggregation_zone == "region"){
     zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
-    zones <- bind_cols(select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, ECOZone), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }else if(aggregation_zone == "state"){
     zones <- st_read(paste0(spatialDir, "/inputs/aoi1.shp"))
-    zones <- bind_cols(select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
+    zones <- bind_cols(dplyr::select(zones, NAME_1), exact_extract(terra::rast(tLv), zones, fun = "sum"))
     
   }
   
@@ -165,3 +165,4 @@ for(aggregation_zone in aggregation_zones){
   cat("Completed extracting maximum stats for: ", aggregation_zone, "\n")
   
 }
+
