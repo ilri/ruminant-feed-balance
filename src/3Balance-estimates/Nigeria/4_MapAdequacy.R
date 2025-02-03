@@ -203,7 +203,7 @@ for(aggregation_zone in aggregation_zones){
     coord_sf(xlim = c(2.1, 15.1), ylim = c(3.7, 14.3), expand = FALSE) + 
     theme_bw() +  
     theme(panel.background = element_rect(fill = "white"), text = element_text(family = "arial", size = 12), panel.grid.minor = element_blank(), plot.background = element_rect(fill = "white"))
-  ggsave(paste0(plotsDir, "/NGAFig3_1000_", aggregation_zone, ".tiff"), Fig3, device = "tiff", dpi = 1000, width=90 * (14/5), height=25 * (14/5), units = "mm")
+  ggsave(paste0(plotsDir, "/NGAFig3_1000_", aggregation_zone, ".tiff"), Fig3, device = "tiff", dpi = 1000,width=90 * (14/5), height=25 * (14/5), units = "mm")
 }
 
 ######

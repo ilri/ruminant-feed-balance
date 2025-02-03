@@ -888,13 +888,13 @@ The R script for completing the above steps is available at: <https://github.com
 
 ### Visualising results
 
-The total biomass available as animal feed in Nigeria was `152` million tonnes (Mt) of DM, averaging `1.49` tonnes DM per hectare in the dry savannah, `1.02` tonnes DM per hectare in the forest region and `1.92` tonnes DM per hectare in the wet savannah.
+The total biomass available as animal feed in Nigeria was `294.08` million tonnes (Mt) of DM, averaging `2.21` tonnes DM per hectare in the dry savannah, `3.73` tonnes DM per hectare in the forest region and `3.83` tonnes DM per hectare in the wet savannah.
 
-In the dry savannah, grass contributed `12.5%` of the total metabolizable energy (ME), with crop residue, browse, and biomass from postharvest growth contributing `57.1%`, `0.18%`, and `30.3%`, respectively. In the forest zone, grass accounted for `26.4%`, while with crop residue, browse, and biomass from postharvest growth contributing `27.0%`, `31.5%`, and `15.0%`. In the wet savannah, grass provided `13.4%` of the total ME, crop residue contributed `55.1%`, browse `2.6%`, and biomass from postharvest growth `28.9% `(@fig-Total_ME).
+In the dry savannah, grass contributed `28.17%` of the total metabolizable energy (ME), with crop residue, browse, and biomass from postharvest growth contributing `46.67%`, `0.40%`, and `24.76%`, respectively. In the forest zone, grass accounted for `45.22%`, while with crop residue, browse, and biomass from postharvest growth contributing `7.95%`, `42.41%` and `4.42%`. In the wet savannah, grass provided `40.94%` of the total ME, crop residue contributed `32.80%` and `9.05%`, and biomass from postharvest growth `17.21%` (@fig-Total_ME).
 
 ![Metabolisable energy (ME) availability for ruminant livestock from feed sources in 2023 (TJ ME/year). Uncertainty due to ME concentration represented by error bands.](img/Total_ME.png){#fig-Total_ME fig-pos="H"}
 
-The adequacy of locally available metabolisable energy for ruminant livestock was most constrained in the (Agro)pastoral sahel (30% of requirements locally available), Forest mixed, Northern mixed and Southern mixed zones (@fig-Requirements_me).
+The adequacy of locally available metabolisable energy for ruminant livestock was most constrained in the (Agro)pastoral sahel (68% of requirements locally available) (@fig-Requirements_me).
 
 ![Energy balance of ruminant livestock from feeds over time by zone (J ME available / J ME required/year). Uncertainty due to ME concentration and livestock parameters represented by grey bands. Dashed line at 1 where feed is sufficient for all estimated requirements (maintenance, growth, locomotion, draught power, gestation and lactation) for the zone.](img/Requirements_me.png){#fig-Requirements_me fig-pos="H"}
 
