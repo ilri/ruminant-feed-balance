@@ -86,6 +86,64 @@ lv <- c(lv, periurban)
 
 lvTLU <- lapp(lv[[1:3]], fun = function(cattle, sheep, goat){(cattle*1)+(sheep*0.15)+(goat*0.15)}, filename = paste0(spatialDir, "/inputs/GLW4/TLU.tif"), overwrite = T)
 
+# Produce livestock number by categories
+Regions <- c("Dry Savannah", "Forest", "Wet Savannah")
+lvPopCategories <- c("Bull", "Cow", "Steer", "Heifer", "Calf", "Sheep", "Lamb", "Goat", "Kid")
+lvPop <- c(lvCattle, lvSheep, lvGoat, ECORegions)
+
+for(i in Regions){
+  
+  for(k in lvPopCategories) {
+    
+    if(k%in%c("Bull", "Cow", "Steer", "Heifer", "Calf")&i=="Dry Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==1, cattle * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Bull", "Cow", "Steer", "Heifer", "Calf")&i=="Forest"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==2, cattle * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Bull", "Cow", "Steer", "Heifer", "Calf")&i=="Wet Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==3, cattle * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Sheep", "Lamb")&i=="Dry Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==1, sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Sheep", "Lamb")&i=="Forest"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==2, sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Sheep", "Lamb")&i=="Wet Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==3, sheep * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Goat", "Kid")&i=="Dry Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==1, goat * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Goat", "Kid")&i=="Forest"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==2, goat * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }else if(k%in%c("Goat", "Kid")&i=="Wet Savannah"){
+      LvPopRegion <- lapp(lvPop, fun = function(cattle, sheep, goat, region) {
+        ifelse(region==3, goat * param_ME$value[param_ME$Variable=="HS" & param_ME$name == k & param_ME$Region == i], NA)
+      })
+    }
+    terra::writeRaster(LvPopRegion, paste0(spatialDir, "/inputs/GLW4/Dissag_GLW4_2020_", k, "_", i, ".tif"), overwrite=TRUE)
+  
+  } 
+}
+
+# Combine livestock population layers
+lvDir <- paste0(root, "/src/3Balance-estimates/Nigeria/SpatialData/inputs/GLW4")
+for(k in lvPopCategories){
+  lvRas <- sum(rast(paste0(lvDir, "/Dissag_GLW4_2020_", k, "_Dry Savannah.tif")), rast(paste0(lvDir, "/Dissag_GLW4_2020_", k, "_Wet Savannah.tif")), rast(paste0(lvDir, "/Dissag_GLW4_2020_", k, "_Forest.tif")), na.rm=TRUE)
+  terra::writeRaster(lvRas, paste0(spatialDir, "/inputs/GLW4/Dissag_GLW4_2020_", k, ".tif"), overwrite=TRUE)
+}
+
 # Loop through years
 yearList <- c("2020", "2021", "2022", "2023")
 for(year in yearList){

@@ -48,6 +48,7 @@ regions <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialDa
 yearList <- c("2020", "2021", "2022", "2023")
 tsSumZone_List <- list()
 tsSumRegion_List <- list()
+tsSumLGA_List <- list()
 for(year in yearList){
   
   cropME_HI_utilmean <- raster(paste0(spatialDir, "/intermediate/Crop_ME/", year , "/cropME_HI_utilmean.tif"))
@@ -61,6 +62,10 @@ for(year in yearList){
   croppingDays <- raster::resample(croppingDays, feedCropBurn, method = "ngb")
   croppingDays <- reclassify(croppingDays, c(220, Inf, 220)) 
   dryDays <- 365 - croppingDays
+  
+  # write length of seasons
+  writeRaster(croppingDays, paste0(spatialDir, "/outputs/croppingDays_", year, ".tif"), overwrite = T)
+  writeRaster(dryDays, paste0(spatialDir, "/outputs/dryDays_", year, ".tif"), overwrite = T)
   
   region <- raster(paste0(spatialDir, "/intermediate/regions.tif"))
   grassMEForest <- 7.9 #Adebayo et al 2020 https://njap.org.ng/index.php/njap/article/view/1264/1103 6.2-9.0 
@@ -171,24 +176,31 @@ for(year in yearList){
   
   #Add DM
   cropDM <- exact_extract(tCrop/cropMEmean, regions, "sum")
+  writeRaster(tCrop/cropMEmean, paste0(Outputs_dir, "/Feed_cropDM", year, ".tif"), overwrite = T)
   tsSumRegion$cropDM <- as.numeric(c(cropDM[1], cropDM[2], cropDM[3]))
   
   grassDM <- exact_extract(tGrass/grassME, regions, "sum")
+  writeRaster(tGrass/grassME, paste0(Outputs_dir, "/Feed_grassDM", year, ".tif"), overwrite = T)
   tsSumRegion$grassDM <- as.numeric(c(grassDM[1], grassDM[2], grassDM[3]))
   
   grassDMwet <- exact_extract(tGrassWet/grassME, regions, "sum")
+  writeRaster(tGrassWet/grassME, paste0(Outputs_dir, "/Feed_grassDMwet", year, ".tif"), overwrite = T)
   tsSumRegion$grassDMwet <- as.numeric(c(grassDMwet[1], grassDMwet[2], grassDMwet[3]))
   
   grassDMdry <- exact_extract(tGrassDry/grassME, regions, "sum")
+  writeRaster(tGrassDry/grassME, paste0(Outputs_dir, "/Feed_grassDMdry", year, ".tif"), overwrite = T)
   tsSumRegion$grassDMdry <- as.numeric(c(grassDMdry[1], grassDMdry[2], grassDMdry[3]))
   
   browseDM_mean <- exact_extract(tBrowse/browseME, regions, "sum")
+  writeRaster(tBrowse/browseME, paste0(Outputs_dir, "/Feed_browseDM", year, ".tif"), overwrite = T)
   tsSumRegion$browseDM <- as.numeric(c(browseDM_mean[1], browseDM_mean[2], browseDM_mean[3]))
   
   browseDMwet_mean <- exact_extract(tBrowseWet/browseME, regions, "sum")
+  writeRaster(tBrowseWet/browseME, paste0(Outputs_dir, "/Feed_browseDMwet", year, ".tif"), overwrite = T)
   tsSumRegion$browseDMwet <- as.numeric(c(browseDMwet_mean[1], browseDMwet_mean[2], browseDMwet_mean[3]))
   
   browseDMdry_mean <- exact_extract(tBrowseDry/browseME, regions, "sum")
+  writeRaster(tBrowseDry/browseME, paste0(Outputs_dir, "/Feed_browseDMdry", year, ".tif"), overwrite = T)
   tsSumRegion$browseDMdry <- as.numeric(c(browseDMdry_mean[1], browseDMdry_mean[2], browseDMdry_mean[3]))
   
   tsSumRegion$afterDM <- tsSumRegion$afterME_mean / feedQuality_item$ME[feedQuality_item$codeSPAM == "natPast"]
