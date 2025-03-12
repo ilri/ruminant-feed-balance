@@ -31,6 +31,14 @@ feedDM_stats <- cbind(LGA = aoi2$NAME_2, feedDM)
 colnames(feedDM_stats)[2:4] <- c("cropDM_kg", "grassDM_kg", "browseDM_kg")
 write.csv(feedDM_stats, paste0(Results_dir, "/FeedDM_LGA.csv"), row.names = FALSE)
 
+# extract diet proportions
+feed_list <- c("crop", "grass", "browse", "after")
+tFeed <- rast(paste0(spatialDir, "/outputs/Feed_", feed_list, "DM2023.tif"))
+feedDM <- exact_extract(tFeed, aoi2, "sum")
+feedDM_stats <- cbind(LGA = aoi2$NAME_2, feedDM)
+colnames(feedDM_stats)[2:4] <- c("cropDM_kg", "grassDM_kg", "browseDM_kg")
+write.csv(feedDM_stats, paste0(Results_dir, "/FeedDM_LGA.csv"), row.names = FALSE)
+
 # extract cropping and non-cropping days
 season_list <- c("cropping", "dry")
 tSeasons <- rast(paste0(spatialDir, "/outputs/", season_list, "Days_2023.tif"))
@@ -51,4 +59,38 @@ tSumLv <- tSumLv %>% mutate_if(is.numeric, round, digits = 0)
 # tSumLv$Cattle <- tSumLv$Bulls+tSumLv$Cows+tSumLv$Steers+tSumLv$Heifers+tSumLv$Calves
 # sum(tSumLv$Cattle)
 write.csv(tSumLv, paste0(Results_dir, "/LivestockPopulation.csv"), row.names = FALSE)
+
+# extract land use types and proportions
+luClasses <- c("grass", "shrub", "tree", "crops")
+tLU <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Nigeria/Feed_DrySeason/LandUse/LU",luClasses,"300.tif"))
+#tLUcrop <- rast(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Nigeria/Feed_DrySeason/LandUse/LUcrops300DEA.tif"))
+#tLU <- c(tLU, tLUcrop)
+tMeanLU <- exact_extract(tLU, aoi2, "mean")
+tMeanLU <- cbind(LGA = aoi2$NAME_2, tMeanLU)
+colnames(tMeanLU)[2:5] <- c("grass", "shrub", "tree", "crop")
+tMeanLU <- tMeanLU %>% mutate(across(where(is.numeric), ~ . * 100))
+write.csv(tMeanLU, paste0(Results_dir, "/LandUseProportion.csv"), row.names = FALSE)
+
+# extract burning incidences
+luClasses <- c("Crop", "Grass")
+tBurn <- rast(paste0(root, "/src/3Balance-estimates/Nigeria/SpatialData/inputs/Burned/2023/burn",luClasses,"Months.tif"))
+tBurn <- exact_extract(tBurn, aoi2, "frac")
+tBurnEvents <- cbind(LGA = aoi2$NAME_2, tBurn)
+tBurnEvents <- tBurnEvents %>%
+  mutate(burnEventsCrop = case_when(
+    frac_0.burnCropMonths >= 1 ~ 0,
+    frac_1.burnCropMonths > 0 | 
+      frac_2.burnCropMonths > 0 | 
+      frac_3.burnCropMonths > 0 | 
+      frac_4.burnCropMonths > 0 ~ 1,
+    TRUE ~ NA_real_),
+  burnEventsGrass = case_when(
+    frac_0.burnGrassMonths >= 1 ~ 0,
+    frac_1.burnGrassMonths > 0 | 
+      frac_2.burnGrassMonths > 0 | 
+      frac_3.burnGrassMonths > 0 | 
+      frac_4.burnGrassMonths > 0 ~ 1,
+    TRUE ~ NA_real_)) %>% 
+  dplyr::select(LGA, burnEventsCrop, burnEventsGrass)
+write.csv(tBurnEvents, paste0(Results_dir, "/BurnEventsBoolean.csv"), row.names = FALSE)
 

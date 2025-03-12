@@ -1,0 +1,776 @@
+"LGA","burnEventsCrop","burnEventsGrass"
+"Aba North",0,0
+"Aba South",0,0
+"Arochukwu",0,1
+"Bende",1,1
+"Ikwuano",0,0
+"Isiala Ngwa North",0,0
+"Isiala Ngwa South",0,1
+"Isuikwuato",0,1
+"Obi Ngwa",1,1
+"Ohafia",1,1
+"Osisioma Ngwa",0,1
+"Ugwunagbo",0,0
+"Ukwa East",1,1
+"Ukwa West",1,1
+"Umu Nneochi",1,1
+"Umuahia North",0,1
+"Umuahia South",0,0
+"Demsa",1,1
+"Fufore",1,1
+"Ganye",1,1
+"Girie",1,1
+"Gombi",1,1
+"Guyuk",1,1
+"Hong",1,1
+"Jada",1,1
+"Lamurde",1,1
+"Madagali",1,1
+"Maiha",1,1
+"Mayo-Belwa",1,1
+"Michika",1,1
+"Mubi North",1,1
+"Mubi South",0,0
+"Numan",1,1
+"Shelleng",1,1
+"Song",1,1
+"Teungo",1,1
+"Yola North",0,1
+"Yola South",1,1
+"Abak",0,0
+"Eastern Obolo",0,0
+"Eket",1,1
+"Esit Eket",0,0
+"Essien Udim",0,1
+"Etim Ekpo",0,0
+"Etinan",0,0
+"Ibeno",0,1
+"Ibesikpo Asutan",0,0
+"Ibiono Ibom",0,0
+"Ika",0,0
+"Ikono",0,0
+"Ikot Abasi",0,0
+"Ikot Ekpene",0,0
+"Ini",0,1
+"Itu",0,0
+"Mbo",0,0
+"Mkpat Enin",0,0
+"Nsit Atai",0,0
+"Nsit Ibom",0,0
+"Nsit Ubium",0,0
+"Obot Akara",0,0
+"Okobo",0,1
+"Onna",0,1
+"Oron",0,0
+"Oruk Anam",0,0
+"Udung Uko",0,1
+"Ukanafun",0,0
+"Uruan",0,0
+"Urue Offong",0,0
+"Uyo",0,0
+"Aguata",0,0
+"Anambra East",1,1
+"Anambra West",0,1
+"Anaocha",0,0
+"Awka North",1,1
+"Awka South",0,0
+"Ayamelum",1,1
+"Dunukofia",0,0
+"Ekwusigo",0,0
+"Idemili North",1,1
+"Idemili South",1,1
+"Ihiala",1,1
+"Njikoka",0,0
+"Nnewi North",1,1
+"Nnewi South",0,0
+"Ogbaru",0,1
+"Onitsha North",0,0
+"Onitsha South",0,0
+"Orumba North",1,1
+"Orumba South",0,0
+"Oyi",0,0
+"Alkaleri",1,1
+"Bauchi",1,1
+"Bogoro",1,1
+"Damban",0,0
+"Darazo",1,1
+"Dass",1,1
+"Gamawa",0,0
+"Ganjuwa",1,1
+"Giade",0,0
+"Itas/Gadau",0,0
+"Jama'are",0,0
+"Katagum",0,0
+"Kirfi",1,1
+"Misau",1,1
+"Ningi",1,1
+"Shira",0,0
+"Tafawa-Balewa",1,1
+"Toro",1,1
+"Warji",1,1
+"Zaki",0,0
+"Brass",1,1
+"Ekeremor",0,1
+"Kolokuma/Opokuma",0,0
+"Nembe",0,1
+"Ogbia",0,0
+"Sagbama",0,0
+"Southern Ijaw",0,1
+"Yenagoa",0,1
+"Ado",1,1
+"Agatu",1,1
+"Apa",1,1
+"Bukuru",1,1
+"Gboko",1,1
+"Guma",1,1
+"Gwer East",1,1
+"Gwer West",1,1
+"Katsina-Ala",1,1
+"Konshisha",1,1
+"Kwande",1,1
+"Logo",1,1
+"Makurdi",1,1
+"Obi",1,1
+"Ogbadibo",0,1
+"Ohimini",1,1
+"Oju",1,1
+"Okpokwu",1,1
+"Otukpo",1,1
+"Tarka",1,1
+"Ukum",1,1
+"Ushongo",1,1
+"Vande Ikya",0,0
+"Abadam",1,1
+"Askira/Uba",1,1
+"Bama",1,1
+"Bayo",1,1
+"Biu",1,1
+"Chibok",1,1
+"Damboa",1,1
+"Dikwa",1,1
+"Gubio",1,1
+"Guzamala",1,1
+"Gwoza",1,1
+"Hawul",1,1
+"Jere",1,1
+"Kaga",1,1
+"Kala/Balge",1,1
+"Konduga",1,1
+"Kukawa",1,1
+"Kwaya Kusar",0,0
+"Lake Chad",1,1
+"Mafa",1,1
+"Magumeri",1,1
+"Maiduguri",1,1
+"Marte",1,1
+"Mobbar",1,1
+"Monguno",1,1
+"Ngala",1,1
+"Nganzai",1,1
+"Shani",0,0
+"Abi",1,1
+"Akamkpa",0,1
+"Akpabuyo",0,0
+"Bakassi",0,0
+"Bekwarra",1,1
+"Biase",0,1
+"Boki",0,1
+"Calabar",0,0
+"Calabar South",0,0
+"Etung",0,0
+"Ikom",1,1
+"Obanliku",1,1
+"Obubra",1,1
+"Obudu",1,1
+"Odukpani",0,1
+"Ogoja",1,1
+"Yakurr",0,1
+"Yala",1,1
+"Aniocha North",1,1
+"Aniocha South",1,1
+"Bomadi",0,0
+"Burutu",0,0
+"Ethiope East",1,1
+"Ethiope West",1,1
+"Ika North-East",1,1
+"Ika South",1,1
+"Isoko North",1,1
+"Isoko South",1,1
+"Ndokwa East",1,1
+"Ndokwa West",1,1
+"Okpe",0,0
+"Oshimili North",1,1
+"Oshimili South",0,0
+"Patani",0,0
+"Sapele",1,1
+"Udu",1,1
+"Ughelli North",1,1
+"Ughelli South",1,1
+"Ukwuani",1,1
+"Uvwie",0,0
+"Warri North",1,1
+"Warri South",0,0
+"Warri South-West",0,1
+"Abakaliki",1,1
+"Afikpo North",1,1
+"Afikpo South",0,1
+"Ebonyi",0,1
+"Ezza North",1,1
+"Ezza South",1,1
+"Ikwo",0,1
+"Ishielu",1,1
+"Ivo",1,1
+"Izzi",1,1
+"Ohaozara",1,1
+"Ohaukwu",1,1
+"Onicha",1,1
+"Akoko-Edo",1,1
+"Egor",0,0
+"Esan Central",1,1
+"Esan North-East",1,1
+"Esan South-East",1,1
+"Esan West",1,1
+"Etsako Central",1,1
+"Etsako East",1,1
+"Etsako West",1,1
+"Igueben",1,1
+"Ikpoba-Okha",1,1
+"Oredo",1,1
+"Orhionmwon",1,1
+"Ovia North-East",1,1
+"Ovia South-West",1,1
+"Owan East",1,1
+"Owan West",1,1
+"Uhunmwonde",1,1
+"Ado-Ekiti",1,1
+"Efon",1,1
+"Ekiti East",0,0
+"Ekiti South-West",1,1
+"Ekiti West",1,1
+"Emure/Ise/Orun",0,1
+"Gboyin",1,0
+"Ido-Osi",1,1
+"Ijero",1,1
+"Ikere",1,1
+"Ikole",1,1
+"Ilejemeje",1,1
+"Irepodun/Ifelodun",1,1
+"Ise/Orun",1,1
+"Moba",1,1
+"Oye",1,1
+"Aninri",1,0
+"Awgu",1,1
+"Enugu East",1,1
+"Enugu North",1,1
+"Enugu South",1,1
+"Ezeagu",1,1
+"Igbo-Etiti",1,1
+"Igbo-eze North",1,1
+"Igbo-eze South",1,1
+"Isi-Uzo",1,1
+"Nkanu East",1,1
+"Nkanu West",1,1
+"Nsukka",1,1
+"Oji-River",1,1
+"Udenu",1,1
+"Udi",1,1
+"Uzo-Uwani",1,1
+"Abaji",1,1
+"Abuja",1,1
+"Bwari",1,1
+"Gwagwalada",1,1
+"Kuje",1,1
+"Kwali",1,1
+"Akko",0,0
+"Balanga",1,1
+"Billiri",1,1
+"Dukku",1,1
+"Funakaye",1,1
+"Gombe",0,0
+"Kaltungo",1,1
+"Kwami",1,1
+"Nafada",1,1
+"Shomgom",1,1
+"Yamaltu/Deba",0,0
+"Aboh-Mbaise",0,0
+"Ahiazu-Mbaise",0,0
+"Ehime-Mbano",0,0
+"Ezinihitte Mbaise",0,0
+"Ideato North",0,0
+"Ideato South",0,0
+"Ihitte/Uboma",0,0
+"Ikeduru",0,1
+"Isiala Mbano",0,0
+"Isu",0,0
+"Mbatoli",0,1
+"Ngor-Okpala",1,1
+"Njaba",0,0
+"Nkwerre",0,0
+"Nwangele",0,0
+"Obowo",0,0
+"Oguta",1,1
+"Ohaji/Egbema",1,1
+"Okigwe",1,1
+"Orlu",0,0
+"Orsu",0,0
+"Oru East",0,1
+"Oru West",1,1
+"Owerri Municipal",1,1
+"Owerri North",0,0
+"Owerri West",1,1
+"Unuimo",0,0
+"Auyo",0,0
+"Babura",0,0
+"Biriniwa",0,0
+"Birnin Kudu",1,1
+"Buji",0,0
+"Dutse",0,0
+"Gagarawa",0,0
+"Garki",0,0
+"Gumel",0,0
+"Guri",1,1
+"Gwaram",0,0
+"Gwiwa",0,0
+"Hadejia",0,0
+"Jahun",0,1
+"Kafin Hausa",0,0
+"Kaugama",0,1
+"Kazaure",0,0
+"Kiri Kasama",1,1
+"Kiyawa",1,1
+"Maigatari",0,0
+"Malam Maduri",0,0
+"Miga",1,0
+"Ringim",0,0
+"Roni",0,0
+"Sule Tankarkar",0,0
+"Taura",0,0
+"Yankwashi",0,0
+"Birnin Gwari",1,1
+"Chikun",1,1
+"Giwa",1,1
+"Igabi",1,1
+"Ikara",0,0
+"Jaba",1,1
+"Jema'a",1,1
+"Kachia",1,1
+"Kaduna North",0,0
+"Kaduna South",0,0
+"Kagarko",1,1
+"Kajuru",1,1
+"Kaura",1,1
+"Kauru",1,1
+"Kubau",1,1
+"Kudan",0,0
+"Lere",1,1
+"Makarfi",0,0
+"Sabon Gari",0,0
+"Sanga",1,1
+"Soba",1,1
+"Zangon Kataf",1,1
+"Zaria",1,1
+"Ajingi",0,0
+"Albasu",0,0
+"Bagwai",0,0
+"Bebeji",1,1
+"Bichi",0,0
+"Bunkure",0,0
+"Dala",0,0
+"Dambatta",0,0
+"Dawakin Kudu",0,0
+"Dawakin Tofa",0,0
+"Doguwa",1,1
+"Fagge",0,0
+"Gabasawa",0,0
+"Garko",0,0
+"Garum Mallam",0,0
+"Gaya",1,1
+"Gezawa",0,0
+"Gwale",0,0
+"Gwarzo",0,0
+"Kabo",0,0
+"Kano",0,0
+"Karaye",0,0
+"Kibiya",0,0
+"Kiru",0,0
+"Kumbotso",1,1
+"Kunchi",0,0
+"Kura",0,0
+"Madobi",0,0
+"Makoda",0,0
+"Minjibir",0,0
+"Nasarawa",0,0
+"Rano",0,0
+"Rimin Gado",0,0
+"Rogo",0,0
+"Shanono",0,0
+"Sumaila",0,0
+"Takai",0,0
+"Tarauni",0,0
+"Tofa",0,0
+"Tsanyawa",0,0
+"Tudun Wada",1,1
+"Ungogo",1,1
+"Warawa",0,0
+"Wudil",0,0
+"Bakori",1,1
+"Batagarawa",1,1
+"Batsari",1,1
+"Baure",0,0
+"Bindawa",0,0
+"Charanchi",0,0
+"Dandume",1,1
+"Danja",1,1
+"Danmusa",1,1
+"Daura",0,0
+"Dutsi",0,0
+"Dutsinma",1,1
+"Faskari",1,1
+"Funtua",0,0
+"Ingawa",0,0
+"Jibia",1,1
+"Kafur",0,0
+"Kaita",0,0
+"Kankara",1,1
+"Kankia",0,0
+"Katsina",0,0
+"Kurfi",1,1
+"Kusada",0,0
+"Mai'Adua",0,0
+"Malumfashi",0,0
+"Mani",0,0
+"Mashi",0,0
+"Matazu",1,1
+"Musawa",1,1
+"Rimi",0,0
+"Sabuwa",1,1
+"Safana",1,1
+"Sandamu",0,0
+"Zango",0,0
+"Aleiro",0,0
+"Arewa Dandi",1,1
+"Argungu",1,1
+"Augie",1,1
+"Bagudo",1,1
+"Birnin Kebbi",1,1
+"Bunza",1,1
+"Dandi",1,1
+"Danko Wasagu",1,1
+"Fakai",1,1
+"Gwandu",0,0
+"Jega",1,1
+"Kalgo",1,1
+"Koko/Besse",1,1
+"Maiyama",1,1
+"Ngaski",1,1
+"Sakaba",1,1
+"Shanga",1,1
+"Suru",1,1
+"Yauri",1,1
+"Zuru",1,1
+"Adavi",1,1
+"Ajaokuta",1,1
+"Ankpa",1,1
+"Bassa",1,1
+"Dekina",1,1
+"Ibaji",1,1
+"Idah",0,0
+"Igalamela-Odolu",1,1
+"Ijumu",1,1
+"Kabba/Bunu",1,1
+"Kogi",1,1
+"Lokoja",1,1
+"Mopa-Muro",1,1
+"Ofu",1,1
+"Ogori/Magongo",0,0
+"Okehi",1,1
+"Okene",1,1
+"Olamaboro",1,1
+"Omala",1,1
+"Yagba East",1,1
+"Yagba West",1,1
+"Asa",1,1
+"Baruten",1,1
+"Edu",1,1
+"Ekiti",1,1
+"Ifelodun",1,1
+"Ilorin East",0,0
+"Ilorin South",0,0
+"Ilorin West",0,0
+"Irepodun",0,1
+"Isin",1,1
+"Kaiama",1,1
+"Moro",1,1
+"Offa",0,0
+"Oke-Ero",1,1
+"Oyun",0,0
+"Pategi",1,1
+"Agege",0,0
+"Ajeromi/Ifelodun",0,0
+"Alimosho",0,0
+"Amuwo Odofin",0,0
+"Apapa",0,0
+"Badagry",0,1
+"Epe",1,1
+"Eti-Osa",0,0
+"Ibeju-Lekki",1,1
+"Ifako/Ijaye",0,0
+"Ikeja",0,0
+"Ikorodu",0,1
+"Kosofe",0,0
+"Lagos Island",0,0
+"Mainland",0,0
+"Mushin",0,0
+"Ojo",0,0
+"Oshodi/Isolo",0,0
+"Shomolu",0,0
+"Surulere",0,0
+"Akwanga",1,1
+"Awe",1,1
+"Doma",1,1
+"Karu",1,1
+"Keana",1,1
+"Keffi",0,0
+"Kokona",1,1
+"Lafia",1,1
+"Nasarawa",1,1
+"Nasarawa Eggon",1,1
+"Obi",1,1
+"Toto",1,1
+"Wamba",1,1
+"Agaie",1,1
+"Agwara",1,1
+"Bida",0,0
+"Borgu",1,1
+"Bosso",1,1
+"Chanchaga",0,0
+"Edati",1,1
+"Gbako",1,1
+"Gurara",1,1
+"Katcha",1,1
+"Kontagora",1,1
+"Lapai",1,1
+"Lavun",1,1
+"Magama",1,1
+"Mariga",1,1
+"Mashegu",1,1
+"Mokwa",1,1
+"Muya",1,1
+"Paikoro",1,1
+"Rafi",1,1
+"Rijau",1,1
+"Shiroro",1,1
+"Suleja",0,0
+"Tafa",0,0
+"Wushishi",1,1
+"Abeokuta North",1,1
+"Abeokuta South",0,0
+"Ado Odo/Ota",0,1
+"Ewekoro",1,1
+"Ifo",0,1
+"Ijebu-Ode",0,1
+"Ijebu East",0,1
+"Ijebu North",1,1
+"Ijebu North-East",1,1
+"Ikenne",1,1
+"Imeko-Afon",1,1
+"Ipokia",0,1
+"Obafemi-Owode",0,1
+"Odeda",1,1
+"Odogbolu",1,1
+"Ogun Waterside",1,1
+"Remo-North",0,1
+"Shagamu",1,1
+"Yewa North",1,1
+"Yewa South",0,1
+"Akoko North-East",1,0
+"Akoko North-West",1,1
+"Akoko South-East",1,1
+"Akoko South-West",1,1
+"Akure North",1,1
+"Akure South",0,1
+"Ese-Odo",0,1
+"Idanre",1,1
+"Ifedore",1,0
+"Ilaje",0,1
+"Ile-Oluji/Okeigbo",1,0
+"Irele",1,1
+"Odigbo",1,1
+"Okitipupa",0,0
+"Ondo East",0,0
+"Ondo West",0,1
+"Ose",1,1
+"Owo",1,1
+"Aiyedade",1,1
+"Atakumosa East",0,0
+"Atakumosa West",0,1
+"Ayedire",1,1
+"Boluwaduro",1,1
+"Boripe",0,1
+"Ede North",0,0
+"Ede South",1,1
+"Egbedore",1,1
+"Ejigbo",1,1
+"Ife Central",0,0
+"Ife East",0,0
+"Ife North",0,1
+"Ife South",0,1
+"Ifedayo",0,1
+"Ifelodun",0,0
+"Ila",1,1
+"Ilesha East",0,0
+"Ilesha West",0,0
+"Irepodun",0,0
+"Irewole",1,1
+"Isokan",0,1
+"Iwo",1,1
+"Obokun",1,1
+"Odo-Otin",1,1
+"Ola Oluwa",1,1
+"Olorunda",0,0
+"Oriade",0,1
+"Orolu",0,0
+"Osogbo",0,0
+"Afijio",1,1
+"Akinyele",1,1
+"Atiba",1,1
+"Atisbo",1,1
+"Egbeda",1,1
+"Ibadan North",0,0
+"Ibadan North-East",0,0
+"Ibadan North-West",0,0
+"Ibadan South-East",0,0
+"Ibadan South-West",0,0
+"Ibarapa Central",1,1
+"Ibarapa East",1,1
+"Ibarapa North",1,1
+"Ido",1,1
+"Irepo",1,1
+"Iseyin",1,1
+"Itesiwaju",1,1
+"Iwajowa",1,1
+"Kajola",1,1
+"Lagelu",1,1
+"Ogbomosho North",0,0
+"Ogbomosho South",0,0
+"Ogo Oluwa",1,1
+"Olorunsogo",1,1
+"Oluyole",1,1
+"Ona Ara",1,1
+"Orelope",1,1
+"Ori-Ire",1,1
+"Oyo East",0,0
+"Oyo West",1,1
+"Saki East",1,1
+"Saki West",1,1
+"Surulere",0,0
+"Barkin Ladi",1,1
+"Bassa",1,1
+"Bokkos",1,1
+"Jos East",1,1
+"Jos North",1,1
+"Jos South",1,1
+"Kanam",1,1
+"Kanke",1,1
+"Langtang North",1,1
+"Langtang South",1,1
+"Mangu",1,1
+"Mikang",1,1
+"Pankshin",1,1
+"Qua'an Pan",1,1
+"Riyom",1,1
+"Shendam",1,1
+"Wase",1,1
+"Abua/Odual",0,0
+"Ahoada East",1,1
+"Ahoada West",0,1
+"Akuku-Toru",0,0
+"Andoni",0,1
+"Asari-Toru",0,1
+"Bonny",0,1
+"Degema",0,0
+"Eleme",1,1
+"Emuoha",1,1
+"Etche",1,1
+"Gokana",0,1
+"Ikwerre",1,1
+"Khana",1,1
+"Obio/Akpor",1,1
+"Ogba/Egbema/Ndoni",1,1
+"Ogu/Bolo",0,0
+"Okrika",0,1
+"Omumma",0,1
+"Opobo/Nkoro",0,0
+"Oyigbo",1,1
+"Port Harcourt",0,0
+"Tai",1,1
+"Binji",1,1
+"Bodinga",1,1
+"Dange-Shuni",1,1
+"Gada",1,1
+"Goronyo",1,1
+"Gudu",1,1
+"Gwadabawa",1,1
+"Illela",1,0
+"Isa",1,1
+"Kebbe",1,1
+"Kware",0,0
+"Rabah",1,1
+"Sabon Birni",1,1
+"Shagari",1,1
+"Silame",0,0
+"Sokoto North",0,0
+"Sokoto South",0,0
+"Tambuwal",1,1
+"Tangaza",1,1
+"Tureta",1,1
+"Wamako",1,1
+"Wurno",1,1
+"Yabo",0,0
+"Ardo-Kola",1,1
+"Bali",1,1
+"Donga",1,1
+"Gashaka",1,1
+"Gassol",1,1
+"Ibi",1,1
+"Jalingo",1,1
+"Karim Lamido",1,1
+"Kurmi",1,1
+"Lau",1,1
+"Sardauna",1,1
+"Takum",1,1
+"Ussa",1,1
+"Wukari",1,1
+"Yorro",1,1
+"Zing",1,1
+"Bade",1,1
+"Borsari",1,1
+"Damaturu",1,1
+"Fika",1,1
+"Fune",1,1
+"Geidam",1,1
+"Gujba",1,1
+"Gulani",1,1
+"Jakusko",1,1
+"Karasuwa",0,1
+"Machina",0,0
+"Nangere",0,0
+"Nguru",0,1
+"Potiskum",1,1
+"Tarmuwa",1,1
+"Yunusari",1,1
+"Yusufari",0,0
+"Anka",1,1
+"Bakura",1,1
+"Birnin-Magaji/Kiyaw",1,1
+"Bukkuyum",1,1
+"Bungudu",1,1
+"Gummi",1,1
+"Gusau",1,1
+"Kaura Namoda",1,1
+"Maradun",1,1
+"Maru",1,1
+"Shinkafi",1,1
+"Talata-Mafara",1,1
+"Tsafe",1,1
+"Zurmi",1,1
