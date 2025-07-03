@@ -38,3 +38,4 @@ feedQuality_sum <- summarise(feedQuality, ME_SD = sd(ME, na.rm = T), ME = mean(M
 
 feedQuality <- group_by(feedQuality, codeBasket_grouped_NGA)
 ssa_cat_quality_sum <- summarise(feedQuality, ME_SD = sd(ME, na.rm = T), ME = mean(ME, na.rm = T), n = n())
+

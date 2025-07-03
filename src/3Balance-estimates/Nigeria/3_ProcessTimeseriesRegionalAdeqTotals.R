@@ -51,8 +51,12 @@ for(year in yearList){
   
   FAOlvstPop <- read.csv(paste0(LivestockParams_dir, "/FAOSTAT_livestock_data.csv"))
   
-  lv_List[[year]] <- sum(horseDonkeyIntake_model_MJ, (cattleIntake_model_MJ + (cattleIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Cattle"])), (shoatsIntake_model_MJ + (shoatsIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Shoats"])), na.rm = T)
+  lvReq <- sum(horseDonkeyIntake_model_MJ, (cattleIntake_model_MJ + (cattleIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Cattle"])), (shoatsIntake_model_MJ + (shoatsIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Shoats"])), na.rm = T)
   
+  writeRaster(lvReq, paste0(Outputs_dir, "/lvReqTotal", year, ".tif"), overwrite=TRUE)
+    
+  lv_List[[year]] <- sum(horseDonkeyIntake_model_MJ, (cattleIntake_model_MJ + (cattleIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Cattle"])), (shoatsIntake_model_MJ + (shoatsIntake_model_MJ*FAOlvstPop$PcChange[FAOlvstPop$Year == year & FAOlvstPop$Item == "Shoats"])), na.rm = T)
+    
 }
 
 tLv <- stack(lv_List)

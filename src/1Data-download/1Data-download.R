@@ -433,7 +433,7 @@ for (speciesCategory in speciesCategories){
   }
 }
 
-# Download livestok population from FAOSTATS
+# Download livestock population from FAOSTATS
 outdir <- paste0(root, "/src/1Data-download/Tables/inputs/", country, "/LivestockParams"); dir.create(outdir, F, T)
 
 # Load crop and livestock production data

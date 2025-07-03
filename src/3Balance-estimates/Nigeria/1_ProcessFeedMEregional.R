@@ -44,6 +44,8 @@ Outputs_dir <- paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/o
 zones <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/zones.gpkg"))
 regions <- st_read(paste0(root, "/src/3Balance-estimates/", country, "/SpatialData/intermediate/regions.gpkg"))
 
+feedWastage <- raster(paste0(root, "/src/2Feed-geoprocessing/SpatialData/inputs/Nigeria/Wastage/feedWastage.tif"))
+
 # Loop through years
 yearList <- c("2020", "2021", "2022", "2023")
 tsSumZone_List <- list()
@@ -93,17 +95,20 @@ for(year in yearList){
   # }
   
   tCrop <- overlay(tCrop, feedCropBurn, fun = function(DMP, burn){ifelse(burn > 0, 0, DMP)})
+  tCrop <- tCrop*feedWastage # apply wastage
   writeRaster(tCrop, paste0(Outputs_dir, "/Feed_crop_MJ", year, ".tif"), overwrite = T) # Write tCrop outputs
   
   #tGrassWet <- stack(list.files(path = 'SpatialData/inputs/Feed_quantity/',pattern="DMPgrassWetmean_2",full.names = T))
   tGrassWet <- raster(paste0(spatialDir, "/inputs/Feed_quantity/DMPgrassWetmean_", year, ".tif"))
   tGrassWet <- reclassify(tGrassWet, c(-Inf, 0, 0)) #Some negative DM in copernicus product
   tGrassWet <- tGrassWet*grassFracWet*croppingDays * grassME 
+  tGrassWet <- tGrassWet*feedWastage # apply wastage
   
   #tGrassDry <- stack(list.files(path = 'SpatialData/inputs/Feed_quantity/', pattern="DMPgrassDrymean_2",full.names = T))
   tGrassDry <- raster(paste0(spatialDir, "/inputs/Feed_quantity/DMPgrassDrymean_", year, ".tif"))
   tGrassDry <- reclassify(tGrassDry, c(-Inf, 0, 0)) 
   tGrassDry <- tGrassDry*grassFracDry*dryDays * grassME
+  tGrassDry <- tGrassDry*feedWastage # apply wastage
   
   tGrass <- tGrassWet + tGrassDry
   writeRaster(tGrass, paste0(Outputs_dir, "/Feed_grass_MJ", year, ".tif"), overwrite = T) # Write tGrass outputs
@@ -111,8 +116,8 @@ for(year in yearList){
   #tBrowse <- stack(list.files(path = 'SpatialData/inputs/Feed_quantity/',pattern="DMPbrowsemean_2",full.names = T))
   tBrowse <- raster(paste0(spatialDir, "/inputs/Feed_quantity/DMPbrowsemean_", year, ".tif"))
   tBrowse <- reclassify(tBrowse, c(-Inf, 0, 0)) 
-  tBrowseWet <- tBrowse*browseME*croppingDays * browseFrac
-  tBrowseDry <- tBrowse*browseME*dryDays * browseFrac
+  tBrowseWet <- tBrowse*browseME*croppingDays * browseFrac*feedWastage # apply wastage
+  tBrowseDry <- tBrowse*browseME*dryDays * browseFrac*feedWastage # apply wastage
   
   tBrowse <- tBrowseWet + tBrowseDry
   writeRaster(tBrowse, paste0(Outputs_dir, "/Feed_browse_MJ", year, ".tif"), overwrite = T) # Write tBrowse outputs
@@ -121,6 +126,7 @@ for(year in yearList){
   tAfter <- raster(paste0(spatialDir, "/inputs/Feed_quantity/DMPaftermean_", year, ".tif"))
   tAfter <- reclassify(tAfter, c(-Inf, 0, 0)) 
   tAfter <- tAfter*grassFracDry*feedQuality_item$ME[feedQuality_item$codeSPAM == "natPast"]*dryDays
+  tAfter <- tAfter*feedWastage # apply wastage
   writeRaster(tAfter, paste0(Outputs_dir, "/Feed_after_MJ", year, ".tif"), overwrite = T) # Write tAfter outputs
   
   rm(dryDays, croppingDays, feedCropBurn)
@@ -204,6 +210,7 @@ for(year in yearList){
   tsSumRegion$browseDMdry <- as.numeric(c(browseDMdry_mean[1], browseDMdry_mean[2], browseDMdry_mean[3]))
   
   tsSumRegion$afterDM <- tsSumRegion$afterME_mean / feedQuality_item$ME[feedQuality_item$codeSPAM == "natPast"]
+  writeRaster(tAfter/feedQuality_item$ME[feedQuality_item$codeSPAM == "natPast"], paste0(Outputs_dir, "/Feed_afterDM", year, ".tif"), overwrite = T)
   
   tsSumRegion_List[[year]] <- tsSumRegion
   

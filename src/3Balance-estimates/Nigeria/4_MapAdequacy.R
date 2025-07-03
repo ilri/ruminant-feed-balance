@@ -165,8 +165,8 @@ tsSumReg_mean <- separate(tsSumReg_mean, name, c("name", "year"), "_")
 tsSumRegMin <- pivot_longer(dplyr::select(tsSumReg, NAME_1, adeqMin_2020, adeqMin_2021, adeqMin_2022, adeqMin_2023), cols = -c(NAME_1))
 tsSumRegMax <- pivot_longer(dplyr::select(tsSumReg, NAME_1, adeqMax_2020, adeqMax_2021, adeqMax_2022, adeqMax_2023), cols = -c(NAME_1))
 
-tsSumReg_plot <- cbind(tsSumReg_mean, select(tsSumRegMin, lower = value))
-tsSumReg_plot <- cbind(tsSumReg_plot, select(tsSumRegMax, upper = value))
+tsSumReg_plot <- cbind(tsSumReg_mean, dplyr::select(tsSumRegMin, lower = value))
+tsSumReg_plot <- cbind(tsSumReg_plot, dplyr::select(tsSumRegMax, upper = value))
 
 tsSumReg_plot <- transform(tsSumReg_plot, NAME_1=factor(NAME_1,levels=c("(Agro)pastoral sahel", "Central mixed", "Forest mixed", "Northern mixed", "Southern mixed")))
 
