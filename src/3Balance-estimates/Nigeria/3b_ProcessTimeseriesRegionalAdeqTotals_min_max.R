@@ -1,7 +1,7 @@
 gc()
 rm(list=ls())
 # Process time series - Regional adequacy totals - minimum and maximum
-# Author: Simon Fraval
+# Author: John Mutua/Simon Fraval
 # Last modified by John Mutua on 19/11/2024
 
 # avoid scientific notation

@@ -2,7 +2,7 @@ gc()
 rm(list=ls())
 #.libPaths(c(.libPaths()[2], .libPaths()[3]))
 # Prepare livestock requirements - minimum and maximum
-# Author: Simon Fraval
+# Author: John Mutua/Simon Fraval
 # Last modified by John Mutua on 18/11/2024
 
 # avoid scientific notation
