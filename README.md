@@ -1,10 +1,10 @@
-# Code for assessing feed balances for ruminant livestock at national scale
+# Feed balances for ruminant livestock: informing national policy and strategic investment
  
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Case studies have been conducted in Ethiopia, Burkina Faso and Nigeria.
+Code for assessing feed balances for ruminant livestock to inform national policy and strategic investment.
 
-The Ethiopia and Burkina Faso case studies have been published in an article titled [Feed balances for ruminant livestock at national scale: case studies in 
+Case studies have been conducted in Ethiopia, Burkina Faso and Nigeria. The Ethiopia and Burkina Faso case studies have been published in an article titled [Feed balances for ruminant livestock at national scale: case studies in 
 Ethiopia and Burkina Faso](https://doi.org/10.1016/j.animal.2024.101199).
 
 The code is organized into three workflows:
@@ -16,7 +16,13 @@ The code is organized into three workflows:
 The code is provided as-is and may require minor adjustments to file paths to reproduce the results.
 
 ### Acknowledgements
-The authors acknowledge the support of the Digital Earth Africa team in providing access to Sandbox compute resources for cropland extent data input. 
+We acknowledge the support of the [Digital Earth Africa](https://digitalearthafrica.org/en_za/) team in providing access to Sandbox compute resources for cropland extent data input. We also appreciate the expertise of the enumerators from Nigeria's Federal Ministry of Livestock Development (FMLD), who conducted household surveys to gather data on livestock populations, herd composition, feed sources, and feeding practices to validate Earth Observation (EO)-based estimates of feed supply and demand.
 
 ### Financial support statement 
-The Ethiopia and Burkina Faso case studies were funded by the CGIAR Research Programme on Livestock and latterly through a TRAIN@ED fellowship to the lead author funded by the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No 801215 and the University of Edinburgh Data-Driven Innovation programme, part of the Edinburgh and South East Scotland City Region Deal. The TRAIN@ED fellowship was partly funded through ILRI’s Sustainable Livestock Systems program. The latter stages of data collation were funded in whole or part by the United States Agency for International Development (USAID) Bureau for Resilience and Food Security under Agreement # AID-OAA-L-15-00003 as part of Feed the Future Innovation Lab for Livestock Systems. Additional funding was received from Bill & Melinda Gates Foundation OPP#1175487. The research was conducted as part of the One CGIAR Sustainable Animal Productivity for Livelihoods, Nutrition and Gender Inclusion (SAPLING) Program based at ILRI which is supported by contributors to the [CGIAR Trust Fund](https://www.cgiar.org/funders). Any opinions, findings, conclusions, or recommendations expressed in the article are those of the authors alone. Under the grant conditions of the Foundation, a Creative Commons Attribution 4.0 Generic License was assigned to the Author Accepted Manuscript version. The Nigeria case study was conducted with financial and technical support from the [African Union Inter-African Bureau for Animal Resources (AU-IBAR)](https://www.au-ibar.org).
+The approach was initially developed at the University of Edinburgh with funding from the CGIAR Research Programme on Livestock, the Marie Skłodowska-Curie program, the University of Edinburgh Data-Driven Innovation programme, the International Livestock Research Institute (ILRI)'s Sustainable Livestock Systems programme, and the United States Agency for International Development (USAID) Bureau for Resilience and Food Security. More about this collaboration is available [here](https://github.com/SFrav/Ruminant-feed-balance-2024). The methodology was later scaled through [Jameel Observatory for Food Security Early Action](https://jameelobservatory.org), with financial and technical support from the [African Union Inter-African Bureau for Animal Resources (AU-IBAR)](https://www.au-ibar.org). This initiative produced the national inventory for Nigeria, laying the groundwork for stronger livestock feed strategies across Africa.
+
+## Citation
+
+If you use this repository, please cite it as follows:
+
+Mutua, J., Cherotich, F., & Fraval, S. (2025). *Feed balances for ruminant livestock: informing national policy and strategic investment* [Computer software]. GitHub. [https://github.com/ilri/ruminant-feed-balance](https://github.com/ilri/ruminant-feed-balance)
